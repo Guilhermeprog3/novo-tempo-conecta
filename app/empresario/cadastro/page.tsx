@@ -1,7 +1,7 @@
 // app/empresario/cadastro/page.tsx
 "use client"
 
-import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, Store, MapPin, Clock, Globe, FileText } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, Store, MapPin, Clock, Globe, FileText, Loader2, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,6 +29,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
+// --- COMPONENTES DO MAPA ---
 type LocationMarkerProps = {
   position: LatLng | null;
   setPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
@@ -47,12 +48,10 @@ function LocationMarker({ position, setPosition }: LocationMarkerProps) {
   );
 }
 
-// CORREÇÃO APLICADA AQUI
 type CenterMapProps = {
     setPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
 }
 
-// Componente para centralizar o mapa na localização do usuário
 function CenterMapToUserLocation({ setPosition }: CenterMapProps) {
     const map = useMap();
   
@@ -72,90 +71,158 @@ function CenterMapToUserLocation({ setPosition }: CenterMapProps) {
   
     return null;
 }
-  
+
+// --- LÓGICA DO FORMULÁRIO ---
+const categories = [
+    { value: "restaurante", label: "Restaurantes e Alimentação" },
+    { value: "comercio", label: "Comércio e Varejo" },
+    { value: "servicos", label: "Serviços Técnicos" },
+    { value: "saude", label: "Saúde e Bem-estar" },
+    { value: "beleza", label: "Beleza e Estética" },
+    { value: "educacao", label: "Educação e Cursos" },
+    { value: "automotivo", label: "Automotivo" },
+    { value: "casa", label: "Casa e Construção" },
+    { value: "lazer", label: "Lazer" },
+    { value: "moda", label: "Moda e Vestuário" },
+    { value: "esportes", label: "Esportes" },
+];
+
+const daysOfWeek = [
+    { id: 'monday', label: 'Segunda-feira' },
+    { id: 'tuesday', label: 'Terça-feira' },
+    { id: 'wednesday', label: 'Quarta-feira' },
+    { id: 'thursday', label: 'Quinta-feira' },
+    { id: 'friday', label: 'Sexta-feira' },
+    { id: 'saturday', label: 'Sábado' },
+    { id: 'sunday', label: 'Domingo' },
+];
 
 export default function EmpresarioCadastroPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [position, setPosition] = useState<LatLng | null>(null);
   const [formData, setFormData] = useState({
-    ownerName: '',
-    email: '',
-    phone: '',
-    whatsapp: '',
-    businessName: '',
-    category: '',
-    businessPhone: '',
-    address: '',
-    hours: '',
-    website: '',
-    description: '',
-    password: '',
-    confirmPassword: '',
-    terms: false,
+    ownerName: '', email: '', phone: '', whatsapp: '',
+    businessName: '', category: '', businessPhone: '',
+    address: '', website: '', description: '',
+    password: '', confirmPassword: '', terms: false,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value, type } = e.target;
-    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
+  const [openingHours, setOpeningHours] = useState(
+    daysOfWeek.map(day => ({ day: day.label, opens: '08:00', closes: '18:00', isOpen: false }))
+  );
+  
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(false);
 
-    setFormData((prev) => ({
-      ...prev,
-      [id]: type === 'checkbox' ? checked : value,
-    }));
+  const handleOpeningHoursChange = (index: number, field: string, value: string | boolean) => {
+    const newHours = [...openingHours];
+    newHours[index] = { ...newHours[index], [field]: value };
+    setOpeningHours(newHours);
+  };
+
+  const formatHoursToString = (hours: typeof openingHours) => {
+    if (!hours.some(h => h.isOpen)) return "Não informado";
+    const dayShortNames = { 'Segunda-feira': 'Seg', 'Terça-feira': 'Ter', 'Quarta-feira': 'Qua', 'Quinta-feira': 'Qui', 'Sexta-feira': 'Sex', 'Sábado': 'Sáb', 'Domingo': 'Dom' };
+    const grouped = hours.reduce((acc, day) => {
+        if (!day.isOpen || !day.opens || !day.closes) return acc;
+        const timeRange = `${day.opens} - ${day.closes}`;
+        if (!acc[timeRange]) acc[timeRange] = [];
+        acc[timeRange].push(day.day);
+        return acc;
+    }, {} as Record<string, string[]>);
+  
+    return Object.entries(grouped).map(([timeRange, days]) => {
+      if (days.length === 0) return '';
+      const dayIndexes = days.map(d => daysOfWeek.findIndex(dayInfo => dayInfo.label === d));
+      let groups: string[] = [];
+      let currentGroup: string[] = [days[0]];
+
+      for (let i = 1; i < days.length; i++) {
+        if (dayIndexes[i] === dayIndexes[i-1] + 1) {
+          currentGroup.push(days[i]);
+        } else {
+          groups.push(currentGroup.length > 2 ? `${dayShortNames[currentGroup[0] as keyof typeof dayShortNames]}-${dayShortNames[currentGroup[currentGroup.length-1] as keyof typeof dayShortNames]}` : currentGroup.map(d => dayShortNames[d as keyof typeof dayShortNames]).join(', '));
+          currentGroup = [days[i]];
+        }
+      }
+      groups.push(currentGroup.length > 2 ? `${dayShortNames[currentGroup[0] as keyof typeof dayShortNames]}-${dayShortNames[currentGroup[currentGroup.length-1] as keyof typeof dayShortNames]}` : currentGroup.map(d => dayShortNames[d as keyof typeof dayShortNames]).join(', '));
+      return `${groups.join(', ')}: ${timeRange}`;
+    }).join('; ');
+  };
+
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
   
   const handleCategoryChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      category: value,
-    }));
+    setFormData((prev) => ({ ...prev, category: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrors({});
+    setLoading(true);
+    let fieldErrors: { [key: string]: string } = {};
+
     if (formData.password !== formData.confirmPassword) {
-      alert("As senhas não coincidem!");
-      return;
+      fieldErrors.confirmPassword = "As senhas não coincidem!";
     }
     if (!position) {
-      alert("Por favor, marque a localização do seu negócio no mapa.");
-      return;
+      fieldErrors.map = "Por favor, marque a localização do seu negócio no mapa.";
+    }
+
+    if (Object.keys(fieldErrors).length > 0) {
+        setErrors({...fieldErrors, form: "Preencha corretamente todos os campos."});
+        setLoading(false);
+        return;
     }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      await setDoc(doc(db, "businesses", user.uid), {
-        ownerName: formData.ownerName,
-        email: formData.email,
-        phone: formData.phone,
-        whatsapp: formData.whatsapp,
-        businessName: formData.businessName,
-        category: formData.category,
-        businessPhone: formData.businessPhone,
-        address: formData.address,
-        hours: formData.hours,
-        website: formData.website,
-        description: formData.description,
-        location: {
-          latitude: position.lat,
-          longitude: position.lng,
-        },
+      const dataToSave = { ...formData,
+        hours: formatHoursToString(openingHours),
+        location: { latitude: position!.lat, longitude: position!.lng },
         ownerId: user.uid,
-      });
+        rating: 0,
+        reviewCount: 0,
+      };
+      // @ts-ignore
+      delete dataToSave.password;
+      // @ts-ignore
+      delete dataToSave.confirmPassword;
+      
+      await setDoc(doc(db, "businesses", user.uid), dataToSave);
 
-      alert("Negócio cadastrado com sucesso!");
       window.location.href = '/empresario/dashboard';
 
-    } catch (error) {
-      console.error("Erro ao cadastrar:", error);
-      if (error instanceof Error) {
-        alert("Erro ao cadastrar: " + error.message);
-      } else {
-        alert("Ocorreu um erro desconhecido ao cadastrar.");
+    } catch (error: any) {
+      console.error("Erro ao cadastrar:", error.code, error.message);
+      let newErrors: { [key: string]: string } = {};
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          newErrors.email = "Este e-mail já está em uso.";
+          newErrors.form = "Preencha corretamente todos os campos.";
+          break;
+        case 'auth/invalid-email':
+          newErrors.email = "O formato do e-mail é inválido.";
+          newErrors.form = "Preencha corretamente todos os campos.";
+          break;
+        case 'auth/weak-password':
+          newErrors.password = "A senha deve ter pelo menos 6 caracteres.";
+          newErrors.form = "Preencha corretamente todos os campos.";
+          break;
+        default:
+          newErrors.form = "Ocorreu um erro inesperado. Verifique sua conexão e tente novamente.";
+          break;
       }
+      setErrors(newErrors);
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -166,8 +233,7 @@ export default function EmpresarioCadastroPage() {
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar ao início
+              <ArrowLeft className="w-4 h-4 mr-2" /> Voltar ao início
             </Link>
           </Button>
         </div>
@@ -178,50 +244,35 @@ export default function EmpresarioCadastroPage() {
               <Store className="w-8 h-8 text-primary-foreground" />
             </div>
             <CardTitle className="text-2xl font-bold">Cadastrar Estabelecimento</CardTitle>
-            <CardDescription>
-              Registre seu negócio na plataforma e conecte-se com milhares de moradores do Novo Tempo
-            </CardDescription>
+            <CardDescription>Registre seu negócio e conecte-se com milhares de moradores</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* DADOS DO RESPONSÁVEL */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dados do Responsável</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ownerName">Nome completo</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="ownerName" type="text" placeholder="Seu nome completo" className="pl-10" required onChange={handleChange} value={formData.ownerName}/>
+                    <div className="space-y-2">
+                        <Label htmlFor="ownerName">Nome completo</Label>
+                        <div className="relative">
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                            <Input id="ownerName" type="text" placeholder="Seu nome completo" className="pl-10" required onChange={handleChange} value={formData.ownerName} aria-invalid={!!errors.ownerName} />
+                        </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="email" type="email" placeholder="seu@email.com" className="pl-10" required onChange={handleChange} value={formData.email}/>
+                    <div className="space-y-2">
+                        <Label htmlFor="email">E-mail</Label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                            <Input id="email" type="email" placeholder="seu@email.com" className="pl-10" required onChange={handleChange} value={formData.email} aria-invalid={!!errors.email} />
+                        </div>
+                        {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                     </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="phone" type="tel" placeholder="(11) 99999-9999" className="pl-10" required onChange={handleChange} value={formData.phone}/>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="whatsapp">WhatsApp (opcional)</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="whatsapp" type="tel" placeholder="(11) 99999-9999" className="pl-10" onChange={handleChange} value={formData.whatsapp}/>
-                    </div>
-                  </div>
                 </div>
               </div>
 
+              {/* DADOS DO ESTABELECIMENTO */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dados do Estabelecimento</h3>
+                 <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dados do Estabelecimento</h3>
                 <div className="space-y-2">
                   <Label htmlFor="businessName">Nome do estabelecimento</Label>
                   <div className="relative">
@@ -236,18 +287,10 @@ export default function EmpresarioCadastroPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="restaurante">Restaurantes e Alimentação</SelectItem>
-                        <SelectItem value="comercio">Comércio e Varejo</SelectItem>
-                        <SelectItem value="servicos">Serviços Técnicos</SelectItem>
-                        <SelectItem value="saude">Saúde e Bem-estar</SelectItem>
-                        <SelectItem value="beleza">Beleza e Estética</SelectItem>
-                        <SelectItem value="educacao">Educação e Cursos</SelectItem>
-                        <SelectItem value="automotivo">Automotivo</SelectItem>
-                        <SelectItem value="casa">Casa e Construção</SelectItem>
-                        <SelectItem value="lazer">Cafés e Lazer</SelectItem>
-                        <SelectItem value="moda">Moda e Vestuário</SelectItem>
-                        <SelectItem value="esportes">Esportes e Fitness</SelectItem>
+                      <SelectContent className="z-[1000]">
+                        {categories.map((cat) => (
+                           <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -259,6 +302,7 @@ export default function EmpresarioCadastroPage() {
                     </div>
                   </div>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="address">Endereço completo</Label>
                   <div className="relative">
@@ -266,33 +310,64 @@ export default function EmpresarioCadastroPage() {
                     <Textarea id="address" placeholder="Rua, número, complemento, bairro" className="pl-10 min-h-[80px]" required onChange={handleChange} value={formData.address}/>
                   </div>
                 </div>
+                
+                <div className="space-y-2">
+                  <Label>Horário de funcionamento</Label>
+                  <div className="p-4 border rounded-md">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                          {openingHours.map((hour, index) => (
+                              <div key={hour.day}>
+                                  <div className="flex items-center mb-2">
+                                      <Checkbox
+                                          id={hour.day}
+                                          checked={hour.isOpen}
+                                          onCheckedChange={(checked) => handleOpeningHoursChange(index, 'isOpen', !!checked)}
+                                      />
+                                      <Label htmlFor={hour.day} className="text-sm font-normal ml-2">
+                                          {hour.day}
+                                      </Label>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                      <Input
+                                          type="time"
+                                          className="w-full"
+                                          value={hour.opens}
+                                          onChange={(e) => handleOpeningHoursChange(index, 'opens', e.target.value)}
+                                          disabled={!hour.isOpen}
+                                      />
+                                      <Input
+                                          type="time"
+                                          className="w-full"
+                                          value={hour.closes}
+                                          onChange={(e) => handleOpeningHoursChange(index, 'closes', e.target.value)}
+                                          disabled={!hour.isOpen}
+                                      />
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+                </div>
 
                 <div className="space-y-2">
                   <Label>Localização no Mapa</Label>
                   <p className="text-sm text-muted-foreground">Clique no mapa para marcar a localização exata do seu negócio.</p>
-                  <MapContainer center={[-5.0892, -42.8028]} zoom={13} style={{ height: '300px', width: '100%' }}>
+                  <MapContainer center={[-5.0892, -42.8028]} zoom={13} style={{ height: '300px', width: '100%', zIndex: 0 }}>
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'/>
                     <LocationMarker position={position} setPosition={setPosition} />
                     <CenterMapToUserLocation setPosition={setPosition} />
                   </MapContainer>
+                  {errors.map && <p className="text-sm text-destructive mt-1">{errors.map}</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="website">Site/Instagram (opcional)</Label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input id="website" type="url" placeholder="www.seusite.com.br" className="pl-10" onChange={handleChange} value={formData.website} />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="hours">Horário de funcionamento</Label>
-                    <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="hours" type="text" placeholder="Seg-Sex: 8h-18h, Sáb: 8h-12h" className="pl-10" required onChange={handleChange} value={formData.hours}/>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Site/Instagram (opcional)</Label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="website" type="url" placeholder="www.seusite.com.br" className="pl-10" onChange={handleChange} value={formData.website} />
-                    </div>
-                  </div>
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Descrição do negócio</Label>
                   <div className="relative">
@@ -301,7 +376,8 @@ export default function EmpresarioCadastroPage() {
                   </div>
                 </div>
               </div>
-
+              
+              {/* DADOS DE ACESSO */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dados de Acesso</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -309,21 +385,23 @@ export default function EmpresarioCadastroPage() {
                     <Label htmlFor="password">Senha</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 8 caracteres" className="pl-10 pr-10" required onChange={handleChange} value={formData.password}/>
+                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 6 caracteres" className="pl-10 pr-10" required onChange={handleChange} value={formData.password} aria-invalid={!!errors.password}/>
                       <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
                       </Button>
                     </div>
+                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">Confirmar senha</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirme sua senha" className="pl-10 pr-10" required onChange={handleChange} value={formData.confirmPassword}/>
+                      <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirme sua senha" className="pl-10 pr-10" required onChange={handleChange} value={formData.confirmPassword} aria-invalid={!!errors.confirmPassword}/>
                       <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                         {showConfirmPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
                       </Button>
                     </div>
+                    {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>}
                   </div>
                 </div>
               </div>
@@ -332,28 +410,22 @@ export default function EmpresarioCadastroPage() {
                 <Checkbox id="terms" onCheckedChange={(checked: CheckedState) => setFormData(prev => ({ ...prev, terms: !!checked }))} checked={formData.terms} />
                 <Label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed">
                   Concordo com os{" "}
-                  <Link href="/termos-de-uso" className="text-primary hover:underline">
-                    Termos de Uso
-                  </Link>
-                  ,{" "}
-                  <Link href="/politica-de-privacidade" className="text-primary hover:underline">
-                    Política de Privacidade
-                  </Link>{" "}
-                  e autorizo a publicação das informações do meu estabelecimento na plataforma.
+                  <Link href="/termos-de-uso" className="text-primary hover:underline">Termos de Uso</Link> e <Link href="/politica-de-privacidade" className="text-primary hover:underline">Política de Privacidade</Link>.
                 </Label>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Cadastrar Estabelecimento
+              
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {loading ? 'Cadastrando...' : 'Cadastrar Estabelecimento'}
               </Button>
+              {errors.form && <p className="text-sm text-destructive text-center mt-2">{errors.form}</p>}
             </form>
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Já tem uma conta empresarial?{" "}
-                <Link href="/empresario/login" className="text-primary hover:underline font-medium">
-                  Faça login aqui
-                </Link>
+                <Link href="/empresario/login" className="text-primary hover:underline font-medium">Faça login aqui</Link>
               </p>
             </div>
           </CardContent>

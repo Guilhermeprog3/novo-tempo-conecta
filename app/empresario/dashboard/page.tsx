@@ -158,75 +158,6 @@ export default function EmpresarioDashboard() {
           </div>
 
           <div className="lg:col-span-3 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Visualizações</p>
-                      <p className="text-2xl font-bold">1,234</p>
-                    </div>
-                    <Eye className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="flex items-center mt-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                    <span className="text-green-500">+12%</span>
-                    <span className="text-muted-foreground ml-1">vs mês anterior</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Avaliações</p>
-                      <p className="text-2xl font-bold">{businessData?.reviewCount || 0}</p>
-                    </div>
-                    <Star className="w-8 h-8 text-yellow-500" />
-                  </div>
-                  <div className="flex items-center mt-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                    <span className="text-green-500">+8</span>
-                    <span className="text-muted-foreground ml-1">este mês</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Contatos</p>
-                      <p className="text-2xl font-bold">89</p>
-                    </div>
-                    <Phone className="w-8 h-8 text-blue-500" />
-                  </div>
-                  <div className="flex items-center mt-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                    <span className="text-green-500">+15</span>
-                    <span className="text-muted-foreground ml-1">esta semana</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Nota Média</p>
-                      <p className="text-2xl font-bold">{businessData?.rating || 'N/A'}</p>
-                    </div>
-                    <Star className="w-8 h-8 text-primary fill-current" />
-                  </div>
-                  <div className="flex items-center mt-2 text-sm">
-                    <span className="text-green-500">Excelente</span>
-                    <span className="text-muted-foreground ml-1">classificação</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
             <Card>
               <CardHeader>
                 <CardTitle>Ações Rápidas</CardTitle>
@@ -293,17 +224,6 @@ export default function EmpresarioDashboard() {
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-medium">Completude do Perfil</p>
-                    <span className="text-sm text-muted-foreground">85%</span>
-                  </div>
-                  <Progress value={85} className="mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Adicione mais fotos e informações para melhorar sua visibilidade
-                  </p>
                 </div>
               </CardContent>
             </Card>

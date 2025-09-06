@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,79 +8,94 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Star, ArrowLeft, Search, Filter, Calendar, Edit3, Trash2, ThumbsUp, MessageSquare } from "lucide-react"
+import { Star, ArrowLeft, Search, Filter, Calendar, Edit3, Trash2, ThumbsUp, MessageSquare, Loader2 } from "lucide-react"
+import { auth, db } from '@/lib/firebase'
+import { onAuthStateChanged, User } from 'firebase/auth'
+import { collectionGroup, query, where, getDocs, doc, getDoc, Timestamp } from "firebase/firestore"
+
+// Tipos de dados
+type Review = {
+  id: string;
+  businessId: string;
+  business: {
+    name: string;
+    category: string;
+    image?: string;
+  };
+  rating: number;
+  title: string;
+  comment: string;
+  createdAt: Timestamp;
+  helpful?: number;
+  replies?: number;
+  photos?: number;
+};
 
 export default function UsuarioAvaliacoes() {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [searchTerm, setSearchTerm] = useState("")
   const [filterRating, setFilterRating] = useState("all")
   const [sortBy, setSortBy] = useState("recent")
 
-  const [reviews] = useState([
-    {
-      id: 1,
-      business: {
-        name: "Padaria do João",
-        category: "Alimentação",
-        image: "/padaria.png",
-      },
-      rating: 5,
-      title: "Excelente padaria no bairro!",
-      comment:
-        "Atendimento excepcional e pães sempre fresquinhos. A equipe é muito simpática e o ambiente é acolhedor. Recomendo especialmente o pão francês e os doces caseiros.",
-      date: "2024-01-20",
-      helpful: 8,
-      replies: 1,
-      photos: 2,
-    },
-    {
-      id: 2,
-      business: {
-        name: "Farmácia Central",
-        category: "Saúde",
-        image: "/farmacia.jpg",
-      },
-      rating: 4,
-      title: "Boa farmácia, preços justos",
-      comment:
-        "Farmácia bem localizada com bom atendimento. Os preços são competitivos e sempre tem os medicamentos que preciso. Único ponto negativo é que às vezes demora um pouco para ser atendido.",
-      date: "2024-01-18",
-      helpful: 5,
-      replies: 0,
-      photos: 0,
-    },
-    {
-      id: 3,
-      business: {
-        name: "Restaurante Sabor Caseiro",
-        category: "Alimentação",
-        image: "/cozy-italian-restaurant.png",
-      },
-      rating: 5,
-      title: "Comida caseira deliciosa!",
-      comment:
-        "O melhor restaurante de comida caseira da região! Pratos bem servidos, tempero perfeito e preço justo. O ambiente é simples mas muito acolhedor.",
-      date: "2024-01-15",
-      helpful: 12,
-      replies: 2,
-      photos: 3,
-    },
-    {
-      id: 4,
-      business: {
-        name: "Mercadinho São José",
-        category: "Comércio",
-        image: "/bustling-market.png",
-      },
-      rating: 3,
-      title: "Conveniente mas pode melhorar",
-      comment:
-        "Mercadinho bem localizado e com horário estendido, o que é muito conveniente. Porém, alguns produtos estão sempre com preços acima da média e a variedade poderia ser maior.",
-      date: "2024-01-10",
-      helpful: 3,
-      replies: 1,
-      photos: 0,
-    },
-  ])
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        fetchUserReviews(user.uid);
+      } else {
+        window.location.href = '/login';
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchUserReviews = async (userId: string) => {
+    setLoading(true);
+    try {
+      // 1. Encontrar todas as avaliações feitas pelo usuário
+      const reviewsQuery = query(collectionGroup(db, 'reviews'), where('userId', '==', userId));
+      const querySnapshot = await getDocs(reviewsQuery);
+      
+      const userReviews: Review[] = [];
+
+      // 2. Para cada avaliação, buscar os dados do estabelecimento pai
+      for (const reviewDoc of querySnapshot.docs) {
+        const reviewData = reviewDoc.data();
+        const businessId = reviewDoc.ref.parent.parent?.id; // Pega o ID do documento pai (o negócio)
+
+        if (businessId) {
+          const businessRef = doc(db, "businesses", businessId);
+          const businessSnap = await getDoc(businessRef);
+
+          if (businessSnap.exists()) {
+            const businessData = businessSnap.data();
+            userReviews.push({
+              id: reviewDoc.id,
+              businessId: businessId,
+              business: {
+                name: businessData.businessName,
+                category: businessData.category,
+                image: businessData.images?.[0] || undefined, // Pega a primeira imagem
+              },
+              rating: reviewData.rating,
+              title: reviewData.title || `Avaliação de ${reviewData.rating} estrelas`,
+              comment: reviewData.comment,
+              createdAt: reviewData.createdAt,
+            });
+          }
+        }
+      }
+      setReviews(userReviews);
+    } catch (error) {
+      console.error("Erro ao buscar avaliações:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredReviews = reviews
     .filter((review) => {
@@ -91,9 +106,9 @@ export default function UsuarioAvaliacoes() {
       return matchesSearch && matchesRating
     })
     .sort((a, b) => {
-      if (sortBy === "recent") return new Date(b.date).getTime() - new Date(a.date).getTime()
-      if (sortBy === "rating") return b.rating - a.rating
-      if (sortBy === "helpful") return b.helpful - a.helpful
+      if (sortBy === "recent") return b.createdAt.toMillis() - a.createdAt.toMillis();
+      if (sortBy === "rating") return b.rating - a.rating;
+      // if (sortBy === "helpful") return (b.helpful || 0) - (a.helpful || 0); // Requer 'helpful' no DB
       return 0
     })
 
@@ -103,7 +118,15 @@ export default function UsuarioAvaliacoes() {
     ))
   }
 
-  const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+  const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
+
+  if (loading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -180,7 +203,7 @@ export default function UsuarioAvaliacoes() {
                 <SelectContent>
                   <SelectItem value="recent">Mais recentes</SelectItem>
                   <SelectItem value="rating">Maior nota</SelectItem>
-                  <SelectItem value="helpful">Mais úteis</SelectItem>
+                  {/* <SelectItem value="helpful">Mais úteis</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
@@ -196,10 +219,7 @@ export default function UsuarioAvaliacoes() {
                   <Avatar className="h-12 w-12 flex-shrink-0">
                     <AvatarImage src={review.business.image || "/placeholder.svg"} alt={review.business.name} />
                     <AvatarFallback>
-                      {review.business.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {review.business.name.split(" ").map((n) => n[0]).join("")}
                     </AvatarFallback>
                   </Avatar>
 
@@ -231,28 +251,11 @@ export default function UsuarioAvaliacoes() {
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {new Date(review.date).toLocaleDateString("pt-BR")}
+                        {review.createdAt.toDate().toLocaleDateString("pt-BR")}
                       </div>
 
-                      {review.helpful > 0 && (
-                        <div className="flex items-center gap-1">
-                          <ThumbsUp className="h-4 w-4" />
-                          {review.helpful} acharam útil
-                        </div>
-                      )}
-
-                      {review.replies > 0 && (
-                        <div className="flex items-center gap-1">
-                          <MessageSquare className="h-4 w-4" />
-                          {review.replies} resposta{review.replies > 1 ? "s" : ""}
-                        </div>
-                      )}
-
-                      {review.photos > 0 && (
-                        <Badge variant="outline" className="text-xs">
-                          {review.photos} foto{review.photos > 1 ? "s" : ""}
-                        </Badge>
-                      )}
+                      {/* Outras informações como 'helpful', 'replies' podem ser adicionadas aqui se existirem no seu DB */}
+                      
                     </div>
                   </div>
                 </div>
@@ -261,7 +264,7 @@ export default function UsuarioAvaliacoes() {
           ))}
         </div>
 
-        {filteredReviews.length === 0 && (
+        {filteredReviews.length === 0 && !loading && (
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">

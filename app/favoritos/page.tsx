@@ -1,47 +1,110 @@
 "use client"
 
-import { Heart, Star, MapPin, Phone, Trash2, Share2, Grid, List } from "lucide-react"
+import { Heart, Star, MapPin, Phone, Trash2, Share2, Grid, List, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { auth, db } from '@/lib/firebase'
+import { onAuthStateChanged, User } from 'firebase/auth'
+import { doc, getDoc, updateDoc, arrayRemove } from "firebase/firestore"
+import { Timestamp } from "firebase/firestore"
+
+// Tipos
+type Favorite = {
+  id: string;
+  name: string;
+  category: string;
+  rating: number;
+  reviewCount: number;
+  address: string;
+  phone: string;
+  image?: string;
+  addedDate?: Timestamp; // Supondo que a data seja salva como Timestamp
+};
+
 
 export default function FavoritosPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const favorites = [
-    {
-      id: "1",
-      name: "Pizzaria do Bairro",
-      category: "Restaurante",
-      rating: 4.8,
-      reviewCount: 127,
-      address: "Rua das Flores, 123",
-      phone: "(11) 3333-3333",
-      addedDate: "Há 2 semanas",
-    },
-    {
-      id: "2",
-      name: "Salão Beleza Total",
-      category: "Beleza",
-      rating: 4.7,
-      reviewCount: 156,
-      address: "Rua da Beleza, 321",
-      phone: "(11) 4444-4444",
-      addedDate: "Há 1 mês",
-    },
-    {
-      id: "3",
-      name: "Farmácia Popular",
-      category: "Saúde",
-      rating: 4.4,
-      reviewCount: 78,
-      address: "Av. Saúde, 654",
-      phone: "(11) 5555-5555",
-      addedDate: "Há 3 dias",
-    },
-  ]
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        fetchFavorites(user.uid);
+      } else {
+        window.location.href = '/login';
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchFavorites = async (userId: string) => {
+    setLoading(true);
+    try {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists() && userSnap.data().favorites) {
+        const favoriteIds: string[] = userSnap.data().favorites;
+        const favoritePromises = favoriteIds.map(async (id) => {
+          const businessRef = doc(db, "businesses", id);
+          const businessSnap = await getDoc(businessRef);
+          if (businessSnap.exists()) {
+            const businessData = businessSnap.data();
+            return {
+              id: businessSnap.id,
+              name: businessData.businessName,
+              category: businessData.category,
+              rating: businessData.rating || 0,
+              reviewCount: businessData.reviewCount || 0,
+              address: businessData.address,
+              phone: businessData.businessPhone,
+              image: businessData.images?.[0]
+            } as Favorite;
+          }
+          return null;
+        });
+
+        const resolvedFavorites = (await Promise.all(favoritePromises)).filter(fav => fav !== null) as Favorite[];
+        setFavorites(resolvedFavorites);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar favoritos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveFavorite = async (businessId: string) => {
+    if (!currentUser) return;
+    if (!window.confirm("Tem certeza que deseja remover este estabelecimento dos favoritos?")) return;
+
+    try {
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+            favorites: arrayRemove(businessId)
+        });
+        // Atualiza o estado local para refletir a remoção
+        setFavorites(prev => prev.filter(fav => fav.id !== businessId));
+    } catch (error) {
+        console.error("Erro ao remover favorito:", error);
+        alert("Não foi possível remover o favorito. Tente novamente.");
+    }
+  };
+  
+  if (loading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,9 +159,6 @@ export default function FavoritosPage() {
               <Button asChild>
                 <Link href="/busca">Explorar Estabelecimentos</Link>
               </Button>
-              <Button variant="outline" asChild className="bg-transparent">
-                <Link href="/categorias">Ver Categorias</Link>
-              </Button>
             </div>
           </div>
         ) : (
@@ -136,10 +196,14 @@ export default function FavoritosPage() {
                 >
                   <div
                     className={`${
-                      viewMode === "list" ? "w-48 h-32" : "h-48"
+                      viewMode === "list" ? "w-48 h-full flex-shrink-0" : "h-48"
                     } bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center`}
                   >
-                    <Heart className="w-16 h-16 text-primary" />
+                   {favorite.image ? (
+                        <img src={favorite.image} alt={favorite.name} className="w-full h-full object-cover"/>
+                   ) : (
+                        <Heart className="w-16 h-16 text-primary" />
+                   )}
                   </div>
                   <div className={viewMode === "list" ? "flex-1" : ""}>
                     <CardHeader className={viewMode === "list" ? "pb-2" : ""}>
@@ -150,13 +214,11 @@ export default function FavoritosPage() {
                             <Badge variant="secondary" className="mr-2 text-xs">
                               {favorite.category}
                             </Badge>
-                            <MapPin className="w-3 h-3 mr-1" />
-                            {favorite.address}
                           </CardDescription>
                         </div>
                         <div className="flex items-center ml-2">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="ml-1 text-sm font-medium">{favorite.rating}</span>
+                          <span className="ml-1 text-sm font-medium">{favorite.rating.toFixed(1)}</span>
                         </div>
                       </div>
                     </CardHeader>
@@ -164,7 +226,6 @@ export default function FavoritosPage() {
                       <div className="flex items-center justify-between text-sm mb-4">
                         <div className="flex items-center space-x-4">
                           <span className="text-muted-foreground">({favorite.reviewCount} avaliações)</span>
-                          <span className="text-muted-foreground">Salvo {favorite.addedDate}</span>
                         </div>
                       </div>
 
@@ -181,7 +242,7 @@ export default function FavoritosPage() {
                           <Button variant="ghost" size="sm">
                             <Share2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleRemoveFavorite(favorite.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Search, MapPin, Star, Clock, SlidersHorizontal, Grid, List, Loader2, X, Store } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,7 @@ import Link from "next/link"
 import { db } from "@/lib/firebase"
 import { collection, getDocs } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useSearchParams } from "next/navigation"
 
 // Definição do tipo para os dados do negócio
 type Business = {
@@ -29,7 +30,22 @@ type Business = {
   hours?: string;
 };
 
-export default function BuscaPage() {
+// Estrutura de dados unificada para categorias
+const categories = [
+    { value: "restaurante", label: "Restaurantes e Alimentação" },
+    { value: "comercio", label: "Comércio e Varejo" },
+    { value: "servicos", label: "Serviços Técnicos" },
+    { value: "saude", label: "Saúde e Bem-estar" },
+    { value: "beleza", label: "Beleza e Estética" },
+    { value: "educacao", label: "Educação e Cursos" },
+    { value: "automotivo", label: "Automotivo" },
+    { value: "casa", label: "Casa e Construção" },
+    { value: "lazer", label: "Lazer" },
+    { value: "moda", label: "Moda e Vestuário" },
+    { value: "esportes", label: "Esportes" },
+];
+
+function SearchResults() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   
@@ -37,13 +53,15 @@ export default function BuscaPage() {
   const [loading, setLoading] = useState(true);
 
   // Estados dos Filtros
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") || "";
+  const initialCategory = searchParams.get("categoria");
+
+  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : []);
   const [minRating, setMinRating] = useState([0]);
   const [isOpen, setIsOpen] = useState(false);
   const [sortBy, setSortBy] = useState("relevance");
-
-  const categories = ["Restaurantes e Alimentação", "Comércio e Varejo", "Serviços Técnicos", "Saúde e Bem-estar", "Beleza e Estética", "Educação e Cursos", "Automotivo", "Casa e Construção", "Lazer", "Moda e Vestuário", "Esportes"];
 
   useEffect(() => {
     const fetchBusinesses = async () => {
@@ -63,11 +81,11 @@ export default function BuscaPage() {
     fetchBusinesses();
   }, []);
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
+  const handleCategoryChange = (categoryValue: string, checked: boolean) => {
     if (checked) {
-      setSelectedCategories(prev => [...prev, category]);
+      setSelectedCategories(prev => [...prev, categoryValue]);
     } else {
-      setSelectedCategories(prev => prev.filter(c => c !== category));
+      setSelectedCategories(prev => prev.filter(c => c !== categoryValue));
     }
   };
 
@@ -93,153 +111,159 @@ export default function BuscaPage() {
     });
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Search className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Buscar Estabelecimentos</h1>
-                <p className="text-sm text-muted-foreground">Encontre o que você precisa no Novo Tempo</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-foreground hover:text-primary transition-colors">Início</Link>
-              <Link href="/mapa" className="text-foreground hover:text-primary transition-colors">Mapa</Link>
-              <Link href="/categorias" className="text-foreground hover:text-primary transition-colors">Categorias</Link>
-              <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">Sobre</Link>
-            </nav>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" asChild><Link href="/login">Entrar</Link></Button>
-              <Button size="sm" asChild><Link href="/empresario/cadastro">Cadastrar Negócio</Link></Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <aside className={`lg:w-80 ${showFilters ? "block" : "hidden lg:block"}`}>
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Filtros</span>
-                  <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setShowFilters(false)}><X className="w-4 h-4" /></Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                 <div className="space-y-2">
-                  <Label>Categorias</Label>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {categories.map((category) => (
-                      <div key={category} className="flex items-center space-x-2">
-                        <Checkbox id={category} onCheckedChange={(checked) => handleCategoryChange(category, !!checked)} checked={selectedCategories.includes(category)} />
-                        <Label htmlFor={category} className="text-sm font-normal">{category}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Avaliação mínima: {minRating[0].toFixed(1)} estrelas</Label>
-                  <Slider value={minRating} onValueChange={setMinRating} max={5} step={0.5} className="w-full" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="open" checked={isOpen} onCheckedChange={(checked) => setIsOpen(!!checked)} />
-                    <Label htmlFor="open" className="text-sm font-normal">Aberto agora</Label>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-
-          <main className="flex-1">
-            <div className="mb-6">
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input placeholder="Busque por 'pizza', 'farmácia', 'salão'..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <aside className={`lg:w-80 ${showFilters ? "block" : "hidden lg:block"}`}>
+          <Card className="sticky top-24">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Filtros</span>
+                <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setShowFilters(false)}><X className="w-4 h-4" /></Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+               <div className="space-y-2">
+                <Label>Categorias</Label>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {categories.map((category) => (
+                    <div key={category.value} className="flex items-center space-x-2">
+                      <Checkbox id={category.value} onCheckedChange={(checked) => handleCategoryChange(category.value, !!checked)} checked={selectedCategories.includes(category.value)} />
+                      <Label htmlFor={category.value} className="text-sm font-normal">{category.label}</Label>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal className="w-4 h-4 mr-2" />Filtros</Button>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-48"><SelectValue placeholder="Ordenar por" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="relevance">Relevância</SelectItem>
-                      <SelectItem value="rating">Melhor Avaliação</SelectItem>
-                      <SelectItem value="name">Nome (A-Z)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label>Avaliação mínima: {minRating[0].toFixed(1)} estrelas</Label>
+                <Slider value={minRating} onValueChange={setMinRating} max={5} step={0.5} className="w-full" />
+              </div>
+              <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Button variant={viewMode === "grid" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("grid")}><Grid className="w-4 h-4" /></Button>
-                  <Button variant={viewMode === "list" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("list")}><List className="w-4 h-4" /></Button>
+                  <Checkbox id="open" checked={isOpen} onCheckedChange={(checked) => setIsOpen(!!checked)} />
+                  <Label htmlFor="open" className="text-sm font-normal">Aberto agora</Label>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                {loading ? 'Buscando...' : `${filteredAndSortedBusinesses.length} resultados encontrados`}
-              </p>
-            </div>
+            </CardContent>
+          </Card>
+        </aside>
 
-            {loading ? (
-                 <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
-                    {Array.from({ length: 6 }).map((_, index) => (
-                        <Card key={index}><Skeleton className="h-48 w-full" /><CardHeader><Skeleton className="h-5 w-3/4" /></CardHeader><CardContent><Skeleton className="h-4 w-full" /></CardContent></Card>
-                    ))}
-                 </div>
-            ) : filteredAndSortedBusinesses.length > 0 ? (
-                <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
-                    {filteredAndSortedBusinesses.map((business) => (
-                        <Link href={`/estabelecimento/${business.id}`} key={business.id} className="h-full">
-                            <Card className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full ${viewMode === "list" ? "flex" : "flex flex-col"}`}>
-                                <div className={`${viewMode === "list" ? "w-48 flex-shrink-0" : "h-48"} bg-muted`}>
-                                    {business.images && business.images.length > 0 ? (
-                                        <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10"><Store className="w-16 h-16 text-muted-foreground/50" /></div>
-                                    )}
-                                </div>
-                                <div className="flex flex-col flex-1">
-                                    <CardHeader className={viewMode === "list" ? "pb-2" : ""}>
-                                        <div className="flex items-start justify-between">
-                                            <CardTitle className="text-lg">{business.businessName}</CardTitle>
-                                            <div className="flex items-center ml-2 flex-shrink-0">
-                                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                                <span className="ml-1 text-sm font-medium">{business.rating || 'N/A'}</span>
-                                            </div>
-                                        </div>
-                                        <CardDescription className="flex items-center pt-1"><Badge variant="secondary" className="mr-2 text-xs">{business.category}</Badge></CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="flex-grow flex flex-col justify-between">
-                                        <p className="text-sm text-muted-foreground mb-3">{business.description.substring(0, 100)}{business.description.length > 100 && '...'}</p>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center text-muted-foreground"><MapPin className="w-4 h-4 mr-1" />{business.address.split(',')[0]}</div>
-                                            <div className={`flex items-center ${business.isOpen === undefined ? 'text-muted-foreground' : business.isOpen ? "text-green-600" : "text-red-600"}`}>
-                                                <Clock className="w-3 h-3 mr-1" />{business.isOpen === undefined ? 'Não informado' : business.isOpen ? "Aberto" : "Fechado"}
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </div>
-                            </Card>
-                        </Link>
-                    ))}
-                </div>
-            ) : (
-                 <div className="text-center py-16">
-                    <Search className="w-24 h-24 text-muted-foreground mx-auto mb-6 opacity-50" />
-                    <h2 className="text-2xl font-bold text-foreground mb-4">Nenhum resultado encontrado</h2>
-                    <p className="text-muted-foreground mb-8 max-w-md mx-auto">Tente ajustar seus filtros de busca ou procurar por um termo diferente.</p>
-                </div>
-            )}
-          </main>
-        </div>
+        <main className="flex-1">
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input placeholder="Busque por 'pizza', 'farmácia', 'salão'..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal className="w-4 h-4 mr-2" />Filtros</Button>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48"><SelectValue placeholder="Ordenar por" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="relevance">Relevância</SelectItem>
+                    <SelectItem value="rating">Melhor Avaliação</SelectItem>
+                    <SelectItem value="name">Nome (A-Z)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button variant={viewMode === "grid" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("grid")}><Grid className="w-4 h-4" /></Button>
+                <Button variant={viewMode === "list" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("list")}><List className="w-4 h-4" /></Button>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              {loading ? 'Buscando...' : `${filteredAndSortedBusinesses.length} resultados encontrados`}
+            </p>
+          </div>
+
+          {loading ? (
+               <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
+                  {Array.from({ length: 6 }).map((_, index) => (
+                      <Card key={index}><Skeleton className="h-48 w-full" /><CardHeader><Skeleton className="h-5 w-3/4" /></CardHeader><CardContent><Skeleton className="h-4 w-full" /></CardContent></Card>
+                  ))}
+               </div>
+          ) : filteredAndSortedBusinesses.length > 0 ? (
+              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
+                  {filteredAndSortedBusinesses.map((business) => (
+                      <Link href={`/estabelecimento/${business.id}`} key={business.id} className="h-full">
+                          <Card className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full ${viewMode === "list" ? "flex" : "flex flex-col"}`}>
+                              <div className={`${viewMode === "list" ? "w-48 flex-shrink-0" : "h-48"} bg-muted`}>
+                                  {business.images && business.images.length > 0 ? (
+                                      <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
+                                  ) : (
+                                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10"><Store className="w-16 h-16 text-muted-foreground/50" /></div>
+                                  )}
+                              </div>
+                              <div className="flex flex-col flex-1">
+                                  <CardHeader className={viewMode === "list" ? "pb-2" : ""}>
+                                      <div className="flex items-start justify-between">
+                                          <CardTitle className="text-lg">{business.businessName}</CardTitle>
+                                          <div className="flex items-center ml-2 flex-shrink-0">
+                                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                              <span className="ml-1 text-sm font-medium">{business.rating || 'N/A'}</span>
+                                          </div>
+                                      </div>
+                                      <CardDescription className="flex items-center pt-1"><Badge variant="secondary" className="mr-2 text-xs">{categories.find(c => c.value === business.category)?.label || business.category}</Badge></CardDescription>
+                                  </CardHeader>
+                                  <CardContent className="flex-grow flex flex-col justify-between">
+                                      <p className="text-sm text-muted-foreground mb-3">{business.description.substring(0, 100)}{business.description.length > 100 && '...'}</p>
+                                      <div className="flex items-center justify-between text-sm">
+                                          <div className="flex items-center text-muted-foreground"><MapPin className="w-4 h-4 mr-1" />{business.address.split(',')[0]}</div>
+                                          <div className={`flex items-center ${business.isOpen === undefined ? 'text-muted-foreground' : business.isOpen ? "text-green-600" : "text-red-600"}`}>
+                                              <Clock className="w-3 h-3 mr-1" />{business.isOpen === undefined ? 'Não informado' : business.isOpen ? "Aberto" : "Fechado"}
+                                          </div>
+                                      </div>
+                                  </CardContent>
+                              </div>
+                          </Card>
+                      </Link>
+                  ))}
+              </div>
+          ) : (
+               <div className="text-center py-16">
+                  <Search className="w-24 h-24 text-muted-foreground mx-auto mb-6 opacity-50" />
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Nenhum resultado encontrado</h2>
+                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">Tente ajustar seus filtros de busca ou procurar por um termo diferente.</p>
+              </div>
+          )}
+        </main>
       </div>
     </div>
   )
 }
 
+export default function BuscaPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-12 w-12 animate-spin" /></div>}>
+      <div className="min-h-screen bg-background">
+        <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <Search className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-foreground">Buscar Estabelecimentos</h1>
+                  <p className="text-sm text-muted-foreground">Encontre o que você precisa no Novo Tempo</p>
+                </div>
+              </div>
+              <nav className="hidden md:flex items-center space-x-6">
+                <Link href="/" className="text-foreground hover:text-primary transition-colors">Início</Link>
+                <Link href="/mapa" className="text-foreground hover:text-primary transition-colors">Mapa</Link>
+                <Link href="/categorias" className="text-foreground hover:text-primary transition-colors">Categorias</Link>
+                <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">Sobre</Link>
+              </nav>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm" asChild><Link href="/login">Entrar</Link></Button>
+                <Button size="sm" asChild><Link href="/empresario/cadastro">Cadastrar Negócio</Link></Button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <SearchResults />
+      </div>
+    </Suspense>
+  )
+}

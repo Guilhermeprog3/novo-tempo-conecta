@@ -12,8 +12,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { doc, getDoc, Timestamp } from 'firebase/firestore'
-import { db } from "@/lib/firebase"
+import { useRouter } from "next/navigation" // Importado para redirecionamento
+import { doc, getDoc, updateDoc, collection, addDoc, getDocs, Timestamp, onSnapshot } from 'firebase/firestore'
+import { db, auth } from "@/lib/firebase"
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth'
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import L from 'leaflet'
@@ -40,13 +42,14 @@ type BusinessData = {
     };
 };
 
-type Comment = {
+type Review = {
     id: string;
-    user: string;
-    avatar: string;
-    date: string;
+    userId: string;
+    userName: string;
+    userAvatar?: string;
+    rating: number;
     comment: string;
-    isGuest: boolean;
+    createdAt: Timestamp;
 };
 
 // --- Configuração do Ícone do Mapa ---
@@ -62,19 +65,25 @@ L.Icon.Default.mergeOptions({
 export default function EstabelecimentoPage({ params }: { params: { id: string } }) {
   const [business, setBusiness] = useState<BusinessData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const router = useRouter(); // Hook para redirecionamento
 
   const [showReviewForm, setShowReviewForm] = useState(false)
-  const [showCommentForm, setShowCommentForm] = useState(false)
   const [userRating, setUserRating] = useState(0)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [newComment, setNewComment] = useState("")
-  const [guestName, setGuestName] = useState("")
-  const [guestEmail, setGuestEmail] = useState("")
-  const [comments, setComments] = useState<Comment[]>([]); // Será buscado do Firebase no futuro
+  const [reviewComment, setReviewComment] = useState("");
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!params.id) return;
+  
     const fetchBusinessData = async () => {
-        if (!params.id) return;
         try {
             const docRef = doc(db, "businesses", params.id);
             const docSnap = await getDoc(docRef);
@@ -92,7 +101,69 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
     };
 
     fetchBusinessData();
+
+    // Listener para avaliações em tempo real
+    const reviewsRef = collection(db, "businesses", params.id, "reviews");
+    const unsubscribeReviews = onSnapshot(reviewsRef, (querySnapshot) => {
+        const reviewsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+        setReviews(reviewsList);
+    });
+
+    return () => unsubscribeReviews();
   }, [params.id]);
+
+  const handleToggleReviewForm = () => {
+    if (currentUser) {
+        setShowReviewForm(!showReviewForm);
+    } else {
+        router.push(`/login?redirect=/estabelecimento/${params.id}`);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser || !business) {
+        alert("Você precisa estar logado para avaliar.");
+        return;
+    }
+    if (userRating === 0 || reviewComment.trim() === "") {
+        alert("Por favor, selecione uma nota e escreva um comentário.");
+        return;
+    }
+
+    try {
+        // 1. Adicionar a nova avaliação na subcoleção
+        const reviewsRef = collection(db, "businesses", params.id, "reviews");
+        await addDoc(reviewsRef, {
+            userId: currentUser.uid,
+            userName: currentUser.displayName || "Usuário Anônimo",
+            userAvatar: currentUser.photoURL,
+            rating: userRating,
+            comment: reviewComment,
+            createdAt: new Date(),
+        });
+
+        // 2. Atualizar a média de avaliação do estabelecimento
+        const newReviewCount = (business.reviewCount || 0) + 1;
+        const newRating = ((business.rating || 0) * (business.reviewCount || 0) + userRating) / newReviewCount;
+
+        const businessRef = doc(db, "businesses", params.id);
+        await updateDoc(businessRef, {
+            rating: newRating,
+            reviewCount: newReviewCount,
+        });
+        
+        // Limpar o formulário
+        setShowReviewForm(false);
+        setUserRating(0);
+        setReviewComment("");
+        alert("Avaliação enviada com sucesso!");
+
+    } catch (error) {
+        console.error("Erro ao enviar avaliação:", error);
+        alert("Ocorreu um erro ao enviar sua avaliação.");
+    }
+  };
 
 
   if (loading) {
@@ -155,7 +226,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                       <Badge variant="secondary">{business.category}</Badge>
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="font-medium">{business.rating || 'N/A'}</span>
+                        <span className="font-medium">{business.rating?.toFixed(1) || 'N/A'}</span>
                         <span className="text-muted-foreground">({business.reviewCount || 0} avaliações)</span>
                       </div>
                       {business.isOpen && <Badge className="bg-green-500">Aberto</Badge>}
@@ -200,11 +271,63 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Avaliações e Comentários</CardTitle></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Avaliações ({reviews.length})</CardTitle>
+                  <Button onClick={handleToggleReviewForm}>
+                    {showReviewForm ? "Cancelar" : "Deixar uma avaliação"}
+                  </Button>
+              </CardHeader>
               <CardContent>
-                <p className="text-center text-muted-foreground py-8">
-                  Funcionalidade de avaliações e comentários será implementada em breve.
-                </p>
+                {showReviewForm && (
+                    <form onSubmit={handleReviewSubmit} className="mb-6 p-4 border rounded-lg">
+                        <h3 className="font-medium mb-2">Sua Avaliação</h3>
+                        <div className="flex items-center space-x-1 mb-4">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                    key={star}
+                                    className={`w-6 h-6 cursor-pointer transition-colors ${
+                                        star <= userRating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                    }`}
+                                    onClick={() => setUserRating(star)}
+                                />
+                            ))}
+                        </div>
+                        <Textarea 
+                            placeholder="Escreva seu comentário..." 
+                            className="mb-4"
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                        />
+                        <Button type="submit">Enviar Avaliação</Button>
+                    </form>
+                )}
+                <div className="space-y-6">
+                    {reviews.length > 0 ? (
+                        reviews.map(review => (
+                            <div key={review.id} className="flex space-x-4">
+                                <Avatar>
+                                    <AvatarFallback>{review.userName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-medium">{review.userName}</p>
+                                        <div className="flex items-center space-x-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">{review.createdAt.toDate().toLocaleDateString('pt-BR')}</p>
+                                    <p className="mt-2">{review.comment}</p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-center text-muted-foreground py-8">
+                            Ainda não há avaliações. Seja o primeiro a avaliar!
+                        </p>
+                    )}
+                </div>
               </CardContent>
             </Card>
 

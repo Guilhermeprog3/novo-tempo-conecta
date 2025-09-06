@@ -28,15 +28,20 @@ export default function HomePage() {
   const [stats, setStats] = useState({ businessCount: 0 });
   const [loading, setLoading] = useState(true);
 
+  const categoryLinks = [
+    { name: "Restaurantes", value: "restaurante", icon: Utensils },
+    { name: "Comércio", value: "comercio", icon: Store },
+    { name: "Serviços", value: "servicos", icon: Wrench },
+    { name: "Saúde", value: "saude", icon: Heart },
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Buscar o total de negócios para as estatísticas
         const businessesCollection = collection(db, "businesses");
         const allBusinessSnapshot = await getDocs(businessesCollection);
         setStats({ businessCount: allBusinessSnapshot.size });
 
-        // Buscar 3 negócios em destaque (pode ser por data de criação ou rating no futuro)
         const featuredQuery = query(businessesCollection, limit(3));
         const featuredSnapshot = await getDocs(featuredQuery);
         const businessesList = featuredSnapshot.docs.map(doc => ({
@@ -110,10 +115,17 @@ export default function HomePage() {
             <SearchBar placeholder="Busque por 'pizza', 'farmácia', 'salão de beleza'..." />
           </div>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/categorias?categoria=restaurante"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Utensils className="w-4 h-4 mr-2" />Restaurantes</Badge></Link>
-            <Link href="/categorias?categoria=comercio"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Store className="w-4 h-4 mr-2" />Comércio</Badge></Link>
-            <Link href="/categorias?categoria=servicos"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Wrench className="w-4 h-4 mr-2" />Serviços</Badge></Link>
-            <Link href="/categorias?categoria=saude"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Heart className="w-4 h-4 mr-2" />Saúde</Badge></Link>
+            {categoryLinks.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <Link key={cat.value} href={`/busca?categoria=${cat.value}`}>
+                  <Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
+                    <Icon className="w-4 h-4 mr-2" />
+                    {cat.name}
+                  </Badge>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
