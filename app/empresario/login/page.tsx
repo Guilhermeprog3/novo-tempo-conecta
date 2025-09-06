@@ -7,10 +7,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
-import { useState } from "react"
+import React, { useState } from "react" // Importar React
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 export default function EmpresarioLoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // CORREÇÃO APLICADA AQUI
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login realizado com sucesso!");
+      // Redirecionar para o dashboard do empresário
+      window.location.href = '/empresario/dashboard';
+    } catch (error) { // CORREÇÃO APLICADA AQUI
+      console.error("Erro ao fazer login:", error);
+      if (error instanceof Error) {
+        alert("Erro ao fazer login: " + error.message);
+      } else {
+        alert("Ocorreu um erro desconhecido ao fazer login.");
+      }
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
@@ -34,12 +57,12 @@ export default function EmpresarioLoginPage() {
             <CardDescription>Acesse o painel de controle do seu estabelecimento</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail empresarial</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input id="email" type="email" placeholder="empresa@email.com" className="pl-10" required />
+                  <Input id="email" type="email" placeholder="empresa@email.com" className="pl-10" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
               </div>
 
@@ -53,6 +76,8 @@ export default function EmpresarioLoginPage() {
                     placeholder="Sua senha"
                     className="pl-10 pr-10"
                     required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <Button
                     type="button"
@@ -77,14 +102,12 @@ export default function EmpresarioLoginPage() {
                     Lembrar de mim
                   </Label>
                 </div>
-                <Link href="#" className="text-sm text-primary hover:underline">
+                <Link href="/esqueceu-senha" className="text-sm text-primary hover:underline">
                   Esqueceu a senha?
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" asChild>
-                <Link href="/empresario/dashboard">Acessar Painel</Link>
-              </Button>
+              <Button type="submit" className="w-full" size="lg">Acessar Painel</Button>
             </form>
 
             <div className="relative">

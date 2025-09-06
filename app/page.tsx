@@ -1,11 +1,60 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { MapPin, Star, Users, Store, Utensils, Wrench, Heart, Phone, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { SearchBar } from "@/components/search-bar"
+import { db } from "@/lib/firebase"
+import { collection, getDocs, query, limit, orderBy } from "firebase/firestore"
+
+// Tipo para os dados do negócio
+type Business = {
+  id: string;
+  businessName: string;
+  address: string;
+  category: string;
+  description: string;
+  rating?: number;
+  hours?: string;
+  images?: string[];
+};
 
 export default function HomePage() {
+  const [featuredBusinesses, setFeaturedBusinesses] = useState<Business[]>([]);
+  const [stats, setStats] = useState({ businessCount: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Buscar o total de negócios para as estatísticas
+        const businessesCollection = collection(db, "businesses");
+        const allBusinessSnapshot = await getDocs(businessesCollection);
+        setStats({ businessCount: allBusinessSnapshot.size });
+
+        // Buscar 3 negócios em destaque (pode ser por data de criação ou rating no futuro)
+        const featuredQuery = query(businessesCollection, limit(3));
+        const featuredSnapshot = await getDocs(featuredQuery);
+        const businessesList = featuredSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Business[];
+        setFeaturedBusinesses(businessesList);
+
+      } catch (error) {
+        console.error("Erro ao buscar dados da página inicial:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -40,7 +89,7 @@ export default function HomePage() {
                 <Link href="/login">Entrar</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/cadastro">Cadastrar Negócio</Link>
+                <Link href="/empresario/cadastro">Cadastrar Negócio</Link>
               </Button>
             </div>
           </div>
@@ -57,50 +106,14 @@ export default function HomePage() {
             Conecte-se com os negócios locais, descubra novos serviços e fortaleça nossa comunidade. Tudo que você
             precisa está aqui no seu bairro.
           </p>
-
-          {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-8">
             <SearchBar placeholder="Busque por 'pizza', 'farmácia', 'salão de beleza'..." />
           </div>
-
-          {/* Quick Categories */}
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/categorias?categoria=restaurante">
-              <Badge
-                variant="secondary"
-                className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Utensils className="w-4 h-4 mr-2" />
-                Restaurantes
-              </Badge>
-            </Link>
-            <Link href="/categorias?categoria=comercio">
-              <Badge
-                variant="secondary"
-                className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Store className="w-4 h-4 mr-2" />
-                Comércio
-              </Badge>
-            </Link>
-            <Link href="/categorias?categoria=servicos">
-              <Badge
-                variant="secondary"
-                className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Wrench className="w-4 h-4 mr-2" />
-                Serviços
-              </Badge>
-            </Link>
-            <Link href="/categorias?categoria=saude">
-              <Badge
-                variant="secondary"
-                className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Saúde
-              </Badge>
-            </Link>
+            <Link href="/categorias?categoria=restaurante"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Utensils className="w-4 h-4 mr-2" />Restaurantes</Badge></Link>
+            <Link href="/categorias?categoria=comercio"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Store className="w-4 h-4 mr-2" />Comércio</Badge></Link>
+            <Link href="/categorias?categoria=servicos"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Wrench className="w-4 h-4 mr-2" />Serviços</Badge></Link>
+            <Link href="/categorias?categoria=saude"><Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"><Heart className="w-4 h-4 mr-2" />Saúde</Badge></Link>
           </div>
         </div>
       </section>
@@ -110,7 +123,7 @@ export default function HomePage() {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">150+</div>
+              <div className="text-4xl font-bold text-primary mb-2">{loading ? <Skeleton className="h-10 w-24 mx-auto" /> : `${stats.businessCount}+`}</div>
               <div className="text-muted-foreground">Negócios Cadastrados</div>
             </div>
             <div>
@@ -136,123 +149,59 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Business Card 1 */}
-            <Link href="/estabelecimento/1">
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <Utensils className="w-16 h-16 text-primary" />
-                </div>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">Pizzaria do Bairro</CardTitle>
-                      <CardDescription className="flex items-center mt-1">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        Rua das Flores, 123
-                      </CardDescription>
+            {loading ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index}>
+                  <Skeleton className="h-48 w-full" />
+                  <CardHeader><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2 mt-2" /></CardHeader>
+                  <CardContent className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-full" /></CardContent>
+                </Card>
+              ))
+            ) : (
+              featuredBusinesses.map((business) => (
+                <Link href={`/estabelecimento/${business.id}`} key={business.id}>
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
+                    <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      {business.images && business.images.length > 0 ? (
+                        <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
+                      ) : (
+                        <Store className="w-16 h-16 text-primary" />
+                      )}
                     </div>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm font-medium">4.8</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Pizzas artesanais com ingredientes frescos e massa fermentada por 48h. Delivery grátis no bairro!
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Aberto até 23h
-                    </div>
-                    <Button size="sm" variant="outline">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Contato
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Business Card 2 */}
-            <Link href="/estabelecimento/2">
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="h-48 bg-gradient-to-br from-secondary/20 to-accent/20 flex items-center justify-center">
-                  <Store className="w-16 h-16 text-secondary" />
-                </div>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">Mercadinho São José</CardTitle>
-                      <CardDescription className="flex items-center mt-1">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        Av. Principal, 456
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm font-medium">4.6</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Produtos frescos, hortifrúti selecionado e atendimento familiar há mais de 20 anos no bairro.
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Aberto até 22h
-                    </div>
-                    <Button size="sm" variant="outline">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Contato
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Business Card 3 */}
-            <Link href="/estabelecimento/3">
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
-                  <Wrench className="w-16 h-16 text-accent" />
-                </div>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">Auto Elétrica Silva</CardTitle>
-                      <CardDescription className="flex items-center mt-1">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        Rua dos Mecânicos, 789
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm font-medium">4.9</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Especialista em sistemas elétricos automotivos. Diagnóstico gratuito e garantia em todos os
-                    serviços.
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Aberto até 18h
-                    </div>
-                    <Button size="sm" variant="outline">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Contato
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{business.businessName}</CardTitle>
+                          <CardDescription className="flex items-center mt-1">
+                            <MapPin className="w-4 h-4 mr-1" />
+                            {business.address}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="ml-1 text-sm font-medium">{business.rating || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col justify-between">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {business.description.substring(0, 100)}{business.description.length > 100 && '...'}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Clock className="w-4 h-4 mr-1" />
+                          {business.hours || 'Não informado'}
+                        </div>
+                        <Button size="sm" variant="outline">
+                          <Phone className="w-4 h-4 mr-2" />
+                          Contato
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -306,51 +255,19 @@ export default function HomePage() {
             <div>
               <h5 className="font-semibold text-foreground mb-4">Para Moradores</h5>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/busca" className="hover:text-primary transition-colors">
-                    Buscar Negócios
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/mapa" className="hover:text-primary transition-colors">
-                    Mapa Interativo
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/favoritos" className="hover:text-primary transition-colors">
-                    Meus Favoritos
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/categorias" className="hover:text-primary transition-colors">
-                    Categorias
-                  </Link>
-                </li>
+                <li><Link href="/busca" className="hover:text-primary transition-colors">Buscar Negócios</Link></li>
+                <li><Link href="/mapa" className="hover:text-primary transition-colors">Mapa Interativo</Link></li>
+                <li><Link href="/favoritos" className="hover:text-primary transition-colors">Meus Favoritos</Link></li>
+                <li><Link href="/categorias" className="hover:text-primary transition-colors">Categorias</Link></li>
               </ul>
             </div>
             <div>
               <h5 className="font-semibold text-foreground mb-4">Para Empresários</h5>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/empresario/cadastro" className="hover:text-primary transition-colors">
-                    Cadastrar Negócio
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/empresario/login" className="hover:text-primary transition-colors">
-                    Painel de Controle
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/empresario/perfil" className="hover:text-primary transition-colors">
-                    Gerenciar Perfil
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/sobre" className="hover:text-primary transition-colors">
-                    Suporte
-                  </Link>
-                </li>
+                <li><Link href="/empresario/cadastro" className="hover:text-primary transition-colors">Cadastrar Negócio</Link></li>
+                <li><Link href="/empresario/login" className="hover:text-primary transition-colors">Painel de Controle</Link></li>
+                <li><Link href="/empresario/perfil" className="hover:text-primary transition-colors">Gerenciar Perfil</Link></li>
+                <li><Link href="/sobre" className="hover:text-primary transition-colors">Suporte</Link></li>
               </ul>
             </div>
             <div>

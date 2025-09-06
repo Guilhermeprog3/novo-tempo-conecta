@@ -1,24 +1,86 @@
 "use client"
 
-import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, Store } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import Link from "next/link"
-import { useState } from "react"
+import React, { useState } from "react"
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
+import { auth, db } from '@/lib/firebase'
 
 export default function CadastroPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [userType, setUserType] = useState("morador")
+  const [formData, setFormData] = useState({
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      terms: false,
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value, type, checked } = e.target;
+    setFormData(prev => ({
+        ...prev,
+        [id]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("As senhas não coincidem!");
+      setLoading(false);
+      return;
+    }
+    if (!formData.terms) {
+      alert("Você precisa aceitar os Termos de Uso e a Política de Privacidade.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+        // 1. Criar o usuário no Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
+
+        // 2. Salvar informações adicionais no Firestore
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            createdAt: new Date(),
+        });
+
+        alert("Cadastro realizado com sucesso!");
+        // Redirecionar para o dashboard do usuário após o cadastro
+        window.location.href = '/usuario/dashboard';
+
+    } catch (error) {
+        console.error("Erro ao cadastrar:", error);
+        if (error instanceof Error) {
+            alert("Erro ao cadastrar: " + error.message);
+        } else {
+            alert("Ocorreu um erro desconhecido ao cadastrar.");
+        }
+    } finally {
+        setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back Button */}
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
@@ -37,31 +99,12 @@ export default function CadastroPage() {
             <CardDescription>Junte-se à comunidade do Novo Tempo e conecte-se com os negócios locais</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4">
-              {/* User Type Selection */}
-              <div className="space-y-3">
-                <Label>Tipo de conta</Label>
-                <RadioGroup value={userType} onValueChange={setUserType} className="flex space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="morador" id="morador" />
-                    <Label htmlFor="morador" className="text-sm">
-                      Morador
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="empresario" id="empresario" />
-                    <Label htmlFor="empresario" className="text-sm">
-                      Empresário
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome completo</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input id="name" type="text" placeholder="Seu nome completo" className="pl-10" required />
+                  <Input id="name" type="text" placeholder="Seu nome completo" className="pl-10" required value={formData.name} onChange={handleChange} />
                 </div>
               </div>
 
@@ -69,7 +112,7 @@ export default function CadastroPage() {
                 <Label htmlFor="email">E-mail</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input id="email" type="email" placeholder="seu@email.com" className="pl-10" required />
+                  <Input id="email" type="email" placeholder="seu@email.com" className="pl-10" required value={formData.email} onChange={handleChange} />
                 </div>
               </div>
 
@@ -77,25 +120,9 @@ export default function CadastroPage() {
                 <Label htmlFor="phone">Telefone</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input id="phone" type="tel" placeholder="(11) 99999-9999" className="pl-10" required />
+                  <Input id="phone" type="tel" placeholder="(11) 99999-9999" className="pl-10" required value={formData.phone} onChange={handleChange} />
                 </div>
               </div>
-
-              {userType === "empresario" && (
-                <div className="space-y-2">
-                  <Label htmlFor="business">Nome do negócio</Label>
-                  <div className="relative">
-                    <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      id="business"
-                      type="text"
-                      placeholder="Nome do seu estabelecimento"
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
 
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
@@ -107,6 +134,8 @@ export default function CadastroPage() {
                     placeholder="Mínimo 8 caracteres"
                     className="pl-10 pr-10"
                     required
+                    value={formData.password}
+                    onChange={handleChange}
                   />
                   <Button
                     type="button"
@@ -115,11 +144,7 @@ export default function CadastroPage() {
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                    )}
+                    {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
                   </Button>
                 </div>
               </div>
@@ -134,6 +159,8 @@ export default function CadastroPage() {
                     placeholder="Confirme sua senha"
                     className="pl-10 pr-10"
                     required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
                   />
                   <Button
                     type="button"
@@ -142,31 +169,27 @@ export default function CadastroPage() {
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                    )}
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
                   </Button>
                 </div>
               </div>
 
               <div className="flex items-start space-x-2">
-                <Checkbox id="terms" className="mt-1" />
+                <Checkbox id="terms" className="mt-1" checked={formData.terms} onCheckedChange={(checked) => setFormData(prev => ({...prev, terms: !!checked}))} />
                 <Label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed">
                   Concordo com os{" "}
-                  <Link href="#" className="text-primary hover:underline">
+                  <Link href="/termos-de-uso" className="text-primary hover:underline">
                     Termos de Uso
                   </Link>{" "}
                   e{" "}
-                  <Link href="#" className="text-primary hover:underline">
+                  <Link href="/politica-de-privacidade" className="text-primary hover:underline">
                     Política de Privacidade
                   </Link>
                 </Label>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Criar conta
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? "Criando conta..." : "Criar conta"}
               </Button>
             </form>
 

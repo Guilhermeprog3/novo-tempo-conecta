@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,15 +8,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useState } from "react"
+import { sendPasswordResetEmail } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 export default function EsqueceuSenhaPage() {
   const [email, setEmail] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Simular envio do email
-    setIsSubmitted(true)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setIsSubmitted(true);
+    } catch (error) { 
+      console.error("Erro ao enviar e-mail de redefinição de senha:", error);
+      if (error instanceof Error) {
+        alert("Erro ao enviar e-mail: " + error.message);
+      } else {
+        alert("Ocorreu um erro desconhecido ao enviar o e-mail.");
+      }
+    }
   }
 
   if (isSubmitted) {
