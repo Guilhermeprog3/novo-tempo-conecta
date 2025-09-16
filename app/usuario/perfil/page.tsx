@@ -1,3 +1,4 @@
+// app/usuario/perfil/page.tsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -11,9 +12,9 @@ import { Badge } from "@/components/ui/badge"
 import { User, Mail, MapPin, Calendar, Camera, Save, ArrowLeft, Edit3, Shield, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { auth, db } from '@/lib/firebase'
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth'
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore'
+import { uploadImage } from "@/lib/cloudinary" // IMPORTAÇÃO ADICIONADA
 
 // Tipos para os dados do usuário
 type UserData = {
@@ -71,13 +72,10 @@ export default function UsuarioPerfil() {
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
     const file = e.target.files[0];
-    const storage = getStorage();
-    const storageRef = ref(storage, `avatars/${user.uid}/${file.name}`);
 
     setUploading(true);
     try {
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
+        const downloadURL = await uploadImage(file); // USA A FUNÇÃO DO CLOUDINARY
 
         // Atualiza o estado local e o Firestore
         if (formData) {

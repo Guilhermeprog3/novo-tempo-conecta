@@ -128,9 +128,6 @@ export default function FavoritosPage() {
               <Link href="/mapa" className="text-foreground hover:text-primary transition-colors">
                 Mapa
               </Link>
-              <Link href="/categorias" className="text-foreground hover:text-primary transition-colors">
-                Categorias
-              </Link>
               <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">
                 Sobre
               </Link>

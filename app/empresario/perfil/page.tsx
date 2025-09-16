@@ -1,3 +1,4 @@
+// app/empresario/perfil/page.tsx
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
@@ -10,9 +11,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
 import { auth, db } from '@/lib/firebase'
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
 import { onAuthStateChanged, User } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { uploadImage } from '@/lib/cloudinary' // IMPORTAÇÃO ADICIONADA
 
 type BusinessData = {
     businessName: string;
@@ -70,18 +71,14 @@ export default function EmpresarioPerfilPage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
     const file = e.target.files[0];
-    const storage = getStorage();
-    const fileName = `image_${Date.now()}_${file.name}`;
-    const storageRef = ref(storage, `businesses/${user.uid}/${fileName}`);
 
     setUploading(true);
     try {
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
+        const downloadURL = await uploadImage(file); // USA A FUNÇÃO DO CLOUDINARY
 
         const updatedImages = [...(formData?.images || []), downloadURL];
         setFormData(prevData => prevData ? { ...prevData, images: updatedImages } : null);
-        
+
         // Salva a nova imagem no Firestore imediatamente
         const docRef = doc(db, "businesses", user.uid);
         await updateDoc(docRef, { images: updatedImages });
@@ -96,22 +93,21 @@ export default function EmpresarioPerfilPage() {
 
   const handleImageDelete = async (imageUrlToDelete: string) => {
     if (!user || !window.confirm("Tem certeza que deseja excluir esta imagem?")) return;
-    
-    const storage = getStorage();
-    const imageRef = ref(storage, imageUrlToDelete);
 
+    // A exclusão de imagens do Cloudinary pela API requer uma API assinada,
+    // o que não é seguro fazer diretamente do front-end.
+    // A melhor prática é ter um endpoint no seu backend que lide com isso.
+    // Por enquanto, apenas removeremos a URL do Firestore.
     try {
-        await deleteObject(imageRef);
-        
         const updatedImages = formData?.images?.filter(url => url !== imageUrlToDelete) || [];
         setFormData(prevData => prevData ? { ...prevData, images: updatedImages } : null);
 
         const docRef = doc(db, "businesses", user.uid);
         await updateDoc(docRef, { images: updatedImages });
-        alert("Imagem excluída com sucesso!");
+        alert("Imagem removida do perfil!");
     } catch (error) {
-        console.error("Erro ao excluir a imagem:", error);
-        alert("Falha ao excluir a imagem.");
+        console.error("Erro ao remover a imagem:", error);
+        alert("Falha ao remover a imagem.");
     }
   }
 
@@ -199,7 +195,7 @@ export default function EmpresarioPerfilPage() {
                 ))}
 
                 {isEditing && (
-                  <div 
+                  <div
                     className="aspect-square border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
                     onClick={() => fileInputRef.current?.click()}
                   >
@@ -337,4 +333,3 @@ export default function EmpresarioPerfilPage() {
     </div>
   )
 }
-

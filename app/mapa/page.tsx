@@ -228,9 +228,6 @@ export default function MapaPage() {
               <Link href="/mapa" className="text-primary font-medium">
                 Mapa
               </Link>
-              <Link href="/categorias" className="text-foreground hover:text-primary transition-colors">
-                Categorias
-              </Link>
               <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">
                 Sobre
               </Link>

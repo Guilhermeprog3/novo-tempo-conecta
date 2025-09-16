@@ -38,9 +38,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/categorias" className="hover:text-primary transition-colors">
-                  Categorias
-                </Link>
               </li>
             </ul>
           </div>
@@ -67,15 +64,6 @@ export function Footer() {
                   Suporte
                 </Link>
               </li>
-            </ul>
-          </div>
-          <div>
-            <h5 className="font-semibold text-foreground mb-4">Contato</h5>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>contato@novotempo.com.br</li>
-              <li>(11) 9999-9999</li>
-              <li>Bairro Novo Tempo</li>
-              <li>São Paulo - SP</li>
             </ul>
           </div>
         </div>

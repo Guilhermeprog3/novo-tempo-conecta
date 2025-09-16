@@ -203,7 +203,6 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             <nav className="hidden md:flex items-center space-x-6">
               <Link href="/" className="text-foreground hover:text-primary transition-colors">Início</Link>
               <Link href="/mapa" className="text-foreground hover:text-primary transition-colors">Mapa</Link>
-              <Link href="/categorias" className="text-foreground hover:text-primary transition-colors">Categorias</Link>
               <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">Sobre</Link>
             </nav>
             <div className="flex items-center space-x-2">

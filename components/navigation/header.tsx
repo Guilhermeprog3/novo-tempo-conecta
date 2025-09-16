@@ -80,7 +80,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
@@ -171,13 +170,11 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <Button variant="ghost" size="sm" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t" style={{ borderColor: "#e2e8f0" }}>
             <nav className="flex flex-col space-y-2 mt-4">
