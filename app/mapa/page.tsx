@@ -17,8 +17,9 @@ import "leaflet/dist/leaflet.css"
 import L, { LatLng } from 'leaflet'
 import { db } from "@/lib/firebase"
 import { collection, getDocs } from "firebase/firestore"
+import { Header } from "@/components/navigation/header"
+import { Footer } from "@/components/navigation/footer"
 
-// Definição do tipo para os dados do negócio
 type Business = {
   id: string;
   businessName: string;
@@ -32,51 +33,46 @@ type Business = {
   };
 };
 
-// Corrigindo o problema do ícone padrão do Leaflet
-// @ts-ignore
-delete L.Icon.Default.prototype._getIconUrl;
-
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-// Função para criar ícones personalizados com base na categoria
 const getCategoryIcon = (category: string) => {
     let iconComponent;
-    let color = "#4B5563"; // Cor padrão (cinza)
+    let color = "#4B5563";
 
     switch (category) {
         case "Restaurante":
         case "restaurante":
             iconComponent = <Utensils size={18} color="white" />;
-            color = "#F59E0B"; // Laranja
+            color = "#F59E0B";
             break;
         case "Comércio":
         case "comercio":
             iconComponent = <Store size={18} color="white" />;
-            color = "#3B82F6"; // Azul
+            color = "#3B82F6";
             break;
         case "Serviços":
         case "servicos":
             iconComponent = <Wrench size={18} color="white" />;
-            color = "#6B7280"; // Cinza escuro
+            color = "#6B7280";
             break;
         case "Saúde":
         case "saude":
             iconComponent = <Heart size={18} color="white" />;
-            color = "#EF4444"; // Vermelho
+            color = "#EF4444";
             break;
         case "Automotivo":
         case "automotivo":
             iconComponent = <Car size={18} color="white" />;
-            color = "#1F2937"; // Cinza bem escuro
+            color = "#1F2937";
             break;
         case "Casa":
         case "casa":
             iconComponent = <HomeIcon size={18} color="white" />;
-            color = "#10B981"; // Verde
+            color = "#10B981";
             break;
         default:
             iconComponent = <MapPin size={18} color="white" />;
@@ -98,7 +94,6 @@ const getCategoryIcon = (category: string) => {
     });
 };
 
-// Ícone para a localização do usuário
 const userLocationIcon = L.divIcon({
     html: ReactDOMServer.renderToString(
         <div style={{ backgroundColor: '#3B82F6', borderRadius: '50%', width: '20px', height: '20px', border: '3px solid white', boxShadow: '0 0 10px rgba(0,0,0,0.3)' }} />
@@ -109,7 +104,6 @@ const userLocationIcon = L.divIcon({
 });
 
 
-// Componente para centralizar o mapa na localização do usuário
 function CenterMapToUserLocation({ setUserPosition }: { setUserPosition: React.Dispatch<React.SetStateAction<LatLng | null>> }) {
     const map = useMap();
   
@@ -208,47 +202,14 @@ export default function MapaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Novo Tempo Conecta</h1>
-                <p className="text-sm text-muted-foreground">Seu bairro, seus negócios</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-foreground hover:text-primary transition-colors">
-                Início
-              </Link>
-              <Link href="/mapa" className="text-primary font-medium">
-                Mapa
-              </Link>
-              <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">
-                Sobre
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/login">Entrar</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/empresario/cadastro">Cadastrar Negócio</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
 
-      <div className="flex h-[calc(100vh-80px)]">
-        <div className="w-full lg:w-1/3 border-r bg-card overflow-y-auto">
+      <main className="flex-grow flex h-[calc(100vh-80px)]">
+        <div className="w-full lg:w-1/3 border-r bg-card overflow-y-auto bg-gradient-to-r from-[#1E3A8A] to-[#254A9E] text-white">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-foreground">Mapa Interativo</h2>
+              <h2 className="text-2xl font-bold text-white">Mapa Interativo</h2>
               <Badge variant="secondary" className="text-xs">
                 {sortedEstablishments.length} encontrados
               </Badge>
@@ -256,59 +217,59 @@ export default function MapaPage() {
 
             <div className="space-y-4 mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
                 <Input
                   placeholder="Buscar estabelecimentos..."
-                  className="pl-10"
+                  className="pl-10 bg-white/10 text-white placeholder:text-white/60 border-white/30 focus:border-primary"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
 
               <div className="flex items-center space-x-2">
-                <Button variant="outline" className="flex-1 justify-start bg-transparent" onClick={() => setShowFilters(!showFilters)}>
+                <Button variant="outline" className="flex-1 justify-start bg-transparent text-white hover:bg-white/10 hover:text-white" onClick={() => setShowFilters(!showFilters)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filtros
                   <ChevronDown className={`w-4 h-4 ml-auto transition-transform ${showFilters ? "rotate-180" : ""}`} />
                 </Button>
 
                 {(selectedCategories.length > 0 || minRating[0] > 0 || isOpen !== "todos") && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-white hover:bg-white/10 hover:text-white">
                     <X className="w-4 h-4" />
                   </Button>
                 )}
               </div>
 
               {showFilters && (
-                <Card className="p-4 space-y-4">
+                <Card className="p-4 space-y-4 bg-white/10 border-none">
                    <div>
-                    <h4 className="font-medium mb-3">Categorias</h4>
+                    <h4 className="font-medium mb-3 text-white/90">Categorias</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {categories.map((category) => (
                         <div key={category} className="flex items-center space-x-2">
-                          <Checkbox id={category} checked={selectedCategories.includes(category)} onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)} />
-                          <label htmlFor={category} className="text-sm cursor-pointer">{category}</label>
+                          <Checkbox id={category} checked={selectedCategories.includes(category)} onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
+                          <label htmlFor={category} className="text-sm cursor-pointer text-white/90">{category}</label>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <Separator />
+                  <Separator className="bg-white/20"/>
                   <div>
-                    <h4 className="font-medium mb-3">Avaliação Mínima</h4>
+                    <h4 className="font-medium mb-3 text-white/90">Avaliação Mínima</h4>
                     <div className="space-y-2">
                       <Slider value={minRating} onValueChange={setMinRating} max={5} min={0} step={0.5} className="w-full" />
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center justify-between text-xs text-white/70">
                         <span>0</span>
                         <span className="font-medium">{minRating[0]} estrelas</span>
                         <span>5</span>
                       </div>
                     </div>
                   </div>
-                  <Separator />
+                   <Separator className="bg-white/20"/>
                   <div>
-                    <h4 className="font-medium mb-3">Status</h4>
+                    <h4 className="font-medium mb-3 text-white/90">Status</h4>
                     <Select value={isOpen} onValueChange={setIsOpen}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="text-black"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="todos">Todos</SelectItem>
                         <SelectItem value="aberto">Apenas Abertos</SelectItem>
@@ -323,18 +284,18 @@ export default function MapaPage() {
             <div className="space-y-4">
               {loading ? (
                 <div className="flex justify-center items-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <Loader2 className="h-8 w-8 animate-spin text-white" />
                 </div>
               ) : sortedEstablishments.length === 0 ? (
-                <Card className="p-6 text-center">
-                  <p className="text-muted-foreground">Nenhum estabelecimento encontrado.</p>
-                  <Button variant="outline" size="sm" className="mt-2 bg-transparent" onClick={clearFilters}>
+                <Card className="p-6 text-center bg-white/10 border-none">
+                  <p className="text-white/80">Nenhum estabelecimento encontrado.</p>
+                  <Button variant="outline" size="sm" className="mt-2 bg-transparent text-white hover:bg-white/10 hover:text-white" onClick={clearFilters}>
                     Limpar Filtros
                   </Button>
                 </Card>
               ) : (
                 sortedEstablishments.map((establishment) => (
-                  <Card key={establishment.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                  <Card key={establishment.id} className="cursor-pointer hover:shadow-md transition-shadow bg-background text-foreground">
                      <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                            <div>
@@ -397,8 +358,7 @@ export default function MapaPage() {
                 ))}
             </MapContainer>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
-

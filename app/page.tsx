@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -14,7 +13,6 @@ import { collection, getDocs, query, limit, orderBy } from "firebase/firestore"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
 
-// Tipo para os dados do negócio
 type Business = {
   id: string;
   businessName: string;
@@ -67,7 +65,6 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Seção com fundo branco */}
       <section className="py-16 px-4 bg-background border-b">
         <div className="container mx-auto text-center max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
@@ -85,7 +82,6 @@ export default function HomePage() {
               const Icon = cat.icon;
               return (
                 <Link key={cat.value} href={`/busca?categoria=${cat.value}`}>
-                  {/* CORREÇÃO: Botões com estilo que contrasta com o fundo branco */}
                   <Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary/80 transition-colors">
                     <Icon className="w-4 h-4 mr-2" />
                     {cat.name}
@@ -97,7 +93,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
       <section className="py-16 px-4 bg-background">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
@@ -117,7 +112,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Businesses */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">

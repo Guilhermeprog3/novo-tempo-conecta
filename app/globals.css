@@ -4,21 +4,18 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(100% 0.00011 271.152); /* Branco */
-  --foreground: oklch(0 0 0); /* Preto */
+  --background: oklch(100% 0.00011 271.152);
+  --foreground: oklch(0 0 0);
 
-  /* Azul escuro (do header) */
   --card: oklch(40.367% 0.12912 255.448);
-  --card-foreground: oklch(1 0 0); /* Texto branco no header */
+  --card-foreground: oklch(1 0 0);
 
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0 0 0);
 
-  /* Amarelo para botões ativos/hover e CTAs */
   --primary: oklch(0.8 0.2 85);
   --primary-foreground: oklch(0 0 0);
 
-  /* Azul claro para botões de navegação */
   --secondary: oklch(0.6 0.18 250);
   --secondary-foreground: oklch(1 0 0);
 

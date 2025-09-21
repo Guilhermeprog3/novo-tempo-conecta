@@ -1,4 +1,3 @@
-// components/navigation/header.tsx
 "use client"
 
 import { MapPin, Menu, X, User, Settings, LogOut, Heart, MessageSquare, Star } from "lucide-react"
@@ -58,8 +57,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
   return (
     <header
-      // Alteração: Novo gradiente azul
-      className="border-b sticky top-0 z-50 shadow-sm bg-gradient-to-r from-[#1E3A8A] to-[#254A9E]" // Tons de azul escuro para gradiente
+      className="border-b sticky top-0 z-50 shadow-sm bg-gradient-to-r from-[#1E3A8A] to-[#254A9E]" 
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
@@ -68,11 +66,9 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               <MapPin className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              {/* Mantido texto branco para contraste */}
               <h1 className="text-xl font-bold text-white">
                 {title}
               </h1>
-              {/* Mantido texto branco com opacidade para contraste */}
               <p className="text-sm text-white/80">
                 {subtitle}
               </p>
@@ -84,7 +80,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               <Link
                 key={item.href}
                 href={item.href}
-                // Mantido texto branco padrão, com hover para primária
                 className={`transition-colors font-medium ${isActive(item.href) ? "text-primary" : "text-white hover:text-white/80"
                   }`}
               >
@@ -157,7 +152,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               </DropdownMenu>
             ) : (
               <>
-                {/* Botão Entrar com texto branco e hover mais sutil */}
                 <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 hover:text-white">
                   <Link href="/login">Entrar</Link>
                 </Button>
@@ -167,14 +161,12 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               </>
             )}
           </div>
-          {/* Ícone do menu mobile também em branco */}
           <Button variant="ghost" size="sm" className="md:hidden text-white hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
         {mobileMenuOpen && (
-          // Fundo do menu mobile continua o padrão para legibilidade
           <div className="md:hidden mt-4 pb-4 border-t border-border bg-background -mx-4 px-4">
             <nav className="flex flex-col space-y-2 mt-4">
               {navItems.map((item) => (

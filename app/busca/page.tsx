@@ -15,8 +15,9 @@ import { db } from "@/lib/firebase"
 import { collection, getDocs } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSearchParams } from "next/navigation"
+import { Header } from "@/components/navigation/header"
+import { Footer } from "@/components/navigation/footer"
 
-// Definição do tipo para os dados do negócio
 type Business = {
   id: string;
   businessName: string;
@@ -30,7 +31,6 @@ type Business = {
   hours?: string;
 };
 
-// Estrutura de dados unificada para categorias
 const categories = [
     { value: "restaurante", label: "Restaurantes e Alimentação" },
     { value: "comercio", label: "Comércio e Varejo" },
@@ -52,7 +52,6 @@ function SearchResults() {
   const [allBusinesses, setAllBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados dos Filtros
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   const initialCategory = searchParams.get("categoria");
@@ -105,7 +104,7 @@ function SearchResults() {
                 return (b.rating || 0) - (a.rating || 0);
             case "name":
                 return a.businessName.localeCompare(b.businessName);
-            default: // relevance (pode ser aprimorado no futuro)
+            default:
                 return 0;
         }
     });
@@ -114,33 +113,33 @@ function SearchResults() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
         <aside className={`lg:w-80 ${showFilters ? "block" : "hidden lg:block"}`}>
-          <Card className="sticky top-24">
+          <Card className="sticky top-24 bg-gradient-to-r from-[#1E3A8A] to-[#254A9E] text-white border-none">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-white">
                 <span>Filtros</span>
-                <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setShowFilters(false)}><X className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="sm" className="lg:hidden text-white hover:bg-white/10 hover:text-white" onClick={() => setShowFilters(false)}><X className="w-4 h-4" /></Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                <div className="space-y-2">
-                <Label>Categorias</Label>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
+                <Label className="text-white/90">Categorias</Label>
+                <div className="space-y-2">
                   {categories.map((category) => (
                     <div key={category.value} className="flex items-center space-x-2">
-                      <Checkbox id={category.value} onCheckedChange={(checked) => handleCategoryChange(category.value, !!checked)} checked={selectedCategories.includes(category.value)} />
-                      <Label htmlFor={category.value} className="text-sm font-normal">{category.label}</Label>
+                      <Checkbox id={category.value} onCheckedChange={(checked) => handleCategoryChange(category.value, !!checked)} checked={selectedCategories.includes(category.value)} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
+                      <Label htmlFor={category.value} className="text-sm font-normal text-white/90">{category.label}</Label>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Avaliação mínima: {minRating[0].toFixed(1)} estrelas</Label>
+                <Label className="text-white/90">Avaliação mínima: {minRating[0].toFixed(1)} estrelas</Label>
                 <Slider value={minRating} onValueChange={setMinRating} max={5} step={0.5} className="w-full" />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="open" checked={isOpen} onCheckedChange={(checked) => setIsOpen(!!checked)} />
-                  <Label htmlFor="open" className="text-sm font-normal">Aberto agora</Label>
+                  <Checkbox id="open" checked={isOpen} onCheckedChange={(checked) => setIsOpen(!!checked)} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
+                  <Label htmlFor="open" className="text-sm font-normal text-white/90">Aberto agora</Label>
                 </div>
               </div>
             </CardContent>
@@ -236,32 +235,14 @@ function SearchResults() {
 export default function BuscaPage() {
   return (
     <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-12 w-12 animate-spin" /></div>}>
-      <div className="min-h-screen bg-background">
-        <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Search className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">Buscar Estabelecimentos</h1>
-                  <p className="text-sm text-muted-foreground">Encontre o que você precisa no Novo Tempo</p>
-                </div>
-              </div>
-              <nav className="hidden md:flex items-center space-x-6">
-                <Link href="/" className="text-foreground hover:text-primary transition-colors">Início</Link>
-                <Link href="/mapa" className="text-foreground hover:text-primary transition-colors">Mapa</Link>
-                <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">Sobre</Link>
-              </nav>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" asChild><Link href="/login">Entrar</Link></Button>
-                <Button size="sm" asChild><Link href="/empresario/cadastro">Cadastrar Negócio</Link></Button>
-              </div>
-            </div>
-          </div>
-        </header>
-        <SearchResults />
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header 
+            title="Buscar Estabelecimentos"
+            subtitle="Encontre o que você precisa no Novo Tempo"
+        />
+        <main className="flex-grow">
+            <SearchResults />
+        </main>
       </div>
     </Suspense>
   )
