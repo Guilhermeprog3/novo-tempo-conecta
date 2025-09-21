@@ -67,10 +67,9 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section */}
-      <section className="py-16 px-4 bg-card border-b"> {/* Alterado para bg-card */}
+      <section className="py-16 px-4 bg-foreground border-b">
         <div className="container mx-auto text-center max-w-4xl">
-          <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
+          <h2 className="text-4xl md:text-6xl font-bold text-secondary mb-6 text-balance">
             Descubra o melhor do <span className="text-primary">Novo Tempo</span>
           </h2>
           <p className="text-xl text-muted-foreground mb-8 text-pretty">
