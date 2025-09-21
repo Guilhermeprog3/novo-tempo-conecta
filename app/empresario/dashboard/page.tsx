@@ -13,6 +13,8 @@ import Link from "next/link"
 import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged, signOut, User } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
+import { Header } from "@/components/navigation/header"
+import { Footer } from "@/components/navigation/footer"
 
 // Tipo para os dados do negócio
 type BusinessData = {
@@ -78,37 +80,7 @@ export default function EmpresarioDashboard() {
     
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Painel Empresarial</h1>
-                <p className="text-sm text-muted-foreground">{businessData?.businessName || 'Carregando...'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <Bell className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={`/estabelecimento/${user?.uid}`}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  Ver Perfil Público
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -230,6 +202,7 @@ export default function EmpresarioDashboard() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

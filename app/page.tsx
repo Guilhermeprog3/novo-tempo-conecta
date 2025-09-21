@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -10,6 +11,8 @@ import Link from "next/link"
 import { SearchBar } from "@/components/search-bar"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, query, limit, orderBy } from "firebase/firestore"
+import { Header } from "@/components/navigation/header"
+import { Footer } from "@/components/navigation/footer"
 
 // Tipo para os dados do negócio
 type Business = {
@@ -62,44 +65,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Novo Tempo Conecta</h1>
-                <p className="text-sm text-muted-foreground">Seu bairro, seus negócios</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-primary font-medium">
-                Início
-              </Link>
-              <Link href="/mapa" className="text-foreground hover:text-primary transition-colors">
-                Mapa
-              </Link>
-              <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">
-                Sobre
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/login">Entrar</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/empresario/cadastro">Cadastrar Negócio</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-secondary/5">
+      <section className="py-16 px-4 bg-card border-b"> {/* Alterado para bg-card */}
         <div className="container mx-auto text-center max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
             Descubra o melhor do <span className="text-primary">Novo Tempo</span>
@@ -116,7 +85,7 @@ export default function HomePage() {
               const Icon = cat.icon;
               return (
                 <Link key={cat.value} href={`/busca?categoria=${cat.value}`}>
-                  <Badge variant="secondary" className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
+                  <Badge variant="outline" className="px-4 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Icon className="w-4 h-4 mr-2" />
                     {cat.name}
                   </Badge>
@@ -128,7 +97,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4 bg-card">
+      <section className="py-16 px-4 bg-slate-50">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
@@ -170,11 +139,11 @@ export default function HomePage() {
               featuredBusinesses.map((business) => (
                 <Link href={`/estabelecimento/${business.id}`} key={business.id}>
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-                    <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                    <div className="h-48 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
                       {business.images && business.images.length > 0 ? (
                         <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
                       ) : (
-                        <Store className="w-16 h-16 text-primary" />
+                        <Store className="w-16 h-16 text-primary/50" />
                       )}
                     </div>
                     <CardHeader>
@@ -244,56 +213,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 bg-card border-t">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground">Novo Tempo Conecta</h4>
-                </div>
-              </div>
-              <p className="text-muted-foreground text-sm">
-                Fortalecendo a economia local e conectando nossa comunidade.
-              </p>
-            </div>
-            <div>
-              <h5 className="font-semibold text-foreground mb-4">Para Moradores</h5>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/busca" className="hover:text-primary transition-colors">Buscar Negócios</Link></li>
-                <li><Link href="/mapa" className="hover:text-primary transition-colors">Mapa Interativo</Link></li>
-                <li><Link href="/favoritos" className="hover:text-primary transition-colors">Meus Favoritos</Link></li>
-                <li><Link href="/categorias" className="hover:text-primary transition-colors">Categorias</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold text-foreground mb-4">Para Empresários</h5>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/empresario/cadastro" className="hover:text-primary transition-colors">Cadastrar Negócio</Link></li>
-                <li><Link href="/empresario/login" className="hover:text-primary transition-colors">Painel de Controle</Link></li>
-                <li><Link href="/empresario/perfil" className="hover:text-primary transition-colors">Gerenciar Perfil</Link></li>
-                <li><Link href="/sobre" className="hover:text-primary transition-colors">Suporte</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold text-foreground mb-4">Contato</h5>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>contato@novotempo.com.br</li>
-                <li>(11) 9999-9999</li>
-                <li>Bairro Novo Tempo</li>
-                <li>São Paulo - SP</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 Novo Tempo Conecta. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

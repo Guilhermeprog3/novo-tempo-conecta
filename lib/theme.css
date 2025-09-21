@@ -1,129 +1,64 @@
-/* Created dedicated theme file for easy color customization */
+/* lib/theme.css */
+/* Paleta de Cores Inspirada no NETEC (Azul, Amarelo, Branco) */
 
-/* Novo Tempo Conecta - Theme Configuration */
-/* Este arquivo centraliza todas as cores do tema para facilitar futuras edições */
-
-/* Cores Principais - Modo Claro */
 :root {
-  /* Identidade Visual */
-  --novo-tempo-primary: #059669; /* Verde esmeralda - cor principal da marca */
-  --novo-tempo-secondary: #10b981; /* Verde claro - ações secundárias */
-  --novo-tempo-accent: #34d399; /* Verde accent - destaques */
-
-  /* Neutros */
-  --novo-tempo-white: #ffffff; /* Branco puro */
-  --novo-tempo-gray-50: #f8fafc; /* Cinza muito claro */
-  --novo-tempo-gray-100: #f1f5f9; /* Cinza claro */
-  --novo-tempo-gray-200: #e2e8f0; /* Cinza médio claro */
-  --novo-tempo-gray-400: #94a3b8; /* Cinza médio */
-  --novo-tempo-gray-600: #475569; /* Cinza escuro */
-  --novo-tempo-gray-900: #0f172a; /* Cinza muito escuro */
-
-  /* Estados */
-  --novo-tempo-success: #22c55e; /* Verde sucesso */
-  --novo-tempo-warning: #f59e0b; /* Amarelo aviso */
-  --novo-tempo-error: #dc2626; /* Vermelho erro */
-  --novo-tempo-info: #3b82f6; /* Azul informação */
-
-  /* Transparências */
-  --novo-tempo-overlay: rgba(15, 23, 42, 0.5); /* Overlay escuro */
-  --novo-tempo-shadow: rgba(0, 0, 0, 0.1); /* Sombra sutil */
-
-  /* Adicionando variáveis para modo claro/escuro compatíveis com Tailwind */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  --background: 210 20% 98%; /* Branco levemente acinzentado */
+  --foreground: 222.2 84% 4.9%; /* Texto escuro */
+  
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
+
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 158 64% 52%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-  --muted: 210 40% 96%;
+
+  /* Azul principal do NETEC */
+  --primary: 211 100% 50%; /* HSL para #007bff */
+  --primary-foreground: 0 0% 100%; /* Texto branco */
+
+  /* Amarelo de destaque do NETEC */
+  --secondary: 45 100% 51%; /* HSL para #ffc107 */
+  --secondary-foreground: 222.2 84% 4.9%; /* Texto escuro */
+  
+  --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
+
+  --accent: 210 40% 96.1%;
   --accent-foreground: 222.2 84% 4.9%;
+
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 100%;
+  
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 158 64% 52%;
+  --ring: 211 100% 50%; /* Anel de foco azul */
+  
   --radius: 0.5rem;
 }
 
-/* Modo Escuro com variáveis Tailwind */
 .dark {
-  /* Cores customizadas do Novo Tempo para modo escuro */
-  --novo-tempo-primary: #10b981; /* Verde mais claro no modo escuro */
-  --novo-tempo-secondary: #34d399; /* Verde accent no modo escuro */
-  --novo-tempo-accent: #6ee7b7; /* Verde muito claro no modo escuro */
-
-  --novo-tempo-white: #0f172a; /* Fundo escuro */
-  --novo-tempo-gray-50: #1e293b; /* Cinza escuro */
-  --novo-tempo-gray-100: #334155; /* Cinza médio escuro */
-  --novo-tempo-gray-200: #475569; /* Cinza médio */
-  --novo-tempo-gray-400: #94a3b8; /* Cinza médio claro */
-  --novo-tempo-gray-600: #cbd5e1; /* Cinza claro */
-  --novo-tempo-gray-900: #f8fafc; /* Texto claro */
-
-  --novo-tempo-overlay: rgba(255, 255, 255, 0.1); /* Overlay claro */
-
-  /* Variáveis Tailwind para modo escuro */
+  /* Adaptação para modo escuro */
   --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+  --foreground: 0 0% 98%;
+
   --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
+  --card-foreground: 0 0% 98%;
+
   --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 158 64% 52%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 211 100% 60%; 
   --primary-foreground: 222.2 84% 4.9%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+
+  --secondary: 45 100% 60%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  
   --muted: 217.2 32.6% 17.5%;
   --muted-foreground: 215 20.2% 65.1%;
+
   --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --accent-foreground: 0 0% 98%;
+
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
-  --ring: 158 64% 52%;
-}
-
-/* Classes Utilitárias para Fácil Uso */
-.novo-tempo-bg-primary {
-  background-color: var(--novo-tempo-primary);
-}
-.novo-tempo-bg-secondary {
-  background-color: var(--novo-tempo-secondary);
-}
-.novo-tempo-bg-accent {
-  background-color: var(--novo-tempo-accent);
-}
-
-.novo-tempo-text-primary {
-  color: var(--novo-tempo-primary);
-}
-.novo-tempo-text-secondary {
-  color: var(--novo-tempo-secondary);
-}
-.novo-tempo-text-accent {
-  color: var(--novo-tempo-accent);
-}
-
-.novo-tempo-border-primary {
-  border-color: var(--novo-tempo-primary);
-}
-.novo-tempo-border-secondary {
-  border-color: var(--novo-tempo-secondary);
-}
-
-/* Gradientes */
-.novo-tempo-gradient-primary {
-  background: linear-gradient(135deg, var(--novo-tempo-primary), var(--novo-tempo-secondary));
-}
-
-.novo-tempo-gradient-accent {
-  background: linear-gradient(135deg, var(--novo-tempo-secondary), var(--novo-tempo-accent));
+  --ring: 211 100% 60%;
 }

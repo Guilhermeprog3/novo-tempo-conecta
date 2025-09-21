@@ -5,6 +5,9 @@ import Link from "next/link"
 import { ArrowLeft, Shield, Eye, Lock, Users, Cookie, FileText, AlertTriangle, Mail, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Header } from "@/components/navigation/header"
+import { Footer } from "@/components/navigation/footer"
+
 
 export default function PoliticaPrivacidadePage() {
   const [activeSection, setActiveSection] = useState("coleta")
@@ -21,30 +24,9 @@ export default function PoliticaPrivacidadePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-emerald-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-emerald-100 dark:border-emerald-800 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Voltar
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Política de Privacidade</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Última atualização: Janeiro de 2025</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -53,7 +35,7 @@ export default function PoliticaPrivacidadePage() {
             <Card className="sticky top-24">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
-                  <Shield className="h-5 w-5 mr-2 text-emerald-600" />
+                  <Shield className="h-5 w-5 mr-2 text-primary" />
                   Navegação Rápida
                 </CardTitle>
               </CardHeader>
@@ -66,8 +48,8 @@ export default function PoliticaPrivacidadePage() {
                       onClick={() => setActiveSection(section.id)}
                       className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                         activeSection === section.id
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                          ? "bg-primary/10 text-primary"
+                          : "hover:bg-muted/50 text-muted-foreground"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -84,7 +66,7 @@ export default function PoliticaPrivacidadePage() {
             {/* Introdução */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center text-emerald-700 dark:text-emerald-300">
+                <CardTitle className="flex items-center text-primary">
                   <Shield className="h-6 w-6 mr-3" />
                   Compromisso com sua Privacidade
                 </CardTitle>
@@ -100,14 +82,14 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Eye className="h-5 w-5 mr-2 text-emerald-600" />
+                    <Eye className="h-5 w-5 mr-2 text-primary" />
                     Coleta de Dados
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-2">Informações que Coletamos:</h4>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Dados de cadastro (nome, email, telefone)</li>
                       <li>Informações de perfil e preferências</li>
                       <li>Avaliações e comentários sobre estabelecimentos</li>
@@ -118,7 +100,7 @@ export default function PoliticaPrivacidadePage() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Como Coletamos:</h4>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Diretamente através de formulários</li>
                       <li>Automaticamente durante o uso</li>
                       <li>Através de cookies e tecnologias similares</li>
@@ -134,14 +116,14 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Users className="h-5 w-5 mr-2 text-emerald-600" />
+                    <Users className="h-5 w-5 mr-2 text-primary" />
                     Uso das Informações
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-2">Utilizamos seus dados para:</h4>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Fornecer e melhorar nossos serviços</li>
                       <li>Personalizar sua experiência na plataforma</li>
                       <li>Processar avaliações e comentários</li>
@@ -151,8 +133,8 @@ export default function PoliticaPrivacidadePage() {
                       <li>Cumprir obrigações legais</li>
                     </ul>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg">
-                    <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                  <div className="bg-primary/10 p-4 rounded-lg">
+                    <p className="text-sm text-primary">
                       <strong>Base Legal:</strong> Processamos seus dados com base no seu consentimento, execução de
                       contrato, interesse legítimo e cumprimento de obrigações legais.
                     </p>
@@ -166,17 +148,17 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Shield className="h-5 w-5 mr-2 text-emerald-600" />
+                    <Shield className="h-5 w-5 mr-2 text-primary" />
                     Compartilhamento de Dados
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-2">Não vendemos seus dados pessoais.</h4>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    <p className="text-muted-foreground mb-4">
                       Podemos compartilhar informações apenas nas seguintes situações:
                     </p>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Com seu consentimento explícito</li>
                       <li>Com prestadores de serviços terceirizados</li>
                       <li>Para cumprir obrigações legais</li>
@@ -199,14 +181,14 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Lock className="h-5 w-5 mr-2 text-emerald-600" />
+                    <Lock className="h-5 w-5 mr-2 text-primary" />
                     Segurança dos Dados
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-2">Medidas de Proteção:</h4>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Criptografia de dados em trânsito e em repouso</li>
                       <li>Controles de acesso rigorosos</li>
                       <li>Monitoramento contínuo de segurança</li>
@@ -217,7 +199,7 @@ export default function PoliticaPrivacidadePage() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Retenção de Dados:</h4>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-muted-foreground">
                       Mantemos seus dados apenas pelo tempo necessário para cumprir as finalidades descritas nesta
                       política ou conforme exigido por lei.
                     </p>
@@ -231,7 +213,7 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Cookie className="h-5 w-5 mr-2 text-emerald-600" />
+                    <Cookie className="h-5 w-5 mr-2 text-primary" />
                     Política de Cookies
                   </CardTitle>
                 </CardHeader>
@@ -239,21 +221,21 @@ export default function PoliticaPrivacidadePage() {
                   <div>
                     <h4 className="font-semibold mb-2">Tipos de Cookies:</h4>
                     <div className="space-y-3">
-                      <div className="border-l-4 border-emerald-500 pl-4">
+                      <div className="border-l-4 border-primary pl-4">
                         <h5 className="font-medium">Cookies Essenciais</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           Necessários para o funcionamento básico da plataforma
                         </p>
                       </div>
                       <div className="border-l-4 border-blue-500 pl-4">
                         <h5 className="font-medium">Cookies de Performance</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           Coletam informações sobre como você usa nosso site
                         </p>
                       </div>
                       <div className="border-l-4 border-purple-500 pl-4">
                         <h5 className="font-medium">Cookies de Funcionalidade</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           Lembram suas preferências e personalizam sua experiência
                         </p>
                       </div>
@@ -261,7 +243,7 @@ export default function PoliticaPrivacidadePage() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Gerenciamento:</h4>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-muted-foreground">
                       Você pode gerenciar cookies através das configurações do seu navegador ou através das nossas
                       configurações de privacidade.
                     </p>
@@ -275,7 +257,7 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <FileText className="h-5 w-5 mr-2 text-emerald-600" />
+                    <FileText className="h-5 w-5 mr-2 text-primary" />
                     Seus Direitos (LGPD)
                   </CardTitle>
                 </CardHeader>
@@ -285,28 +267,28 @@ export default function PoliticaPrivacidadePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <div className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                           <div>
                             <h5 className="font-medium">Acesso</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               Saber quais dados temos sobre você
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                           <div>
                             <h5 className="font-medium">Correção</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               Corrigir dados incorretos ou incompletos
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                           <div>
                             <h5 className="font-medium">Exclusão</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               Solicitar a remoção de seus dados
                             </p>
                           </div>
@@ -314,28 +296,28 @@ export default function PoliticaPrivacidadePage() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                           <div>
                             <h5 className="font-medium">Portabilidade</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               Receber seus dados em formato estruturado
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                           <div>
                             <h5 className="font-medium">Oposição</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               Opor-se ao processamento de seus dados
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                           <div>
                             <h5 className="font-medium">Revogação</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               Retirar consentimento a qualquer momento
                             </p>
                           </div>
@@ -343,8 +325,8 @@ export default function PoliticaPrivacidadePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  <div className="bg-secondary/20 p-4 rounded-lg">
+                    <p className="text-sm text-secondary-foreground">
                       <strong>Como exercer:</strong> Entre em contato conosco através dos canais oficiais. Responderemos
                       em até 15 dias úteis.
                     </p>
@@ -358,21 +340,21 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <AlertTriangle className="h-5 w-5 mr-2 text-emerald-600" />
+                    <AlertTriangle className="h-5 w-5 mr-2 text-primary" />
                     Alterações na Política
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-2">Atualizações:</h4>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Podemos atualizar esta política periodicamente</li>
                       <li>Notificaremos sobre mudanças significativas</li>
                       <li>A data da última atualização será sempre indicada</li>
                       <li>Recomendamos revisar regularmente esta política</li>
                     </ul>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>Última atualização: Janeiro de 2025</span>
                   </div>
@@ -385,14 +367,14 @@ export default function PoliticaPrivacidadePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Mail className="h-5 w-5 mr-2 text-emerald-600" />
+                    <Mail className="h-5 w-5 mr-2 text-primary" />
                     Entre em Contato
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-2">Dúvidas sobre Privacidade:</h4>
-                    <div className="space-y-2 text-gray-600 dark:text-gray-400">
+                    <div className="space-y-2 text-muted-foreground">
                       <p>
                         <strong>Email:</strong> privacidade@novotempoconecta.com.br
                       </p>
@@ -406,13 +388,13 @@ export default function PoliticaPrivacidadePage() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Encarregado de Dados (DPO):</h4>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-muted-foreground">
                       Para questões específicas sobre proteção de dados, entre em contato com nosso Encarregado de
                       Proteção de Dados através do email: dpo@novotempoconecta.com.br
                     </p>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg">
-                    <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                  <div className="bg-primary/10 p-4 rounded-lg">
+                    <p className="text-sm text-primary">
                       <strong>Compromisso:</strong> Respondemos a todas as solicitações relacionadas à privacidade em
                       até 15 dias úteis, conforme estabelecido pela LGPD.
                     </p>
@@ -446,6 +428,7 @@ export default function PoliticaPrivacidadePage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Header from "@/components/navigation/header"
+import { Header } from "@/components/navigation/header"
+import { Footer } from "@/components/navigation/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -148,6 +149,7 @@ export default function UsuarioDashboard() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
