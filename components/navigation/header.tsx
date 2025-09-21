@@ -58,7 +58,8 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
   return (
     <header
-      className="border-b sticky top-0 z-50 shadow-sm bg-card"
+      // Alteração: Novo gradiente azul
+      className="border-b sticky top-0 z-50 shadow-sm bg-gradient-to-r from-[#1E3A8A] to-[#254A9E]" // Tons de azul escuro para gradiente
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
@@ -67,10 +68,12 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               <MapPin className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">
+              {/* Mantido texto branco para contraste */}
+              <h1 className="text-xl font-bold text-white">
                 {title}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              {/* Mantido texto branco com opacidade para contraste */}
+              <p className="text-sm text-white/80">
                 {subtitle}
               </p>
             </div>
@@ -81,7 +84,8 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               <Link
                 key={item.href}
                 href={item.href}
-                className={`transition-colors font-medium ${isActive(item.href) ? "text-primary" : "text-foreground"
+                // Mantido texto branco padrão, com hover para primária
+                className={`transition-colors font-medium ${isActive(item.href) ? "text-primary" : "text-white hover:text-white/80"
                   }`}
               >
                 {item.label}
@@ -153,7 +157,8 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               </DropdownMenu>
             ) : (
               <>
-                <Button variant="outline" size="sm" asChild>
+                {/* Botão Entrar com texto branco e hover mais sutil */}
+                <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 hover:text-white">
                   <Link href="/login">Entrar</Link>
                 </Button>
                 <Button size="sm" asChild>
@@ -162,22 +167,23 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               </>
             )}
           </div>
-
-          <Button variant="ghost" size="sm" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {/* Ícone do menu mobile também em branco */}
+          <Button variant="ghost" size="sm" className="md:hidden text-white hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-border">
+          // Fundo do menu mobile continua o padrão para legibilidade
+          <div className="md:hidden mt-4 pb-4 border-t border-border bg-background -mx-4 px-4">
             <nav className="flex flex-col space-y-2 mt-4">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={`px-2 py-2 rounded transition-colors font-medium ${isActive(item.href)
-                    ? "text-primary bg-primary/10"
-                    : "text-foreground"
+                      ? "text-primary bg-primary/10"
+                      : "text-foreground"
                     }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -189,9 +195,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             <div className="flex flex-col space-y-2 mt-4">
               {isLoggedIn ? (
                 <>
-                  <div
-                    className="flex items-center space-x-3 px-2 py-3 border rounded-lg border-border"
-                  >
+                  <div className="flex items-center space-x-3 px-2 py-3 border rounded-lg border-border">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={user?.avatar || "/avatar-mulher-brasileira.jpg"}
@@ -208,20 +212,17 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                   </div>
                   <Button variant="outline" size="sm" asChild>
                     <Link href="/usuario/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      <User className="mr-2 h-4 w-4" />
-                      Meu Perfil
+                      <User className="mr-2 h-4 w-4" /> Meu Perfil
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
                     <Link href="/favoritos" onClick={() => setMobileMenuOpen(false)}>
-                      <Heart className="mr-2 h-4 w-4" />
-                      Favoritos
+                      <Heart className="mr-2 h-4 w-4" /> Favoritos
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
                     <Link href="/usuario/configuracoes" onClick={() => setMobileMenuOpen(false)}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Configurações
+                      <Settings className="mr-2 h-4 w-4" /> Configurações
                     </Link>
                   </Button>
                   <Button
@@ -233,8 +234,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                     }}
                     className="text-red-600 border-red-200 hover:bg-red-50"
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sair
+                    <LogOut className="mr-2 h-4 w-4" /> Sair
                   </Button>
                 </>
               ) : (

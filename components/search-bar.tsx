@@ -29,10 +29,9 @@ export function SearchBar({ placeholder = "Busque por estabelecimentos...", clas
   const [results, setResults] = useState<SearchResult[]>([])
   const [allBusinesses, setAllBusinesses] = useState<SearchResult[]>([])
   const [showResults, setShowResults] = useState(false)
-  const [isLoading, setIsLoading] = useState(true) // Adicionado estado de carregamento inicial
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
-  // Efeito para buscar todos os estabelecimentos do Firestore uma única vez
   useEffect(() => {
     const fetchAllBusinesses = async () => {
       try {
@@ -49,20 +48,18 @@ export function SearchBar({ placeholder = "Busque por estabelecimentos...", clas
       } catch (error) {
         console.error("Erro ao buscar todos os negócios para a busca:", error);
       } finally {
-        setIsLoading(false); // Finaliza o carregamento inicial
+        setIsLoading(false);
       }
     };
 
     fetchAllBusinesses();
   }, []);
 
-  // Efeito para filtrar os resultados com base na busca do usuário
   useEffect(() => {
     if (query.length > 2) {
       const lowerCaseQuery = query.toLowerCase();
       const filtered = allBusinesses.filter(
         (item) =>
-          // Verificações de segurança para evitar erros
           item.businessName?.toLowerCase().includes(lowerCaseQuery) ||
           item.category?.toLowerCase().includes(lowerCaseQuery),
       ).slice(0, 5);
@@ -107,9 +104,9 @@ export function SearchBar({ placeholder = "Busque por estabelecimentos...", clas
         </Button>
       </div>
 
-      {/* Lógica de renderização do Dropdown atualizada */}
+      {/* CORREÇÃO: Removido o "absolute" e classes de posicionamento */}
       {showResults && (
-        <Card className="absolute top-full left-0 right-0 mt-2 z-50 shadow-lg">
+        <Card className="mt-2 shadow-lg">
           <CardContent className="p-0">
             <div className="max-h-80 overflow-y-auto">
               {isLoading ? (

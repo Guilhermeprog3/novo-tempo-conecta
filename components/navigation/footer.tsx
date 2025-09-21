@@ -3,7 +3,8 @@ import Link from "next/link"
 
 export function Footer() {
   return (
-    <footer className="py-12 px-4 bg-card border-t">
+    // Alteração: Novo gradiente azul
+    <footer className="py-12 px-4 bg-gradient-to-r from-[#1E3A8A] to-[#254A9E] border-t">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -12,16 +13,20 @@ export function Footer() {
                 <MapPin className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h4 className="font-bold text-foreground">Novo Tempo Conecta</h4>
+                {/* Mantido texto branco para contraste */}
+                <h4 className="font-bold text-white">Novo Tempo Conecta</h4>
               </div>
             </div>
-            <p className="text-muted-foreground text-sm">
+            {/* Mantido texto branco com opacidade para contraste */}
+            <p className="text-white/80 text-sm">
               Fortalecendo a economia local e conectando nossa comunidade.
             </p>
           </div>
           <div>
-            <h5 className="font-semibold text-foreground mb-4">Para Moradores</h5>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            {/* Mantido texto branco */}
+            <h5 className="font-semibold text-white mb-4">Para Moradores</h5>
+            {/* Mantido texto branco com opacidade */}
+            <ul className="space-y-2 text-sm text-white/80">
               <li>
                 <Link href="/busca" className="hover:text-primary transition-colors">
                   Buscar Negócios
@@ -37,13 +42,13 @@ export function Footer() {
                   Meus Favoritos
                 </Link>
               </li>
-              <li>
-              </li>
             </ul>
           </div>
           <div>
-            <h5 className="font-semibold text-foreground mb-4">Para Empresários</h5>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            {/* Mantido texto branco */}
+            <h5 className="font-semibold text-white mb-4">Para Empresários</h5>
+            {/* Mantido texto branco com opacidade */}
+            <ul className="space-y-2 text-sm text-white/80">
               <li>
                 <Link href="/empresario/cadastro" className="hover:text-primary transition-colors">
                   Cadastrar Negócio
@@ -67,7 +72,8 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
+        {/* Mantido texto branco com opacidade */}
+        <div className="border-t border-white/20 mt-8 pt-8 text-center text-sm text-white/60">
           <p>&copy; 2025 Novo Tempo Conecta. Todos os direitos reservados.</p>
         </div>
       </div>
