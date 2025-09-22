@@ -53,6 +53,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
     { href: "/", label: "Início" },
     { href: "/mapa", label: "Mapa" },
     { href: "/sobre", label: "Sobre" },
+    { href: "/contato", label: "Contato" },
   ]
 
   return (

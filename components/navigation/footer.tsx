@@ -62,6 +62,11 @@ export function Footer() {
                   Suporte
                 </Link>
               </li>
+              <li>
+                <Link href="/contato" className="hover:text-primary transition-colors">
+                  Contato
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
