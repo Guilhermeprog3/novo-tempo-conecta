@@ -1,3 +1,4 @@
+// components/navigation/header.tsx
 "use client"
 
 import { MapPin, Menu, X, User, Settings, LogOut, Heart, MessageSquare, Star } from "lucide-react"
@@ -58,7 +59,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
   return (
     <header
-      className="border-b sticky top-0 z-50 shadow-sm bg-gradient-to-r from-[#1E3A8A] to-[#254A9E]" 
+      className="border-b sticky top-0 z-[9999] shadow-sm bg-gradient-to-r from-[#1E3A8A] to-[#254A9E]" 
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
@@ -156,8 +157,11 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 hover:text-white">
                   <Link href="/login">Entrar</Link>
                 </Button>
+                <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white">
+                  <Link href="/cadastro">Cadastrar Cidadão</Link>
+                </Button>
                 <Button size="sm" asChild>
-                  <Link href="/cadastro">Cadastrar Negócio</Link>
+                  <Link href="/empresario/cadastro">Cadastrar Negócio</Link>
                 </Button>
               </>
             )}
@@ -168,15 +172,15 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-border bg-background -mx-4 px-4">
+          <div className="md:hidden mt-4 pb-4 border-t border-blue-700/50 bg-[#1E3A8A] -mx-4 px-4">
             <nav className="flex flex-col space-y-2 mt-4">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-2 py-2 rounded transition-colors font-medium ${isActive(item.href)
+                  className={`px-3 py-2 rounded transition-colors font-medium ${isActive(item.href)
                       ? "text-primary bg-primary/10"
-                      : "text-foreground"
+                      : "text-white"
                     }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -185,10 +189,10 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               ))}
             </nav>
 
-            <div className="flex flex-col space-y-2 mt-4">
+            <div className="flex flex-col space-y-2 mt-4 pt-4 border-t border-blue-700/50">
               {isLoggedIn ? (
                 <>
-                  <div className="flex items-center space-x-3 px-2 py-3 border rounded-lg border-border">
+                  <div className="flex items-center space-x-3 px-2 py-3 border rounded-lg border-blue-700/50">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={user?.avatar || "/avatar-mulher-brasileira.jpg"}
@@ -199,23 +203,13 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-medium">{user?.name || "Usuário"}</p>
-                      <p className="text-xs text-muted-foreground">{user?.email || "usuario@email.com"}</p>
+                      <p className="text-sm font-medium text-white">{user?.name || "Usuário"}</p>
+                      <p className="text-xs text-white/80">{user?.email || "usuario@email.com"}</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50">
                     <Link href="/usuario/dashboard" onClick={() => setMobileMenuOpen(false)}>
                       <User className="mr-2 h-4 w-4" /> Meu Perfil
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/favoritos" onClick={() => setMobileMenuOpen(false)}>
-                      <Heart className="mr-2 h-4 w-4" /> Favoritos
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/usuario/configuracoes" onClick={() => setMobileMenuOpen(false)}>
-                      <Settings className="mr-2 h-4 w-4" /> Configurações
                     </Link>
                   </Button>
                   <Button
@@ -225,20 +219,25 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                       handleLogout()
                       setMobileMenuOpen(false)
                     }}
-                    className="text-red-600 border-red-200 hover:bg-red-50"
+                    className="text-red-400 border-red-400/50 bg-transparent"
                   >
                     <LogOut className="mr-2 h-4 w-4" /> Sair
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                       Entrar
                     </Link>
                   </Button>
-                  <Button size="sm" asChild>
+                   <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50">
                     <Link href="/cadastro" onClick={() => setMobileMenuOpen(false)}>
+                      Cadastrar Cidadão
+                    </Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link href="/empresario/cadastro" onClick={() => setMobileMenuOpen(false)}>
                       Cadastrar Negócio
                     </Link>
                   </Button>

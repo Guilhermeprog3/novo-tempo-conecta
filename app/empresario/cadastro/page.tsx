@@ -1,7 +1,7 @@
 // app/empresario/cadastro/page.tsx
 "use client"
 
-import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, Store, MapPin, Clock, Globe, FileText, Loader2, Copy } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, Store, MapPin, Clock, Globe, FileText, Loader2, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,6 +19,7 @@ import { auth, db } from '@/lib/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { CheckedState } from "@radix-ui/react-checkbox"
+import Header from "@/components/navigation/header";
 
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
@@ -56,17 +57,19 @@ function CenterMapToUserLocation({ setPosition }: CenterMapProps) {
     const map = useMap();
   
     useEffect(() => {
-      navigator.geolocation.getCurrentPosition(
-        (location) => {
-          const { latitude, longitude } = location.coords;
-          const userLatLng = new L.LatLng(latitude, longitude);
-          map.flyTo(userLatLng, 15);
-          setPosition(userLatLng);
-        },
-        () => {
-          console.log("Não foi possível obter a localização.");
-        }
-      );
+      if (map) {
+        navigator.geolocation.getCurrentPosition(
+          (location) => {
+            const { latitude, longitude } = location.coords;
+            const userLatLng = new L.LatLng(latitude, longitude);
+            map.flyTo(userLatLng, 15);
+            setPosition(userLatLng);
+          },
+          () => {
+            console.log("Não foi possível obter a localização.");
+          }
+        );
+      }
     }, [map, setPosition]);
   
     return null;
@@ -85,6 +88,7 @@ const categories = [
     { value: "lazer", label: "Lazer" },
     { value: "moda", label: "Moda e Vestuário" },
     { value: "esportes", label: "Esportes" },
+    { value: "outro", label: "Outro" },
 ];
 
 const daysOfWeek = [
@@ -111,7 +115,7 @@ export default function EmpresarioCadastroPage() {
   const [openingHours, setOpeningHours] = useState(
     daysOfWeek.map(day => ({ day: day.label, opens: '08:00', closes: '18:00', isOpen: false }))
   );
-  
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
@@ -131,7 +135,7 @@ export default function EmpresarioCadastroPage() {
         acc[timeRange].push(day.day);
         return acc;
     }, {} as Record<string, string[]>);
-  
+
     return Object.entries(grouped).map(([timeRange, days]) => {
       if (days.length === 0) return '';
       const dayIndexes = days.map(d => daysOfWeek.findIndex(dayInfo => dayInfo.label === d));
@@ -156,7 +160,7 @@ export default function EmpresarioCadastroPage() {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
-  
+
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value }));
   };
@@ -165,6 +169,13 @@ export default function EmpresarioCadastroPage() {
     e.preventDefault();
     setErrors({});
     setLoading(true);
+    
+    if (!formData.terms) {
+      setErrors({ form: "Você deve aceitar os termos de uso e a política de privacidade." });
+      setLoading(false);
+      return;
+    }
+
     let fieldErrors: { [key: string]: string } = {};
 
     if (formData.password !== formData.confirmPassword) {
@@ -195,7 +206,7 @@ export default function EmpresarioCadastroPage() {
       delete dataToSave.password;
       // @ts-ignore
       delete dataToSave.confirmPassword;
-      
+
       await setDoc(doc(db, "businesses", user.uid), dataToSave);
 
       window.location.href = '/empresario/dashboard';
@@ -226,211 +237,211 @@ export default function EmpresarioCadastroPage() {
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4">
-      <div className="container mx-auto max-w-2xl">
-        <div className="mb-6">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Voltar ao início
-            </Link>
-          </Button>
-        </div>
-
-        <Card className="shadow-lg">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <Store className="w-8 h-8 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-2xl font-bold">Cadastrar Estabelecimento</CardTitle>
-            <CardDescription>Registre seu negócio e conecte-se com milhares de moradores</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* DADOS DO RESPONSÁVEL */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dados do Responsável</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="ownerName">Nome completo</Label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input id="ownerName" type="text" placeholder="Seu nome completo" className="pl-10" required onChange={handleChange} value={formData.ownerName} aria-invalid={!!errors.ownerName} />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="email">E-mail</Label>
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input id="email" type="email" placeholder="seu@email.com" className="pl-10" required onChange={handleChange} value={formData.email} aria-invalid={!!errors.email} />
-                        </div>
-                        {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
-                    </div>
-                </div>
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4">
+        <div className="container mx-auto max-w-2xl">
+          <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Store className="w-8 h-8 text-primary-foreground" />
               </div>
-
-              {/* DADOS DO ESTABELECIMENTO */}
-              <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dados do Estabelecimento</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="businessName">Nome do estabelecimento</Label>
-                  <div className="relative">
-                    <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input id="businessName" type="text" placeholder="Nome do seu negócio" className="pl-10" required onChange={handleChange} value={formData.businessName}/>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
-                    <Select onValueChange={handleCategoryChange} value={formData.category}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a categoria" />
-                      </SelectTrigger>
-                      <SelectContent className="z-[1000]">
-                        {categories.map((cat) => (
-                           <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="businessPhone">Telefone comercial</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="businessPhone" type="tel" placeholder="(11) 3333-3333" className="pl-10" required onChange={handleChange} value={formData.businessPhone} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">Endereço completo</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 text-muted-foreground w-4 h-4" />
-                    <Textarea id="address" placeholder="Rua, número, complemento, bairro" className="pl-10 min-h-[80px]" required onChange={handleChange} value={formData.address}/>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Horário de funcionamento</Label>
-                  <div className="p-4 border rounded-md">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                          {openingHours.map((hour, index) => (
-                              <div key={hour.day}>
-                                  <div className="flex items-center mb-2">
-                                      <Checkbox
-                                          id={hour.day}
-                                          checked={hour.isOpen}
-                                          onCheckedChange={(checked) => handleOpeningHoursChange(index, 'isOpen', !!checked)}
-                                      />
-                                      <Label htmlFor={hour.day} className="text-sm font-normal ml-2">
-                                          {hour.day}
-                                      </Label>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                      <Input
-                                          type="time"
-                                          className="w-full"
-                                          value={hour.opens}
-                                          onChange={(e) => handleOpeningHoursChange(index, 'opens', e.target.value)}
-                                          disabled={!hour.isOpen}
-                                      />
-                                      <Input
-                                          type="time"
-                                          className="w-full"
-                                          value={hour.closes}
-                                          onChange={(e) => handleOpeningHoursChange(index, 'closes', e.target.value)}
-                                          disabled={!hour.isOpen}
-                                      />
-                                  </div>
-                              </div>
-                          ))}
+              <CardTitle className="text-2xl font-bold text-white">Cadastrar Estabelecimento</CardTitle>
+              <CardDescription className="text-white/80">Registre seu negócio e conecte-se com milhares de moradores</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* DADOS DO RESPONSÁVEL */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white border-b border-blue-600 pb-2">Dados do Responsável</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                          <Label htmlFor="ownerName" className="text-white/90">Nome completo</Label>
+                          <div className="relative">
+                              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                              <Input id="ownerName" type="text" placeholder="Seu nome completo" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.ownerName} aria-invalid={!!errors.ownerName} />
+                          </div>
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="email" className="text-white/90">E-mail</Label>
+                          <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                              <Input id="email" type="email" placeholder="seu@email.com" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.email} aria-invalid={!!errors.email} />
+                          </div>
+                          {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                       </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Localização no Mapa</Label>
-                  <p className="text-sm text-muted-foreground">Clique no mapa para marcar a localização exata do seu negócio.</p>
-                  <MapContainer center={[-5.0892, -42.8028]} zoom={13} style={{ height: '300px', width: '100%', zIndex: 0 }}>
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'/>
-                    <LocationMarker position={position} setPosition={setPosition} />
-                    <CenterMapToUserLocation setPosition={setPosition} />
-                  </MapContainer>
-                  {errors.map && <p className="text-sm text-destructive mt-1">{errors.map}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="website">Site/Instagram (opcional)</Label>
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input id="website" type="url" placeholder="www.seusite.com.br" className="pl-10" onChange={handleChange} value={formData.website} />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Descrição do negócio</Label>
-                  <div className="relative">
-                    <FileText className="absolute left-3 top-3 text-muted-foreground w-4 h-4" />
-                    <Textarea id="description" placeholder="Descreva seu negócio, produtos e serviços oferecidos..." className="pl-10 min-h-[100px]" required onChange={handleChange} value={formData.description}/>
-                  </div>
-                </div>
-              </div>
-              
-              {/* DADOS DE ACESSO */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dados de Acesso</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* DADOS DO ESTABELECIMENTO */}
+                <div className="space-y-4">
+                   <h3 className="text-lg font-semibold text-white border-b border-blue-600 pb-2">Dados do Estabelecimento</h3>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
+                    <Label htmlFor="businessName" className="text-white/90">Nome do estabelecimento</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 6 caracteres" className="pl-10 pr-10" required onChange={handleChange} value={formData.password} aria-invalid={!!errors.password}/>
-                      <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
-                        {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
-                      </Button>
+                      <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                      <Input id="businessName" type="text" placeholder="Nome do seu negócio" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.businessName}/>
                     </div>
-                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirmar senha</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirme sua senha" className="pl-10 pr-10" required onChange={handleChange} value={formData.confirmPassword} aria-invalid={!!errors.confirmPassword}/>
-                      <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
-                      </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category" className="text-white/90">Categoria</Label>
+                      <Select onValueChange={handleCategoryChange} value={formData.category}>
+                        <SelectTrigger className="bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60">
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                        <SelectContent className="z-[1000] bg-blue-900 text-white border-blue-700">
+                          {categories.map((cat) => (
+                             <SelectItem key={cat.value} value={cat.value} className="focus:bg-blue-800 focus:text-white">{cat.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>}
+                    <div className="space-y-2">
+                      <Label htmlFor="businessPhone" className="text-white/90">Telefone comercial</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                        <Input id="businessPhone" type="tel" placeholder="(11) 3333-3333" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.businessPhone} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-white/90">Endereço completo</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 text-white/60 w-4 h-4" />
+                      <Textarea id="address" placeholder="Rua, número, complemento, bairro" className="pl-10 min-h-[80px] bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.address}/>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white/90">Horário de funcionamento</Label>
+                    <div className="p-4 border border-blue-600 rounded-md">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                            {openingHours.map((hour, index) => (
+                                <div key={hour.day}>
+                                    <div className="flex items-center mb-2">
+                                        <Checkbox
+                                            id={hour.day}
+                                            checked={hour.isOpen}
+                                            onCheckedChange={(checked) => handleOpeningHoursChange(index, 'isOpen', !!checked)}
+                                            className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                        />
+                                        <Label htmlFor={hour.day} className="text-sm font-normal ml-2 text-white/90">
+                                            {hour.day}
+                                        </Label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="time"
+                                            className="w-full bg-blue-900/50 border-blue-700 text-white"
+                                            value={hour.opens}
+                                            onChange={(e) => handleOpeningHoursChange(index, 'opens', e.target.value)}
+                                            disabled={!hour.isOpen}
+                                        />
+                                        <Input
+                                            type="time"
+                                            className="w-full bg-blue-900/50 border-blue-700 text-white"
+                                            value={hour.closes}
+                                            onChange={(e) => handleOpeningHoursChange(index, 'closes', e.target.value)}
+                                            disabled={!hour.isOpen}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white/90">Localização no Mapa</Label>
+                    <p className="text-sm text-white/80">Clique no mapa para marcar a localização exata do seu negócio.</p>
+                    <MapContainer center={[-5.0892, -42.8028]} zoom={13} style={{ height: '300px', width: '100%', zIndex: 0 }}>
+                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'/>
+                      <LocationMarker position={position} setPosition={setPosition} />
+                      <CenterMapToUserLocation setPosition={setPosition} />
+                    </MapContainer>
+                    {errors.map && <p className="text-sm text-destructive mt-1">{errors.map}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="website" className="text-white/90">Site/Instagram (opcional)</Label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                      <Input id="website" type="url" placeholder="www.seusite.com.br" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" onChange={handleChange} value={formData.website} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-white/90">Descrição do negócio</Label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-3 text-white/60 w-4 h-4" />
+                      <Textarea id="description" placeholder="Descreva seu negócio, produtos e serviços oferecidos..." className="pl-10 min-h-[100px] bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.description}/>
+                    </div>
                   </div>
                 </div>
+
+                {/* DADOS DE ACESSO */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white border-b border-blue-600 pb-2">Dados de Acesso</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-white/90">Senha</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                        <Input id="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 6 caracteres" className="pl-10 pr-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.password} aria-invalid={!!errors.password}/>
+                        <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
+                          {showPassword ? <EyeOff className="w-4 h-4 text-white/60" /> : <Eye className="w-4 h-4 text-white/60" />}
+                        </Button>
+                      </div>
+                      {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-white/90">Confirmar senha</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                        <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirme sua senha" className="pl-10 pr-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required onChange={handleChange} value={formData.confirmPassword} aria-invalid={!!errors.confirmPassword}/>
+                        <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4 text-white/60" /> : <Eye className="w-4 h-4 text-white/60" />}
+                        </Button>
+                      </div>
+                      {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-2">
+                  <Checkbox id="terms" onCheckedChange={(checked: CheckedState) => setFormData(prev => ({ ...prev, terms: !!checked }))} checked={formData.terms} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
+                  <Label htmlFor="terms" className="text-sm text-white/80 leading-relaxed">
+                    Concordo com os{" "}
+                    <Link href="/termos-de-uso" className="text-yellow-400 hover:underline">Termos de Uso</Link> e <Link href="/politica-de-privacidade" className="text-yellow-400 hover:underline">Política de Privacidade</Link>.
+                  </Label>
+                </div>
+
+
+                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {loading ? 'Cadastrando...' : 'Cadastrar Estabelecimento'}
+                </Button>
+                {errors.form && (
+                  <div className="flex items-center p-3 text-sm text-red-200 bg-red-900/30 border border-red-500/50 rounded-lg mt-4">
+                      <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span>{errors.form}</span>
+                  </div>
+                )}
+              </form>
+
+              <div className="text-center">
+                <p className="text-sm text-white/80">
+                  Já tem uma conta empresarial?{" "}
+                  <Link href="/empresario/login" className="text-yellow-400 hover:underline font-medium">Faça login aqui</Link>
+                </p>
               </div>
-
-              <div className="flex items-start space-x-2">
-                <Checkbox id="terms" onCheckedChange={(checked: CheckedState) => setFormData(prev => ({ ...prev, terms: !!checked }))} checked={formData.terms} />
-                <Label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed">
-                  Concordo com os{" "}
-                  <Link href="/termos-de-uso" className="text-primary hover:underline">Termos de Uso</Link> e <Link href="/politica-de-privacidade" className="text-primary hover:underline">Política de Privacidade</Link>.
-                </Label>
-              </div>
-
-              
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {loading ? 'Cadastrando...' : 'Cadastrar Estabelecimento'}
-              </Button>
-              {errors.form && <p className="text-sm text-destructive text-center mt-2">{errors.form}</p>}
-            </form>
-
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Já tem uma conta empresarial?{" "}
-                <Link href="/empresario/login" className="text-primary hover:underline font-medium">Faça login aqui</Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

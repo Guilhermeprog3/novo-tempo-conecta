@@ -1,9 +1,10 @@
-import { MapPin } from "lucide-react"
+// components/navigation/footer.tsx
+import { MapPin, FileText, Shield } from "lucide-react"
 import Link from "next/link"
 
 export function Footer() {
   return (
-    <footer className="py-12 px-4 bg-gradient-to-r from-[#1E3A8A] to-[#254A9E] border-t">
+    <footer className="py-12 px-4 bg-gradient-to-r from-[#1E3A8A] to-[#254A9E] border-t border-blue-700/50">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -37,6 +38,11 @@ export function Footer() {
                   Meus Favoritos
                 </Link>
               </li>
+              <li>
+                <Link href="/cadastro" className="hover:text-primary transition-colors">
+                  Cadastrar Morador
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
@@ -48,23 +54,25 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/empresario/login" className="hover:text-primary transition-colors">
-                  Painel de Controle
-                </Link>
-              </li>
-              <li>
-                <Link href="/empresario/perfil" className="hover:text-primary transition-colors">
-                  Gerenciar Perfil
-                </Link>
-              </li>
-              <li>
-                <Link href="/sobre" className="hover:text-primary transition-colors">
-                  Suporte
-                </Link>
-              </li>
-              <li>
                 <Link href="/contato" className="hover:text-primary transition-colors">
                   Contato
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="font-semibold text-white mb-4">Legal</h5>
+            <ul className="space-y-2 text-sm text-white/80">
+              <li>
+                <Link href="/termos-de-uso" className="flex items-center gap-2 hover:text-primary transition-colors">
+                  <FileText className="w-4 h-4" />
+                  <span>Termos de Uso</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/politica-de-privacidade" className="flex items-center gap-2 hover:text-primary transition-colors">
+                  <Shield className="w-4 h-4" />
+                  <span>Política de Privacidade</span>
                 </Link>
               </li>
             </ul>

@@ -1,3 +1,4 @@
+// app/estabelecimento/[id]/page.tsx
 "use client"
 
 import {
@@ -8,17 +9,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation" // Importado para redirecionamento
-import { doc, getDoc, updateDoc, collection, addDoc, getDocs, Timestamp, onSnapshot } from 'firebase/firestore'
+import { useRouter } from "next/navigation"
+import { doc, getDoc, updateDoc, collection, addDoc, onSnapshot, Timestamp } from 'firebase/firestore'
 import { db, auth } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth'
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
+import { MapContainer, TileLayer, Marker } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import L from 'leaflet'
+import { Header } from "@/components/navigation/header"
 
 // --- Tipagem dos Dados ---
 type BusinessData = {
@@ -66,7 +66,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
   const [business, setBusiness] = useState<BusinessData | null>(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const router = useRouter(); // Hook para redirecionamento
+  const router = useRouter();
 
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [userRating, setUserRating] = useState(0)
@@ -82,7 +82,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
 
   useEffect(() => {
     if (!params.id) return;
-  
+
     const fetchBusinessData = async () => {
         try {
             const docRef = doc(db, "businesses", params.id);
@@ -102,7 +102,6 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
 
     fetchBusinessData();
 
-    // Listener para avaliações em tempo real
     const reviewsRef = collection(db, "businesses", params.id, "reviews");
     const unsubscribeReviews = onSnapshot(reviewsRef, (querySnapshot) => {
         const reviewsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
@@ -127,12 +126,11 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
         return;
     }
     if (userRating === 0 || reviewComment.trim() === "") {
-        alert("Por favor, selecione uma nota e escreva um comentário.");
+        alert("Por favor, selecione uma nota и escreva um comentário.");
         return;
     }
 
     try {
-        // 1. Adicionar a nova avaliação na subcoleção
         const reviewsRef = collection(db, "businesses", params.id, "reviews");
         await addDoc(reviewsRef, {
             userId: currentUser.uid,
@@ -143,7 +141,6 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             createdAt: new Date(),
         });
 
-        // 2. Atualizar a média de avaliação do estabelecimento
         const newReviewCount = (business.reviewCount || 0) + 1;
         const newRating = ((business.rating || 0) * (business.reviewCount || 0) + userRating) / newReviewCount;
 
@@ -152,8 +149,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             rating: newRating,
             reviewCount: newReviewCount,
         });
-        
-        // Limpar o formulário
+
         setShowReviewForm(false);
         setUserRating(0);
         setReviewComment("");
@@ -188,80 +184,57 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Novo Tempo Conecta</h1>
-                <p className="text-sm text-muted-foreground">Seu bairro, seus negócios</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-foreground hover:text-primary transition-colors">Início</Link>
-              <Link href="/mapa" className="text-foreground hover:text-primary transition-colors">Mapa</Link>
-              <Link href="/sobre" className="text-foreground hover:text-primary transition-colors">Sobre</Link>
-            </nav>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" asChild><Link href="/login">Entrar</Link></Button>
-              <Button size="sm" asChild><Link href="/empresario/cadastro">Cadastrar Negócio</Link></Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Card>
+            <Card className="bg-[#1E3A8A] border-blue-700 text-white">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">{business.businessName}</h1>
-                    <div className="flex items-center space-x-4 mb-2">
+                    <h1 className="text-3xl font-bold text-white mb-2">{business.businessName}</h1>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-2">
                       <Badge variant="secondary">{business.category}</Badge>
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="font-medium">{business.rating?.toFixed(1) || 'N/A'}</span>
-                        <span className="text-muted-foreground">({business.reviewCount || 0} avaliações)</span>
+                        <span className="font-medium text-white">{business.rating?.toFixed(1) || 'N/A'}</span>
+                        <span className="text-white/80">({business.reviewCount || 0} avaliações)</span>
                       </div>
                       {business.isOpen && <Badge className="bg-green-500">Aberto</Badge>}
                     </div>
-                    <div className="flex items-center space-x-1 text-muted-foreground">
+                    <div className="flex items-center space-x-2 text-white/80">
                       <MapPin className="w-4 h-4" />
                       <span>{business.address}</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" className="bg-transparent"><Heart className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="sm" className="bg-transparent"><Share2 className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><Heart className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><Share2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
-                <p className="text-muted-foreground mb-4">{business.description}</p>
+                <p className="text-white/80 mb-4">{business.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {business.specialties?.map((specialty, index) => (
-                    <Badge key={index} variant="outline">{specialty}</Badge>
+                    <Badge key={index} variant="outline" className="text-white border-white/50">{specialty}</Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader><CardTitle>Fotos</CardTitle></CardHeader>
+            <Card className="bg-[#1E3A8A] border-blue-700 text-white">
+              <CardHeader><CardTitle className="text-white">Fotos</CardTitle></CardHeader>
               <CardContent>
                 {business.images && business.images.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {business.images.map((url, index) => (
-                             <div key={index} className="aspect-square bg-muted rounded-lg flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
+                             <div key={index} className="aspect-square bg-blue-900/50 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
                                 <img src={url} alt={`Foto ${index + 1} de ${business.businessName}`} className="w-full h-full object-cover rounded-lg" />
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-white/60">
                         <Camera className="w-12 h-12 mx-auto mb-4 opacity-50" />
                         <p>Nenhuma foto adicionada ainda.</p>
                     </div>
@@ -269,31 +242,31 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-[#1E3A8A] border-blue-700 text-white">
               <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Avaliações ({reviews.length})</CardTitle>
+                  <CardTitle className="text-white">Avaliações ({reviews.length})</CardTitle>
                   <Button onClick={handleToggleReviewForm}>
                     {showReviewForm ? "Cancelar" : "Deixar uma avaliação"}
                   </Button>
               </CardHeader>
               <CardContent>
                 {showReviewForm && (
-                    <form onSubmit={handleReviewSubmit} className="mb-6 p-4 border rounded-lg">
-                        <h3 className="font-medium mb-2">Sua Avaliação</h3>
+                    <form onSubmit={handleReviewSubmit} className="mb-6 p-4 border border-blue-600 rounded-lg">
+                        <h3 className="font-medium mb-2 text-white">Sua Avaliação</h3>
                         <div className="flex items-center space-x-1 mb-4">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
                                     key={star}
                                     className={`w-6 h-6 cursor-pointer transition-colors ${
-                                        star <= userRating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                        star <= userRating ? 'text-yellow-400 fill-current' : 'text-gray-500'
                                     }`}
                                     onClick={() => setUserRating(star)}
                                 />
                             ))}
                         </div>
-                        <Textarea 
-                            placeholder="Escreva seu comentário..." 
-                            className="mb-4"
+                        <Textarea
+                            placeholder="Escreva seu comentário..."
+                            className="mb-4 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60"
                             value={reviewComment}
                             onChange={(e) => setReviewComment(e.target.value)}
                         />
@@ -309,20 +282,20 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                                 </Avatar>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between">
-                                        <p className="font-medium">{review.userName}</p>
+                                        <p className="font-medium text-white">{review.userName}</p>
                                         <div className="flex items-center space-x-1">
                                             {[...Array(5)].map((_, i) => (
-                                                <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                                                <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-500'}`} />
                                             ))}
                                         </div>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">{review.createdAt.toDate().toLocaleDateString('pt-BR')}</p>
-                                    <p className="mt-2">{review.comment}</p>
+                                    <p className="text-sm text-white/70">{review.createdAt.toDate().toLocaleDateString('pt-BR')}</p>
+                                    <p className="mt-2 text-white/90">{review.comment}</p>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <p className="text-center text-muted-foreground py-8">
+                        <p className="text-center text-white/60 py-8">
                             Ainda não há avaliações. Seja o primeiro a avaliar!
                         </p>
                     )}
@@ -333,62 +306,62 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
           </div>
 
           <div className="space-y-6">
-            <Card>
-              <CardHeader><CardTitle>Contato</CardTitle></CardHeader>
+            <Card className="bg-[#1E3A8A] border-blue-700 text-white">
+              <CardHeader><CardTitle className="text-white">Contato</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <Phone className="w-5 h-5 text-muted-foreground" />
+                  <Phone className="w-5 h-5 text-white/60" />
                   <div>
-                    <p className="font-medium">Telefone</p>
-                    <p className="text-sm text-muted-foreground">{business.businessPhone}</p>
+                    <p className="font-medium text-white">Telefone</p>
+                    <p className="text-sm text-white/80">{business.businessPhone}</p>
                   </div>
                 </div>
                 {business.whatsapp && (
                     <div className="flex items-center space-x-3">
-                        <MessageSquare className="w-5 h-5 text-muted-foreground" />
+                        <MessageSquare className="w-5 h-5 text-white/60" />
                         <div>
-                        <p className="font-medium">WhatsApp</p>
-                        <p className="text-sm text-muted-foreground">{business.whatsapp}</p>
+                        <p className="font-medium text-white">WhatsApp</p>
+                        <p className="text-sm text-white/80">{business.whatsapp}</p>
                         </div>
                     </div>
                 )}
                 {business.website && (
                     <div className="flex items-center space-x-3">
-                        <Globe className="w-5 h-5 text-muted-foreground" />
+                        <Globe className="w-5 h-5 text-white/60" />
                         <div>
-                        <p className="font-medium">Site/Instagram</p>
-                        <p className="text-sm text-muted-foreground">{business.website}</p>
+                        <p className="font-medium text-white">Site/Instagram</p>
+                        <p className="text-sm text-white/80">{business.website}</p>
                         </div>
                     </div>
                 )}
                 <div className="pt-4 space-y-2">
                   <Button className="w-full"><Phone className="w-4 h-4 mr-2" />Ligar Agora</Button>
-                  <Button variant="outline" className="w-full bg-transparent"><MessageSquare className="w-4 h-4 mr-2" />WhatsApp</Button>
+                  <Button variant="outline" className="w-full bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><MessageSquare className="w-4 h-4 mr-2" />WhatsApp</Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader><CardTitle>Horário de Funcionamento</CardTitle></CardHeader>
+            <Card className="bg-[#1E3A8A] border-blue-700 text-white">
+              <CardHeader><CardTitle className="text-white">Horário de Funcionamento</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-3 mb-4">
-                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <Clock className="w-5 h-5 text-white/60" />
                   <div>
-                    <p className="font-medium">{business.hours}</p>
-                    <p className={`text-sm ${business.isOpen ? 'text-green-600' : 'text-red-600'}`}>{business.isOpen ? 'Aberto agora' : 'Fechado agora'}</p>
+                    <p className="font-medium text-white">{business.hours}</p>
+                    <p className={`text-sm ${business.isOpen ? 'text-green-400' : 'text-red-400'}`}>{business.isOpen ? 'Aberto agora' : 'Fechado agora'}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader><CardTitle>Localização</CardTitle></CardHeader>
+            <Card className="bg-[#1E3A8A] border-blue-700 text-white">
+              <CardHeader><CardTitle className="text-white">Localização</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex items-start space-x-3 mb-4">
-                  <MapPin className="w-5 h-5 text-muted-foreground mt-1" />
+                  <MapPin className="w-5 h-5 text-white/60 mt-1" />
                   <div>
-                    <p className="font-medium">Endereço</p>
-                    <p className="text-sm text-muted-foreground">{business.address}</p>
+                    <p className="font-medium text-white">Endereço</p>
+                    <p className="text-sm text-white/80">{business.address}</p>
                   </div>
                 </div>
                 <div className="aspect-video rounded-lg overflow-hidden mb-4">
@@ -402,7 +375,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                         <Marker position={[business.location.latitude, business.location.longitude]} />
                     </MapContainer>
                 </div>
-                <Button variant="outline" className="w-full bg-transparent"><Navigation className="w-4 h-4 mr-2" />Como Chegar</Button>
+                <Button variant="outline" className="w-full bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><Navigation className="w-4 h-4 mr-2" />Como Chegar</Button>
               </CardContent>
             </Card>
           </div>

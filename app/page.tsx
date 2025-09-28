@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -124,48 +125,48 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
               Array.from({ length: 3 }).map((_, index) => (
-                <Card key={index}>
-                  <Skeleton className="h-48 w-full" />
-                  <CardHeader><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2 mt-2" /></CardHeader>
-                  <CardContent className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-full" /></CardContent>
+                <Card key={index} className="bg-[#1E3A8A] border-blue-700">
+                  <Skeleton className="h-48 w-full bg-blue-900/50" />
+                  <CardHeader><Skeleton className="h-5 w-3/4 bg-blue-900/50" /><Skeleton className="h-4 w-1/2 mt-2 bg-blue-900/50" /></CardHeader>
+                  <CardContent className="space-y-2"><Skeleton className="h-4 w-full bg-blue-900/50" /><Skeleton className="h-4 w-full bg-blue-900/50" /></CardContent>
                 </Card>
               ))
             ) : (
               featuredBusinesses.map((business) => (
                 <Link href={`/estabelecimento/${business.id}`} key={business.id}>
-                  <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-                    <div className="h-48 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col bg-[#1E3A8A] border-blue-700 text-white">
+                    <div className="h-48 bg-blue-900/50 flex items-center justify-center">
                       {business.images && business.images.length > 0 ? (
                         <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
                       ) : (
-                        <Store className="w-16 h-16 text-primary/50" />
+                        <Store className="w-16 h-16 text-white/30" />
                       )}
                     </div>
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{business.businessName}</CardTitle>
-                          <CardDescription className="flex items-center mt-1">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            {business.address}
+                          <CardTitle className="text-lg text-white">{business.businessName}</CardTitle>
+                          <CardDescription className="flex items-center mt-1 text-white/80">
+                            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{business.address}</span>
                           </CardDescription>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center text-white flex-shrink-0 pl-2">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
                           <span className="ml-1 text-sm font-medium">{business.rating || 'N/A'}</span>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="flex-grow flex flex-col justify-between">
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <p className="text-sm text-white/80 mb-4">
                         {business.description.substring(0, 100)}{business.description.length > 100 && '...'}
                       </p>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {business.hours || 'Não informado'}
+                        <div className="flex items-center text-sm text-white/80">
+                          <Clock className="w-4 h-4 mr-2" />
+                          <span>{business.hours || 'Não informado'}</span>
                         </div>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white">
                           <Phone className="w-4 h-4 mr-2" />
                           Contato
                         </Button>

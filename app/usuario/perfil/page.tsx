@@ -14,9 +14,10 @@ import Link from "next/link"
 import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth'
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore'
-import { uploadImage } from "@/lib/cloudinary" // IMPORTAÇÃO ADICIONADA
+import { uploadImage } from "@/lib/cloudinary"
+import { Header } from "@/components/navigation/header"
+import { Footer } from "@/components/navigation/footer"
 
-// Tipos para os dados do usuário
 type UserData = {
     name: string;
     email: string;
@@ -28,7 +29,6 @@ type UserData = {
     createdAt: Timestamp;
 };
 
-// Dados simulados para estatísticas (serão substituídos no futuro)
 const stats = {
     totalFavorites: 12,
     totalReviews: 8,
@@ -75,9 +75,8 @@ export default function UsuarioPerfil() {
 
     setUploading(true);
     try {
-        const downloadURL = await uploadImage(file); // USA A FUNÇÃO DO CLOUDINARY
+        const downloadURL = await uploadImage(file);
 
-        // Atualiza o estado local e o Firestore
         if (formData) {
             const updatedData = { ...formData, avatar: downloadURL };
             setFormData(updatedData);
@@ -112,26 +111,17 @@ export default function UsuarioPerfil() {
 
   if (loading || !formData) {
       return (
-          <div className="min-h-screen flex items-center justify-center">
+          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
           </div>
       );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/usuario/dashboard">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar ao Dashboard
-              </Link>
-            </Button>
-          </div>
-
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5">
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
             <div className="relative">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={formData.avatar} alt={formData.name} />
@@ -156,20 +146,10 @@ export default function UsuarioPerfil() {
                     accept="image/png, image/jpeg"
                 />
             </div>
-
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-foreground mb-2">Meu Perfil</h1>
-              <p className="text-muted-foreground mb-4">Gerencie suas informações pessoais e preferências</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  Membro desde{" "}
-                  {formData.createdAt.toDate().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
-                </Badge>
-                <Badge variant="secondary">{stats.helpfulVotes} votos úteis</Badge>
-              </div>
+              <p className="text-muted-foreground">Gerencie suas informações e preferências</p>
             </div>
-
             <div className="flex gap-2">
               {!isEditing ? (
                 <Button onClick={() => setIsEditing(true)}>
@@ -183,65 +163,63 @@ export default function UsuarioPerfil() {
                 </div>
               )}
             </div>
-          </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Card>
+            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />Informações Pessoais</CardTitle>
-                <CardDescription>Suas informações básicas e de contato</CardDescription>
+                <CardTitle className="flex items-center gap-2 text-white"><User className="h-5 w-5" />Informações Pessoais</CardTitle>
+                <CardDescription className="text-white/80">Suas informações básicas e de contato</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome Completo</Label>
-                    <Input id="name" value={formData.name} onChange={handleInputChange} disabled={!isEditing} />
+                    <Label htmlFor="name" className="text-white/90">Nome Completo</Label>
+                    <Input id="name" value={formData.name} onChange={handleInputChange} disabled={!isEditing} className="bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60 disabled:opacity-70" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input id="email" type="email" value={formData.email} disabled={true} />
+                    <Label htmlFor="email" className="text-white/90">E-mail</Label>
+                    <Input id="email" type="email" value={formData.email} disabled={true} className="bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60 disabled:opacity-70" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone</Label>
-                    <Input id="phone" value={formData.phone} onChange={handleInputChange} disabled={!isEditing} />
+                    <Label htmlFor="phone" className="text-white/90">Telefone</Label>
+                    <Input id="phone" value={formData.phone} onChange={handleInputChange} disabled={!isEditing} className="bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60 disabled:opacity-70" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="birthDate">Data de Nascimento</Label>
-                    <Input id="birthDate" type="date" value={formData.birthDate || ''} onChange={handleInputChange} disabled={!isEditing} />
+                    <Label htmlFor="birthDate" className="text-white/90">Data de Nascimento</Label>
+                    <Input id="birthDate" type="date" value={formData.birthDate || ''} onChange={handleInputChange} disabled={!isEditing} className="bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60 disabled:opacity-70" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">Endereço</Label>
-                  <Input id="address" value={formData.address || ''} onChange={handleInputChange} disabled={!isEditing} />
+                  <Label htmlFor="address" className="text-white/90">Endereço</Label>
+                  <Input id="address" value={formData.address || ''} onChange={handleInputChange} disabled={!isEditing} className="bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60 disabled:opacity-70" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Sobre Mim</Label>
-                  <Textarea id="bio" value={formData.bio || ''} onChange={handleInputChange} disabled={!isEditing} rows={4} placeholder="Conte um pouco sobre você..." />
+                  <Label htmlFor="bio" className="text-white/90">Sobre Mim</Label>
+                  <Textarea id="bio" value={formData.bio || ''} onChange={handleInputChange} disabled={!isEditing} rows={4} placeholder="Conte um pouco sobre você..." className="bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60 disabled:opacity-70" />
                 </div>
               </CardContent>
             </Card>
           </div>
           <div className="space-y-6">
-            <Card>
-              <CardHeader><CardTitle className="text-lg">Ações Rápidas</CardTitle></CardHeader>
+            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
+              <CardHeader><CardTitle className="text-lg text-white">Ações Rápidas</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <Button asChild variant="outline" className="w-full justify-start bg-transparent"><Link href="/usuario/avaliacoes"><Edit3 className="h-4 w-4 mr-2" />Minhas Avaliações</Link></Button>
-                <Button asChild variant="outline" className="w-full justify-start bg-transparent"><Link href="/usuario/comentarios"><Mail className="h-4 w-4 mr-2" />Meus Comentários</Link></Button>
-                <Button asChild variant="outline" className="w-full justify-start bg-transparent"><Link href="/favoritos"><MapPin className="h-4 w-4 mr-2" />Locais Favoritos</Link></Button>
-                <Button asChild variant="outline" className="w-full justify-start bg-transparent"><Link href="/usuario/configuracoes"><Shield className="h-4 w-4 mr-2" />Configurações</Link></Button>
+                <Button asChild variant="outline" className="w-full justify-start bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><Link href="/usuario/avaliacoes"><Edit3 className="h-4 w-4 mr-2" />Minhas Avaliações</Link></Button>
+                <Button asChild variant="outline" className="w-full justify-start bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><Link href="/usuario/comentarios"><Mail className="h-4 w-4 mr-2" />Meus Comentários</Link></Button>
+                <Button asChild variant="outline" className="w-full justify-start bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><Link href="/favoritos"><MapPin className="h-4 w-4 mr-2" />Locais Favoritos</Link></Button>
+                <Button asChild variant="outline" className="w-full justify-start bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white"><Link href="/usuario/configuracoes"><Shield className="h-4 w-4 mr-2" />Configurações</Link></Button>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Shield className="h-5 w-5" />Privacidade</CardTitle></CardHeader>
-              <CardContent><p className="text-sm text-muted-foreground mb-4">Suas informações pessoais são mantidas seguras e privadas. Apenas seu nome e foto de perfil são visíveis publicamente em suas avaliações.</p></CardContent>
+            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2 text-white"><Shield className="h-5 w-5" />Privacidade</CardTitle></CardHeader>
+              <CardContent><p className="text-sm text-white/80 mb-4">Suas informações pessoais são mantidas seguras e privadas. Apenas seu nome e foto de perfil são visíveis publicamente em suas avaliações.</p></CardContent>
             </Card>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
