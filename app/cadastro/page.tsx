@@ -64,15 +64,28 @@ export default function CadastroPage() {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         const user = userCredential.user;
 
-        await setDoc(doc(db, "users", user.uid), {
+        // --- INÍCIO DA MODIFICAÇÃO ---
+        const userDataToSave = {
             uid: user.uid,
             name: formData.name,
             email: formData.email,
             phone: formData.phone,
             createdAt: new Date(),
-        });
+        };
+        await setDoc(doc(db, "users", user.uid), userDataToSave);
+        
+        // 1. Salva os dados no localStorage para o Header consumir
+        const userForStorage = {
+            name: formData.name,
+            email: formData.email,
+            avatar: null // Novo usuário não tem avatar ainda
+        };
+        localStorage.setItem("user", JSON.stringify(userForStorage));
+        localStorage.setItem("userType", "user"); // Define o tipo de usuário
 
-        window.location.href = '/usuario/dashboard';
+        // 2. Redireciona para a página inicial (/)
+        window.location.href = '/';
+        // --- FIM DA MODIFICAÇÃO ---
 
     } catch (error: any) {
         console.error("Erro ao cadastrar:", error.code, error.message);

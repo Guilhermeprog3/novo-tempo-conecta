@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import Link from "next/link"
 import { db } from "@/lib/firebase"
-import { collection, getDocs } from "firebase/firestore"
+// CORREÇÃO 1: Importar 'query' e 'where'
+import { collection, getDocs, query, where } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSearchParams } from "next/navigation"
 import { Header } from "@/components/navigation/header"
@@ -26,6 +27,7 @@ type Business = {
   reviewCount?: number;
   address: string;
   isOpen?: boolean;
+  isPublic?: boolean; 
   images?: string[];
   description: string;
   hours?: string;
@@ -65,11 +67,19 @@ function SearchResults() {
   useEffect(() => {
     const fetchBusinesses = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, "businesses"));
+            // CORREÇÃO 2: Modificar a consulta para filtrar por 'isPublic == true'
+            const businessesRef = collection(db, "businesses");
+            const q = query(businessesRef, where("isPublic", "==", true));
+            const querySnapshot = await getDocs(q);
+            // --- Fim da Correção ---
+            
             const businessesList = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             })) as Business[];
+
+            // console.log('DADOS BRUTOS DO FIREBASE (BUSCA):', businessesList); // Debug
+
             setAllBusinesses(businessesList);
         } catch (error) {
             console.error("Erro ao buscar negócios:", error);
@@ -90,24 +100,31 @@ function SearchResults() {
 
   const filteredAndSortedBusinesses = allBusinesses
     .filter(business => {
-        const matchesSearch = business.businessName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              business.description.toLowerCase().includes(searchTerm.toLowerCase());
+        // Correção de segurança para campos nulos
+        const matchesSearch = (business.businessName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
+                              (business.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+        
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(business.category);
         const matchesRating = !business.rating || business.rating >= minRating[0];
         const matchesOpen = !isOpen || business.isOpen === true;
 
-        return matchesSearch && matchesCategory && matchesRating && matchesOpen;
+        // Filtro de visibilidade (já tratado no query, mas bom ter como redundância)
+        const isPublic = business.isPublic === true;
+
+        return matchesSearch && matchesCategory && matchesRating && matchesOpen && isPublic;
     })
     .sort((a, b) => {
         switch (sortBy) {
             case "rating":
                 return (b.rating || 0) - (a.rating || 0);
             case "name":
-                return a.businessName.localeCompare(b.businessName);
+                return (a.businessName || '').localeCompare(b.businessName || '');
             default:
                 return 0;
         }
     });
+
+  // console.log('RESULTADOS FILTRADOS (BUSCA):', filteredAndSortedBusinesses); // Debug
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -206,9 +223,9 @@ function SearchResults() {
                                       <CardDescription className="flex items-center pt-1"><Badge variant="secondary" className="mr-2 text-xs">{categories.find(c => c.value === business.category)?.label || business.category}</Badge></CardDescription>
                                   </CardHeader>
                                   <CardContent className="flex-grow flex flex-col justify-between">
-                                      <p className="text-sm text-muted-foreground mb-3">{business.description.substring(0, 100)}{business.description.length > 100 && '...'}</p>
+                                      <p className="text-sm text-muted-foreground mb-3">{business.description?.substring(0, 100)}{business.description && business.description.length > 100 && '...'}</p>
                                       <div className="flex items-center justify-between text-sm">
-                                          <div className="flex items-center text-muted-foreground"><MapPin className="w-4 h-4 mr-1" />{business.address.split(',')[0]}</div>
+                                          <div className="flex items-center text-muted-foreground"><MapPin className="w-4 h-4 mr-1" />{business.address?.split(',')[0]}</div>
                                           <div className={`flex items-center ${business.isOpen === undefined ? 'text-muted-foreground' : business.isOpen ? "text-green-600" : "text-red-600"}`}>
                                               <Clock className="w-3 h-3 mr-1" />{business.isOpen === undefined ? 'Não informado' : business.isOpen ? "Aberto" : "Fechado"}
                                           </div>

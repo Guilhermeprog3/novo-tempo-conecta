@@ -16,7 +16,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import L, { LatLng } from 'leaflet'
 import { db } from "@/lib/firebase"
-import { collection, getDocs } from "firebase/firestore"
+// CORREÇÃO 1: Importar 'query' e 'where'
+import { collection, getDocs, query, where } from "firebase/firestore"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
 
@@ -27,6 +28,7 @@ type Business = {
   category: string;
   rating?: number;
   isOpen?: boolean;
+  isPublic?: boolean;
   location: {
     latitude: number;
     longitude: number;
@@ -136,16 +138,36 @@ export default function MapaPage() {
   const [loading, setLoading] = useState(true);
   const [userPosition, setUserPosition] = useState<LatLng | null>(null);
 
-  const categories = ["Restaurante", "Comércio", "Serviços", "Saúde", "Beleza", "Educação", "Lazer", "Automotivo", "Casa", "Moda", "Esportes"]
+  // CORREÇÃO 2: Alterado para objetos com 'value' (minúsculo) e 'label' (formatado)
+  const categories = [
+    { value: "restaurante", label: "Restaurante" },
+    { value: "comercio", label: "Comércio" },
+    { value: "servicos", label: "Serviços" },
+    { value: "saude", label: "Saúde" },
+    { value: "beleza", label: "Beleza" },
+    { value: "educacao", label: "Educação" },
+    { value: "lazer", label: "Lazer" },
+    { value: "automotivo", label: "Automotivo" },
+    { value: "casa", label: "Casa" },
+    { value: "moda", label: "Moda" },
+    { value: "esportes", label: "Esportes" },
+  ];
 
   useEffect(() => {
     const fetchBusinesses = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "businesses"));
+        // CORREÇÃO 3: Aplicar o filtro 'where("isPublic", "==", true)' na consulta
+        const businessesRef = collection(db, "businesses");
+        const q = query(businessesRef, where("isPublic", "==", true));
+        const querySnapshot = await getDocs(q);
+        
         const businessesList = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Business[];
+
+        // console.log('DADOS BRUTOS DO FIREBASE (MAPA):', businessesList); // Debug
+        
         setAllEstablishments(businessesList);
       } catch (error) {
           console.error("Error fetching businesses: ", error);
@@ -159,11 +181,14 @@ export default function MapaPage() {
 
 
   const filteredEstablishments = allEstablishments.filter((establishment) => {
+    // Correção para campos nulos
     const matchesSearch =
-      establishment.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      establishment.address.toLowerCase().includes(searchTerm.toLowerCase())
+      (establishment.businessName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (establishment.address?.toLowerCase() || '').includes(searchTerm.toLowerCase())
 
+    // Correção para usar 'value' minúsculo
     const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(establishment.category)
+    
     const matchesRating = !establishment.rating || establishment.rating >= minRating[0]
 
     const matchesOpenStatus =
@@ -171,7 +196,11 @@ export default function MapaPage() {
       (isOpen === "aberto" && establishment.isOpen) ||
       (isOpen === "fechado" && !establishment.isOpen)
 
-    return matchesSearch && matchesCategory && matchesRating && matchesOpenStatus
+    // O filtro isPublic já foi feito na consulta do Firestore, 
+    // então não precisamos mais dele aqui, mas manter não causa problemas.
+    const isPublic = establishment.isPublic === true;
+
+    return matchesSearch && matchesCategory && matchesRating && matchesOpenStatus && isPublic
   })
 
   const sortedEstablishments = [...filteredEstablishments].sort((a, b) => {
@@ -185,11 +214,12 @@ export default function MapaPage() {
     }
   })
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
+  // CORREÇÃO 4: Usar o 'value' da categoria (minúsculo)
+  const handleCategoryChange = (categoryValue: string, checked: boolean) => {
     if (checked) {
-      setSelectedCategories([...selectedCategories, category])
+      setSelectedCategories([...selectedCategories, categoryValue])
     } else {
-      setSelectedCategories(selectedCategories.filter((c) => c !== category))
+      setSelectedCategories(selectedCategories.filter((c) => c !== categoryValue))
     }
   }
 
@@ -200,6 +230,8 @@ export default function MapaPage() {
     setIsOpen("todos")
     setSearchTerm("")
   }
+
+  // console.log('ESTABELECIMENTOS FILTRADOS (MAPA):', sortedEstablishments); // Debug
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -245,10 +277,16 @@ export default function MapaPage() {
                    <div>
                     <h4 className="font-medium mb-3 text-white/90">Categorias</h4>
                     <div className="grid grid-cols-2 gap-2">
+                      {/* CORREÇÃO 5: Usar 'category.value' e 'category.label' */}
                       {categories.map((category) => (
-                        <div key={category} className="flex items-center space-x-2">
-                          <Checkbox id={category} checked={selectedCategories.includes(category)} onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
-                          <label htmlFor={category} className="text-sm cursor-pointer text-white/90">{category}</label>
+                        <div key={category.value} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={category.value} 
+                            checked={selectedCategories.includes(category.value)} 
+                            onCheckedChange={(checked) => handleCategoryChange(category.value, checked as boolean)} 
+                            className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" 
+                          />
+                          <label htmlFor={category.value} className="text-sm cursor-pointer text-white/90">{category.label}</label>
                         </div>
                       ))}
                     </div>
@@ -313,7 +351,7 @@ export default function MapaPage() {
                      </CardHeader>
                      <CardContent className="pt-0">
                         <div className="flex items-center justify-between text-xs">
-                           <Badge variant="secondary" className="text-xs">{establishment.category}</Badge>
+                           <Badge variant="secondary" className="text-xs">{categories.find(c => c.value === establishment.category)?.label || establishment.category}</Badge>
                            <div className={`flex items-center ${establishment.isOpen ? "text-green-600" : "text-red-600"}`}>
                               <Clock className="w-3 h-3 mr-1" />
                               {establishment.isOpen ? "Aberto" : "Fechado"}
@@ -349,7 +387,7 @@ export default function MapaPage() {
                     >
                         <Popup>
                            <div className="font-bold">{business.businessName}</div>
-                           <div>{business.category}</div>
+                           <div>{categories.find(c => c.value === business.category)?.label || business.category}</div>
                            <Link href={`/estabelecimento/${business.id}`} className="text-primary text-sm hover:underline">
                              Ver mais
                            </Link>

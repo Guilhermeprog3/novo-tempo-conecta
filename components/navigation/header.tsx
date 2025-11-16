@@ -89,7 +89,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
           <div className="hidden md:flex items-center space-x-2">
             {isLoggedIn ? (
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar className="h-10 w-10">

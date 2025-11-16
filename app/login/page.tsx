@@ -35,7 +35,18 @@ export default function LoginPage() {
         const businessDocSnap = await getDoc(businessDocRef);
 
         if (businessDocSnap.exists()) {
-            window.location.href = '/empresario/dashboard';
+            // --- CORREÇÃO PARA EMPRESÁRIO ---
+            // Salva dados no localStorage para o Header
+            const businessData = businessDocSnap.data();
+            const userForStorage = {
+                name: businessData.businessName,
+                email: businessData.email,
+                avatar: businessData.avatar || null 
+            };
+            localStorage.setItem("user", JSON.stringify(userForStorage));
+            localStorage.setItem("userType", "business"); // Define o tipo
+            
+            window.location.href = '/empresario/dashboard'; // Mantém redirect de empresário
             return;
         }
 
@@ -44,7 +55,21 @@ export default function LoginPage() {
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
-            window.location.href = '/usuario/dashboard';
+            // --- CORREÇÃO PARA CIDADÃO ---
+            const userData = userDocSnap.data();
+            
+            // 1. Salva os dados no localStorage para o Header consumir
+            const userForStorage = {
+                name: userData.name,
+                email: userData.email,
+                avatar: userData.avatar || null 
+            };
+            localStorage.setItem("user", JSON.stringify(userForStorage));
+            localStorage.setItem("userType", "user"); // Define o tipo de usuário
+
+            // 2. Redireciona para a página inicial (/)
+            window.location.href = '/'; 
+            // --- FIM DA CORREÇÃO ---
             return;
         }
 

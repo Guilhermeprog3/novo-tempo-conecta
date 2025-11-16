@@ -10,7 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { SearchBar } from "@/components/search-bar"
 import { db } from "@/lib/firebase"
-import { collection, getDocs, query, limit, orderBy } from "firebase/firestore"
+// CORREÇÃO 1: Importar 'where' do firestore
+import { collection, getDocs, query, limit, orderBy, where } from "firebase/firestore"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
 
@@ -23,6 +24,7 @@ type Business = {
   rating?: number;
   hours?: string;
   images?: string[];
+  isPublic?: boolean; // Adicionado para consistência
 };
 
 export default function HomePage() {
@@ -41,10 +43,22 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         const businessesCollection = collection(db, "businesses");
-        const allBusinessSnapshot = await getDocs(businessesCollection);
+        
+        // CORREÇÃO 2: Criar a consulta base que filtra por 'isPublic'
+        const publicQuery = query(businessesCollection, where("isPublic", "==", true));
+
+        // CORREÇÃO 3: Usar a consulta pública para obter a contagem
+        const allBusinessSnapshot = await getDocs(publicQuery);
         setStats({ businessCount: allBusinessSnapshot.size });
 
-        const featuredQuery = query(businessesCollection, limit(3));
+        // CORREÇÃO 4: Usar a consulta pública para obter os destaques
+        // (Adicionei orderBy por rating para "destaques" fazerem mais sentido)
+        const featuredQuery = query(
+            publicQuery, 
+            orderBy("rating", "desc"), // Opcional, mas recomendado
+            limit(3)
+        );
+        
         const featuredSnapshot = await getDocs(featuredQuery);
         const businessesList = featuredSnapshot.docs.map(doc => ({
           id: doc.id,
@@ -159,7 +173,7 @@ export default function HomePage() {
                     </CardHeader>
                     <CardContent className="flex-grow flex flex-col justify-between">
                       <p className="text-sm text-white/80 mb-4">
-                        {business.description.substring(0, 100)}{business.description.length > 100 && '...'}
+                        {business.description?.substring(0, 100)}{business.description && business.description.length > 100 && '...'}
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center text-sm text-white/80">
