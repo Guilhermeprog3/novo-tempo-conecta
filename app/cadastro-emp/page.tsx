@@ -252,7 +252,6 @@ export default function EmpresarioCadastroPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* DADOS DO RESPONSÁVEL */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white border-b border-blue-600 pb-2">Dados do Responsável</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -274,7 +273,6 @@ export default function EmpresarioCadastroPage() {
                   </div>
                 </div>
 
-                {/* DADOS DO ESTABELECIMENTO */}
                 <div className="space-y-4">
                    <h3 className="text-lg font-semibold text-white border-b border-blue-600 pb-2">Dados do Estabelecimento</h3>
                   <div className="space-y-2">
@@ -382,7 +380,6 @@ export default function EmpresarioCadastroPage() {
                   </div>
                 </div>
 
-                {/* DADOS DE ACESSO */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white border-b border-blue-600 pb-2">Dados de Acesso</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -88,7 +88,7 @@ export default function ContatoPage() {
                     <p className="text-white/80">
                       Para suporte geral e dúvidas.
                     </p>
-                    <a href="mailto:contato@novotempoconecta.com.br" className="text-yellow-400 hover:underline">
+                    <a href="mailto:contato@novotempoconecta.com.br" className="text-primary hover:underline">
                       contato@novotempoconecta.com.br
                     </a>
                   </div>

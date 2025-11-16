@@ -1,42 +1,49 @@
-// app/empresario/dashboard/page.tsx
 "use client"
 
-// Importe os componentes e ícones que você usa APENAS no conteúdo desta página
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Edit, MessageSquare, MapPin, Phone, Clock, Globe } from "lucide-react";
+import { 
+    Edit, MessageSquare, MapPin, Phone, Clock, Globe, Loader2, Building, Tag, AlignLeft, MessageCircle 
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-// Mova o tipo para cá se for usar os dados completos novamente
 type BusinessData = {
-    address: string;
+    businessName: string;
+    category: string;
+    description: string;
     businessPhone: string;
-    hours: string;
+    whatsapp: string;
     website: string;
+    address: string;
+    hours: string;
 };
 
-// Componente auxiliar para os itens de informação
-const InfoItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string }) => (
-    <div className="flex items-center space-x-4">
-        <div className="flex-shrink-0 bg-blue-100 p-3 rounded-lg text-blue-700">
+const InfoItem = ({ icon, label, value, fullWidth = false }: { 
+    icon: React.ReactNode, 
+    label: string, 
+    value?: string,
+    fullWidth?: boolean
+}) => (
+    <div className={`flex items-start space-x-4 ${fullWidth ? 'md:col-span-2' : ''}`}>
+        <div className="flex-shrink-0 bg-blue-100 p-3 rounded-lg text-blue-700 mt-1">
             {icon}
         </div>
         <div>
             <p className="font-semibold text-gray-800">{label}</p>
-            <p className="text-sm text-gray-600">{value || 'Não informado'}</p>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{value || 'Não informado'}</p>
         </div>
     </div>
 );
 
 
 export default function EmpresarioDashboardPage() {
-    // Se precisar de dados específicos que o layout não tem, pode buscar aqui.
-    // Para este caso, vamos buscar novamente para preencher os cards.
     const [businessData, setBusinessData] = useState<BusinessData | null>(null);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
@@ -46,12 +53,17 @@ export default function EmpresarioDashboardPage() {
                     setBusinessData(docSnap.data() as BusinessData);
                 }
             }
+            setLoading(false);
         });
         return () => unsubscribe();
     }, []);
 
+    if (loading) {
+        return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
+    }
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
                 <CardHeader>
                     <CardTitle className="text-slate-900 text-lg">Ações Rápidas</CardTitle>
@@ -75,18 +87,36 @@ export default function EmpresarioDashboardPage() {
                 </CardContent>
             </Card>
 
+            {/* NOVOS CARDS DE INFORMAÇÕES DETALHADAS */}
             <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
                 <CardHeader>
-                    <CardTitle className="text-slate-900 text-lg">Informações do Estabelecimento</CardTitle>
-                    <CardDescription className="text-slate-500">Resumo das suas informações públicas.</CardDescription>
+                    <CardTitle className="text-slate-900 text-lg">Informações Básicas</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6 pt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                        <InfoItem icon={<MapPin size={20} />} label="Endereço" value={businessData?.address} />
-                        <InfoItem icon={<Phone size={20} />} label="Telefone" value={businessData?.businessPhone} />
-                        <InfoItem icon={<Clock size={20} />} label="Horário" value={businessData?.hours} />
-                        <InfoItem icon={<Globe size={20} />} label="Instagram" value={businessData?.website} />
-                    </div>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <InfoItem icon={<Building size={20} />} label="Nome do Estabelecimento" value={businessData?.businessName} />
+                    <InfoItem icon={<Tag size={20} />} label="Categoria" value={businessData?.category} />
+                    <InfoItem icon={<AlignLeft size={20} />} label="Descrição" value={businessData?.description} fullWidth />
+                </CardContent>
+            </Card>
+            
+            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+                <CardHeader>
+                    <CardTitle className="text-slate-900 text-lg">Informações de Contato</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <InfoItem icon={<Phone size={20} />} label="Telefone" value={businessData?.businessPhone} />
+                    <InfoItem icon={<MessageCircle size={20} />} label="WhatsApp" value={businessData?.whatsapp} />
+                    <InfoItem icon={<Globe size={20} />} label="Instagram / Site" value={businessData?.website} />
+                </CardContent>
+            </Card>
+
+            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+                <CardHeader>
+                    <CardTitle className="text-slate-900 text-lg">Localização e Horários</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <InfoItem icon={<MapPin size={20} />} label="Endereço" value={businessData?.address} />
+                    <InfoItem icon={<Clock size={20} />} label="Horário" value={businessData?.hours} />
                 </CardContent>
             </Card>
         </div>

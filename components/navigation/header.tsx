@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 
 interface HeaderProps {
   title?: string
@@ -63,18 +64,14 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">
-                {title}
-              </h1>
-              <p className="text-sm text-white/80">
-                {subtitle}
-              </p>
-            </div>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png" 
+              alt="Logo Novo Tempo Conecta"
+              width={180}
+              height={50}
+              priority
+            />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-6">

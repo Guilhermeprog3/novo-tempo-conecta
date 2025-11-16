@@ -19,11 +19,7 @@ import L, { LatLng } from 'leaflet'
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 
-// ... (Cole aqui toda a lógica que já estava no seu arquivo de perfil: 
-// a configuração do ícone do Leaflet, os tipos, os componentes do mapa, etc.
-// A lógica não muda, apenas a aparência (JSX) no final.)
-
-// A partir daqui, cole o código como está
+// Configuração do ícone do Leaflet para corrigir problemas de build
 if (typeof window !== 'undefined') {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -39,6 +35,7 @@ type BusinessData = {
     location?: { latitude: number; longitude: number; }; isPublic?: boolean;
 };
 
+// Componentes do Mapa (sem alterações)
 function LocationMarker({ position, setPosition, isEditing }: { position: LatLng | null, setPosition: React.Dispatch<React.SetStateAction<LatLng | null>>, isEditing: boolean }) {
     const map = useMapEvents({ click(e) { if (isEditing) { setPosition(e.latlng); map.flyTo(e.latlng, map.getZoom()); } }, });
     return position === null ? null : (<Marker position={position}></Marker>);
@@ -56,6 +53,7 @@ const daysOfWeek = [
 ];
 
 export default function EmpresarioPerfilPage() {
+    // Toda a lógica de estados e funções permanece a mesma
     const [isEditing, setIsEditing] = useState(false);
     const [user, setUser] = useState<User | null>(null);
     const [formData, setFormData] = useState<BusinessData | null>(null);
@@ -160,48 +158,65 @@ export default function EmpresarioPerfilPage() {
     if (loading) { return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div> }
     if (!formData) { return <div className="flex h-full items-center justify-center"><p>Não foi possível carregar os dados.</p></div> }
 
-    // O JSX ABAIXO FOI ALTERADO PARA O FUNDO AZUL
     return (
         <div className="space-y-6">
-            <div className="flex justify-end items-center">
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setIsEditing(!isEditing)} className="bg-blue-600 text-white border-blue-400 hover:bg-blue-700">
-                        <Edit className="w-4 h-4 mr-2" />{isEditing ? "Cancelar" : "Editar Perfil"}
-                    </Button>
-                    {isEditing && (
-                        <Button onClick={handleSaveChanges} disabled={saving} className="bg-yellow-500 hover:bg-yellow-600 text-black">
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />} Salvar Alterações
+            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-slate-900"><Eye className="w-5 h-5" />Visibilidade do Perfil</CardTitle>
+                        <CardDescription>Controle se seu negócio aparece nas buscas públicas.</CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                        {/* ===== CORREÇÃO AQUI ===== */}
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsEditing(!isEditing)}
+                            className="text-blue-700 border-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                        >
+                            <Edit className="w-4 h-4 mr-2" />
+                            {isEditing ? "Cancelar" : "Editar Perfil"}
                         </Button>
-                    )}
-                </div>
-            </div>
-
-            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white rounded-2xl">
-                <CardHeader><CardTitle className="text-white flex items-center gap-2"><Eye className="w-5 h-5" />Visibilidade do Perfil</CardTitle><CardDescription className="text-white/80">Controle se seu negócio aparece nas buscas.</CardDescription></CardHeader>
+                        {isEditing && (
+                            <Button onClick={handleSaveChanges} disabled={saving}>
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                                Salvar Alterações
+                            </Button>
+                        )}
+                    </div>
+                </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-between p-4 bg-blue-900/50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <Label htmlFor="visibility-switch" className="flex flex-col space-y-1">
-                            <span className="font-medium text-white/90">Perfil Público</span>
-                            <span className="font-normal text-sm text-white/70">{formData.isPublic ? "Seu perfil está visível." : "Seu perfil está oculto."}</span>
+                            <span className="font-medium text-slate-800">Perfil Público</span>
+                            <span className="font-normal text-sm text-slate-500">
+                                {formData.isPublic ? "Seu perfil está visível para todos." : "Seu perfil está oculto das buscas."}
+                            </span>
                         </Label>
                         <Switch id="visibility-switch" checked={formData.isPublic} onCheckedChange={handleVisibilityChange} />
                     </div>
                 </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white rounded-2xl">
-                <CardHeader><CardTitle className="text-white">Fotos do Estabelecimento</CardTitle><CardDescription className="text-white/80">Adicione até 5 fotos.</CardDescription></CardHeader>
+            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+                <CardHeader>
+                    <CardTitle className="text-slate-900">Fotos do Estabelecimento</CardTitle>
+                    <CardDescription>Adicione até 5 fotos para mostrar seu negócio.</CardDescription>
+                </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                         {formData.images?.map((url, index) => (
                             <div key={index} className="aspect-square rounded-lg relative group">
                                 <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
-                                {isEditing && (<Button size="sm" variant="destructive" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 h-8 w-8 p-0" onClick={() => handleImageDelete(url)}><Trash2 className="w-4 h-4" /></Button>)}
+                                {isEditing && (
+                                    <Button size="sm" variant="destructive" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 h-8 w-8 p-0" onClick={() => handleImageDelete(url)}>
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                )}
                             </div>
                         ))}
                         {isEditing && (formData.images?.length || 0) < 5 && (
-                            <div className="aspect-square border-2 border-dashed border-white/25 rounded-lg flex items-center justify-center cursor-pointer hover:border-blue-400" onClick={() => fileInputRef.current?.click()}>
-                                {uploading ? (<Loader2 className="w-6 h-6 animate-spin text-blue-400" />) : (<div className="text-center"><Plus className="w-6 h-6 text-white/60 mx-auto mb-2" /><p className="text-xs text-white/60">Adicionar Foto</p></div>)}
+                            <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-blue-500 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                                {uploading ? (<Loader2 className="w-6 h-6 animate-spin text-blue-600" />) : (<div className="text-center"><Plus className="w-6 h-6 text-gray-400 mx-auto mb-2" /><p className="text-xs text-gray-500">Adicionar Foto</p></div>)}
                             </div>
                         )}
                     </div>
@@ -209,57 +224,57 @@ export default function EmpresarioPerfilPage() {
                 </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white rounded-2xl">
-                <CardHeader><CardTitle className="text-white">Informações Básicas</CardTitle></CardHeader>
+            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+                <CardHeader><CardTitle className="text-slate-900">Informações Básicas</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2"><Label htmlFor="businessName" className="text-white/90">Nome</Label><Input id="businessName" value={formData?.businessName ?? ''} onChange={handleInputChange} disabled={!isEditing} className="bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"/></div>
-                        <div className="space-y-2"><Label htmlFor="category" className="text-white/90">Categoria</Label><Select value={formData?.category ?? ''} onValueChange={handleCategoryChange} disabled={!isEditing}><SelectTrigger className="bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"><SelectValue/></SelectTrigger><SelectContent className="bg-blue-900 text-white border-blue-700"><SelectItem value="Outro">Outro</SelectItem></SelectContent></Select></div>
+                        <div className="space-y-2"><Label htmlFor="businessName">Nome</Label><Input id="businessName" value={formData?.businessName ?? ''} onChange={handleInputChange} disabled={!isEditing} className="text-slate-900" /></div>
+                        <div className="space-y-2"><Label htmlFor="category">Categoria</Label><Select value={formData?.category ?? ''} onValueChange={handleCategoryChange} disabled={!isEditing}><SelectTrigger className="text-slate-900"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Outro">Outro</SelectItem></SelectContent></Select></div>
                     </div>
-                    <div className="space-y-2"><Label htmlFor="description" className="text-white/90">Descrição</Label><Textarea id="description" value={formData?.description ?? ''} onChange={handleInputChange} disabled={!isEditing} className="bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"/></div>
+                    <div className="space-y-2"><Label htmlFor="description">Descrição</Label><Textarea id="description" value={formData?.description ?? ''} onChange={handleInputChange} disabled={!isEditing} className="text-slate-900" /></div>
                 </CardContent>
             </Card>
             
-            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white rounded-2xl">
-                <CardHeader><CardTitle className="text-white">Informações de Contato</CardTitle></CardHeader>
+            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+                <CardHeader><CardTitle className="text-slate-900">Informações de Contato</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2"><Label htmlFor="businessPhone" className="text-white/90">Telefone</Label><div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4" /><Input id="businessPhone" value={formData?.businessPhone ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"/></div></div>
-                        <div className="space-y-2"><Label htmlFor="whatsapp" className="text-white/90">WhatsApp</Label><div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4" /><Input id="whatsapp" value={formData?.whatsapp ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"/></div></div>
+                        <div className="space-y-2"><Label htmlFor="businessPhone">Telefone</Label><div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" /><Input id="businessPhone" value={formData?.businessPhone ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 text-slate-900"/></div></div>
+                        <div className="space-y-2"><Label htmlFor="whatsapp">WhatsApp</Label><div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" /><Input id="whatsapp" value={formData?.whatsapp ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 text-slate-900"/></div></div>
                     </div>
-                    <div className="space-y-2"><Label htmlFor="website" className="text-white/90">Site/Instagram</Label><div className="relative"><Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4" /><Input id="website" value={formData?.website ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"/></div></div>
+                    <div className="space-y-2"><Label htmlFor="website">Site/Instagram</Label><div className="relative"><Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" /><Input id="website" value={formData?.website ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 text-slate-900"/></div></div>
                 </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white rounded-2xl">
-                <CardHeader><CardTitle className="text-white">Localização e Horários</CardTitle></CardHeader>
+            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+                <CardHeader><CardTitle className="text-slate-900">Localização e Horários</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-2"><Label htmlFor="address" className="text-white/90">Endereço</Label><div className="relative"><MapPin className="absolute left-3 top-3 text-white/60 w-4 h-4" /><Textarea id="address" value={formData?.address ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"/></div></div>
+                    <div className="space-y-2"><Label htmlFor="address">Endereço</Label><div className="relative"><MapPin className="absolute left-3 top-3 text-gray-400 w-4 h-4" /><Textarea id="address" value={formData?.address ?? ''} onChange={handleInputChange} disabled={!isEditing} className="pl-10 text-slate-900"/></div></div>
                     <div className="space-y-2">
-                        <Label className="text-white/90">Horário de Funcionamento</Label>
+                        <Label>Horário de Funcionamento</Label>
                         {isEditing ? (
-                            <div className="p-4 border border-blue-600 rounded-md">
+                            <div className="p-4 border border-gray-200 rounded-md">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                                     {openingHours.map((hour, index) => (
                                         <div key={hour.day}>
                                             <div className="flex items-center mb-2">
-                                                <Checkbox id={`day-${index}`} checked={hour.isOpen} onCheckedChange={(checked) => handleOpeningHoursChange(index, 'isOpen', !!checked)} className="border-white/50 data-[state=checked]:bg-blue-600"/>
-                                                <Label htmlFor={`day-${index}`} className="text-sm font-normal ml-2 text-white/90">{hour.day}</Label>
+                                                <Checkbox id={`day-${index}`} checked={hour.isOpen} onCheckedChange={(checked) => handleOpeningHoursChange(index, 'isOpen', !!checked)} />
+                                                <Label htmlFor={`day-${index}`} className="text-sm font-normal ml-2">{hour.day}</Label>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Input type="time" className="w-full bg-blue-900/50 border-blue-700 text-white" value={hour.opens} onChange={(e) => handleOpeningHoursChange(index, 'opens', e.target.value)} disabled={!hour.isOpen} />
-                                                <Input type="time" className="w-full bg-blue-900/50 border-blue-700 text-white" value={hour.closes} onChange={(e) => handleOpeningHoursChange(index, 'closes', e.target.value)} disabled={!hour.isOpen} />
+                                                <Input type="time" className="text-slate-900" value={hour.opens} onChange={(e) => handleOpeningHoursChange(index, 'opens', e.target.value)} disabled={!hour.isOpen} />
+                                                <Input type="time" className="text-slate-900" value={hour.closes} onChange={(e) => handleOpeningHoursChange(index, 'closes', e.target.value)} disabled={!hour.isOpen} />
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        ) : ( <Input id="hours" value={formData?.hours ?? ''} disabled className="bg-blue-900/50 border-blue-700 text-white disabled:opacity-70"/> )}
+                        ) : ( <Input id="hours" value={formData?.hours ?? ''} disabled className="text-slate-900" /> )}
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-white/90">Localização no Mapa</Label>
-                        {isEditing && <p className="text-sm text-white/80">Clique no mapa para mover o marcador.</p>}
-                        <div className="aspect-video rounded-lg overflow-hidden">
+                        <Label>Localização no Mapa</Label>
+                        {isEditing && <p className="text-sm text-slate-500">Clique no mapa para mover o marcador.</p>}
+                        <div className="aspect-video rounded-lg overflow-hidden border">
                             <MapContainer center={position || [-5.0892, -42.8028]} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom={isEditing} dragging={isEditing} touchZoom={isEditing} doubleClickZoom={isEditing}>
                                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'/>
                                 <LocationMarker position={position} setPosition={setPosition} isEditing={isEditing} />

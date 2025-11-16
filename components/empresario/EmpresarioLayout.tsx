@@ -2,57 +2,38 @@
 "use client"
 
 import React, { useState, useEffect } from "react";
-import { usePathname } from 'next/navigation';
-import { BarChart3, Star, MessageSquare, Settings, Edit, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
+import {
+    BarChart3, MessageSquare, Settings, Edit, Loader2, LogOut, Menu, MapPin
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { Header } from "@/components/navigation/header";
-import { Footer } from "@/components/navigation/footer";
 
-// Tipo para os dados exibidos na sidebar
 type BusinessSidebarData = {
     businessName: string;
-    category: string;
-    rating?: number;
-    reviewCount?: number;
-};
-
-// Componente auxiliar para os botões de navegação, para evitar repetição de código
-const NavButton = ({ href, currentPath, icon, label }: { 
-    href: string; 
-    currentPath: string; 
-    icon: React.ReactNode; 
-    label: string; 
-}) => {
-    const isActive = currentPath === href;
-    
-    return (
-        <Button
-            variant={isActive ? "secondary" : "ghost"}
-            className={`w-full justify-start text-base py-6 rounded-lg ${
-                isActive
-                    ? 'bg-white text-blue-800 shadow-md font-semibold hover:bg-gray-100'
-                    : 'text-white/90 hover:bg-white/10 hover:text-white'
-            }`}
-            asChild
-        >
-            <Link href={href}>
-                {icon}
-                {label}
-            </Link>
-        </Button>
-    );
 };
 
 export function EmpresarioLayout({ children }: { children: React.ReactNode }) {
     const [businessData, setBusinessData] = useState<BusinessSidebarData | null>(null);
     const [loading, setLoading] = useState(true);
-    const pathname = usePathname(); // Hook do Next.js para obter a URL atual
+    const pathname = usePathname();
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            window.location.href = '/';
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -63,69 +44,140 @@ export function EmpresarioLayout({ children }: { children: React.ReactNode }) {
                     setBusinessData(docSnap.data() as BusinessSidebarData);
                 }
             } else {
-                // Redireciona para o login se não houver usuário logado
                 window.location.href = '/empresario/login';
             }
             setLoading(false);
         });
-
-        // Limpa a inscrição ao desmontar o componente para evitar vazamentos de memória
         return () => unsubscribe();
     }, []);
 
     const getInitials = (name: string = "") => {
-        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        return name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '??';
     }
+
+    const navLinks = [
+        { href: "/empresario/dashboard", label: "Dashboard", icon: BarChart3 },
+        { href: "/empresario/perfil", label: "Editar Perfil", icon: Edit },
+        { href: "/empresario/avaliacoes", label: "Avaliações", icon: MessageSquare },
+        { href: "/empresario/configuracoes", label: "Configurações", icon: Settings },
+    ];
+    
+    const NavLink = ({ href, label, icon: Icon } : typeof navLinks[0]) => (
+        <Link
+            href={href}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+                pathname === href
+                    ? 'bg-blue-700 text-white'
+                    : 'text-blue-200 hover:text-white hover:bg-blue-700/50'
+            }`}
+        >
+            <Icon className="h-4 w-4" />
+            {label}
+        </Link>
+    );
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="flex h-screen w-full items-center justify-center bg-gray-50">
                 <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 text-slate-800">
-            <Header />
-            <main className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <div className="hidden border-r bg-[#1E3A8A] md:block md:sticky md:top-0 h-screen">
+                <div className="flex h-full max-h-screen flex-col">
+                    <div className="flex h-14 items-center gap-3 border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
+                        <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-blue-600 text-white font-bold">
+                                {getInitials(businessData?.businessName)}
+                            </AvatarFallback>
+                        </Avatar>
+                        <span className="text-white font-semibold">{businessData?.businessName}</span>
+                    </div>
                     
-                    {/* ===== COLUNA DA SIDEBAR MODIFICADA ===== */}
-                    <aside className="lg:col-span-1 lg:sticky lg:top-8 h-fit"> 
-                        <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 rounded-2xl text-white">
-                            <CardHeader className="text-center">
-                                <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-blue-400/50">
-                                    <AvatarFallback className="text-2xl font-bold bg-white text-[#1E3A8A]">
+                    <div className="flex-1 py-2">
+                        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                            {navLinks.map(link => <NavLink key={link.href} {...link} />)}
+                        </nav>
+                    </div>
+                    <div className="mt-auto p-4 border-t border-white/20">
+                         <Button
+                            onClick={handleLogout}
+                            variant="ghost"
+                            className="w-full justify-start gap-3 rounded-lg px-3 py-2 text-red-300 hover:bg-red-500/20 hover:text-red-300"
+                        >
+                            <LogOut className="h-4 w-4" />
+                            Sair
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-col">
+                <header className="flex h-14 items-center gap-4 border-b bg-[#1E3A8A] px-4 text-white lg:h-[60px] lg:px-6">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="ghost" size="icon" className="shrink-0 md:hidden hover:bg-blue-700/50">
+                                <Menu className="h-5 w-5" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="flex flex-col bg-[#1E3A8A] text-white border-r-0 p-0">
+                            <div className="flex h-14 items-center gap-3 border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="bg-blue-600 text-white font-bold">
                                         {getInitials(businessData?.businessName)}
                                     </AvatarFallback>
                                 </Avatar>
-                                <CardTitle className="text-xl text-white">{businessData?.businessName}</CardTitle>
-                                <CardDescription className="text-white/80">{businessData?.category}</CardDescription>
-                                <div className="flex items-center justify-center mt-2 text-white/90">
-                                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                    <span className="ml-1.5 text-sm font-medium">{businessData?.rating || 'N/A'}</span>
-                                    <span className="ml-2 text-sm text-white/80">({businessData?.reviewCount || 0} avaliações)</span>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-2 p-4">
-                                <nav className="space-y-1">
-                                    <NavButton href="/empresario/dashboard" currentPath={pathname} icon={<BarChart3 className="w-5 h-5 mr-3" />} label="Dashboard" />
-                                    <NavButton href="/empresario/perfil" currentPath={pathname} icon={<Edit className="w-5 h-5 mr-3" />} label="Editar Perfil" />
-                                    <NavButton href="/empresario/avaliacoes" currentPath={pathname} icon={<MessageSquare className="w-5 h-5 mr-3" />} label="Avaliações" />
-                                    <NavButton href="/empresario/configuracoes" currentPath={pathname} icon={<Settings className="w-5 h-5 mr-3" />} label="Configurações" />
-                                </nav>
-                            </CardContent>
-                        </Card>
-                    </aside>
-
-                    {/* ===== COLUNA DE CONTEÚDO PRINCIPAL ===== */}
-                    <section className="lg:col-span-3">
-                        {children}
-                    </section>
-                </div>
-            </main>
-            <Footer />
+                                <span className="text-white font-semibold">{businessData?.businessName}</span>
+                            </div>
+                            <nav className="grid gap-2 text-lg font-medium p-4">
+                                {navLinks.map(link => <NavLink key={link.href} {...link} />)}
+                            </nav>
+                            <div className="mt-auto border-t border-white/20 pt-4">
+                                <Button
+                                    onClick={handleLogout}
+                                    variant="ghost"
+                                    className="w-full justify-start gap-3 rounded-lg px-3 py-2 text-red-300 hover:bg-red-500/20 hover:text-red-300"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    Sair
+                                </Button>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                    <Link href="/empresario/dashboard" className="flex items-center gap-2 font-semibold text-white">
+                        <MapPin className="h-6 w-6 text-yellow-400" />
+                        <span className="hidden sm:inline-block">Novo Tempo Conecta</span>
+                    </Link>
+                    <div className="ml-auto">
+                        {/* ===== CORREÇÃO AQUI: Adicionado modal={false} ===== */}
+                        <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 hover:bg-blue-700/50">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarFallback className="bg-blue-600 text-white font-bold">
+                                            {getInitials(businessData?.businessName)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>{businessData?.businessName}</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild><Link href="/empresario/configuracoes">Configurações</Link></DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">Sair</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </header>
+                
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto bg-muted/40">
+                    {children}
+                </main>
+            </div>
         </div>
     );
 }
