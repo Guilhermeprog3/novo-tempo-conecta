@@ -24,6 +24,7 @@ interface HeaderProps {
 
 export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, seus negócios" }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false); 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
@@ -35,6 +36,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
       setUser(parsedUser)
       setIsLoggedIn(true)
     }
+    setIsMounted(true); // Marcar como montado APÓS a verificação
   }, [])
 
   const handleLogout = () => {
@@ -88,8 +90,12 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
           </nav>
 
           <div className="hidden md:flex items-center space-x-2">
-            {isLoggedIn ? (
-              <DropdownMenu modal={false}>
+            {!isMounted ? (
+              <div className="h-10 w-48" /> 
+            ) : isLoggedIn ? (
+              // --- CORREÇÃO AQUI ---
+              <DropdownMenu modal={false}> 
+              {/* --- FIM DA CORREÇÃO --- */}
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar className="h-10 w-10">
@@ -187,7 +193,9 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             </nav>
 
             <div className="flex flex-col space-y-2 mt-4 pt-4 border-t border-blue-700/50">
-              {isLoggedIn ? (
+              {!isMounted ? (
+                 <div className="h-10 w-full" />
+              ) : isLoggedIn ? (
                 <>
                   <div className="flex items-center space-x-3 px-2 py-3 border rounded-lg border-blue-700/50">
                     <Avatar className="h-8 w-8">

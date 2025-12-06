@@ -75,17 +75,41 @@ export default function LoginPage() {
 
         throw new Error("Dados do usuário não encontrados.");
 
+    // --- INÍCIO DA MODIFICAÇÃO (BLOCO CATCH MELHORADO) ---
     } catch (error: any) {
-        console.error("Erro ao fazer login:", error);
-        let errorMessage = "E-mail ou senha incorretos. Verifique e tente novamente.";
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-             errorMessage = "E-mail ou senha inválidos.";
-        } else if (error.message === "Dados do usuário não encontrados.") {
-             errorMessage = "Não foi possível encontrar os dados da sua conta. Entre em contato com o suporte.";
-        } else {
-             errorMessage = "Ocorreu um erro inesperado. Tente novamente mais tarde.";
+        console.error("Erro detalhado ao fazer login:", error.code, error.message); // Log mais detalhado
+        let errorMessage: string;
+
+        // Trata erros específicos do Firebase Auth
+        switch (error.code) {
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+            case 'auth/invalid-credential':
+                errorMessage = "E-mail ou senha inválidos.";
+                break;
+            case 'auth/user-disabled':
+                errorMessage = "Esta conta de usuário foi desativada.";
+                break;
+            case 'auth/network-request-failed':
+                errorMessage = "Erro de rede. Verifique sua conexão e tente novamente.";
+                break;
+            // Erro comum do Firestore
+            case 'permission-denied':
+                errorMessage = "Erro de permissão. Não foi possível verificar os dados da conta.";
+                break;
+            default:
+                // Trata o erro customizado do 'try'
+                if (error.message === "Dados do usuário não encontrados.") {
+                    errorMessage = "Sua conta foi autenticada, mas não encontramos um perfil (cidadão ou empresa) associado. Entre em contato com o suporte.";
+                } else {
+                    // Erro genérico
+                    errorMessage = "Ocorreu um erro inesperado. Tente novamente mais tarde.";
+                }
+                break;
         }
+        
         setErrors({ form: errorMessage });
+    // --- FIM DA MODIFICAÇÃO ---
     } finally {
         setLoading(false);
     }
