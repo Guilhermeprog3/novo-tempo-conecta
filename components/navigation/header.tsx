@@ -1,4 +1,3 @@
-// components/navigation/header.tsx
 "use client"
 
 import { MapPin, Menu, X, User, Settings, LogOut, Heart, MessageSquare, Star } from "lucide-react"
@@ -66,7 +65,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
         
         <div className="flex items-center justify-between">
           
-          {/* LOGO */}
           <Link href="/" className="flex items-center">
             <Image
               src="/logo.png"
@@ -77,7 +75,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             />
           </Link>
 
-          {/* NAV DESKTOP */}
           <nav className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
@@ -94,7 +91,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             ))}
           </nav>
 
-          {/* USER AREA DESKTOP */}
           <div className="hidden md:flex items-center space-x-2">
 
             {!isMounted ? (
@@ -155,7 +151,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
   <DropdownMenuItem asChild>
     <Link
-      href="/favoritos"
+      href="/usuario/favoritos"
       className="
         flex items-center px-3 py-2 rounded-md transition 
         hover:bg-blue-600/40 hover:text-white
@@ -174,18 +170,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
       "
     >
       <Star className="mr-2 h-4 w-4" /> Minhas Avaliações
-    </Link>
-  </DropdownMenuItem>
-
-  <DropdownMenuItem asChild>
-    <Link
-      href="/usuario/comentarios"
-      className="
-        flex items-center px-3 py-2 rounded-md transition 
-        hover:bg-blue-600/40 hover:text-white
-      "
-    >
-      <MessageSquare className="mr-2 h-4 w-4" /> Meus Comentários
     </Link>
   </DropdownMenuItem>
 
@@ -227,13 +211,12 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                   <Link href="/cadastro">Cadastrar Cidadão</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link href="/empresario/cadastro">Cadastrar Negócio</Link>
+                  <Link href="/cadastro-emp">Cadastrar Negócio</Link>
                 </Button>
               </>
             )}
           </div>
 
-          {/* MOBILE BUTTON */}
           <Button
             variant="ghost"
             size="sm"
@@ -244,7 +227,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
           </Button>
         </div>
 
-        {/* MOBILE MENU */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-blue-700/50 bg-[#1E3A8A] -mx-4 px-4">
             <nav className="flex flex-col space-y-2 mt-4">
@@ -318,7 +300,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                   </Button>
 
                   <Button size="sm" asChild>
-                    <Link href="/empresario/cadastro" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/cadastro-emp" onClick={() => setMobileMenuOpen(false)}>
                       Cadastrar Negócio
                     </Link>
                   </Button>
