@@ -57,7 +57,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
             {/* Sidebar Desktop */}
             <aside className="hidden md:flex w-64 flex-col border-r border-white/10 bg-[#1E3A8A] text-white">
-                {/* Header da Sidebar - Agora com a MESMA cor do fundo (#1E3A8A) */}
                 <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6 bg-[#1E3A8A] shadow-sm">
                     <MapPin className="h-6 w-6 text-yellow-400 shrink-0" />
                     <span className="font-bold text-lg tracking-tight truncate text-white">Novo Tempo Admin</span>
@@ -67,7 +66,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     {navLinks.map(link => <NavLink key={link.href} {...link} />)}
                 </div>
 
-                {/* Footer da Sidebar - Também uniforme */}
                 <div className="p-4 border-t border-white/10 bg-[#1E3A8A]">
                      <Button
                         onClick={handleLogout}
@@ -83,14 +81,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             {/* Main Content Area */}
             <div className="flex flex-col flex-1 h-full overflow-hidden">
                 
-                {/* Header Principal - Também uniforme */}
                 <header className="flex h-16 items-center justify-between border-b border-white/10 bg-[#1E3A8A] px-4 lg:px-8 shadow-md shrink-0 z-10">
                     <div className="flex items-center gap-4">
                         <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/10">
-                                    <Menu className="h-6 w-6" />
-                                </Button>
+                            {/* CORREÇÃO: Removemos 'asChild' e Button, usando a classe de estilo diretamente */}
+                            <SheetTrigger className="md:hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-white/10 h-10 w-10 text-white">
+                                <Menu className="h-6 w-6" />
+                                <span className="sr-only">Menu</span>
                             </SheetTrigger>
                             <SheetContent side="left" className="w-72 p-0 bg-[#1E3A8A] text-white border-r-0">
                                 <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6 bg-[#1E3A8A]">
@@ -108,12 +105,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                             </SheetContent>
                         </Sheet>
                         
-                        {/* Título da Página */}
                         <h2 className="text-lg font-semibold text-white hidden md:block">
                             {navLinks.find(link => link.href === pathname)?.label || "Painel"}
                         </h2>
                         
-                        {/* Logo Mobile */}
                         <div className="flex items-center gap-2 md:hidden">
                              <MapPin className="h-5 w-5 text-yellow-400" />
                              <span className="font-bold text-white">Novo Tempo</span>
@@ -150,7 +145,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     </div>
                 </header>
                 
-                {/* Conteúdo com Scroll */}
                 <main className="flex-1 overflow-y-auto bg-slate-50 p-4 lg:p-8">
                     <div className="mx-auto w-full max-w-7xl animate-in fade-in duration-500">
                         {children}

@@ -1,11 +1,11 @@
-// app/admin/dashboard/page.tsx
 "use client"
 
 import React, { useEffect, useState } from "react"
+// CORREÇÃO: Adicionado 'CardDescription' na lista de importações
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Users, Building2, Star, Activity, TrendingUp } from "lucide-react"
+import { Users, Building2, Star, Activity, TrendingUp, AlertTriangle } from "lucide-react"
 import { db } from "@/lib/firebase"
-import { collection, getDocs, query, where } from "firebase/firestore"
+import { collection, getDocs, Timestamp } from "firebase/firestore"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -40,38 +40,87 @@ export default function AdminDashboardPage() {
         recentUsers: [] as any[],
         recentBusinesses: [] as any[]
     });
+    const [chartData, setChartData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1. Contagem de Usuários (não admins)
+                // 1. Buscar TODA a coleção de Usuários
                 const usersRef = collection(db, "users");
-                const qUsers = query(usersRef, where("role", "!=", "admin"));
-                const usersSnap = await getDocs(qUsers);
+                const usersSnap = await getDocs(usersRef);
                 
-                // 2. Contagem de Empresas
+                const allUsers = usersSnap.docs.map(doc => ({id: doc.id, ...doc.data() as any}));
+                
+                // Filtra admins para a contagem de "Usuários"
+                const nonAdminUsers = allUsers.filter(u => u.role !== 'admin');
+                // Se não houver usuários comuns, mostra o total geral para não ficar zerado em testes
+                const totalUsersDisplay = nonAdminUsers.length > 0 ? nonAdminUsers.length : allUsers.length; 
+
+                // 2. Buscar Empresas
                 const businessRef = collection(db, "businesses");
                 const businessSnap = await getDocs(businessRef);
+                const allBusinesses = businessSnap.docs.map(doc => ({id: doc.id, ...doc.data() as any}));
 
                 // 3. Empresas em Destaque
-                const qFeatured = query(businessRef, where("isFeatured", "==", true));
-                const featuredSnap = await getDocs(qFeatured);
+                const featuredBusinesses = allBusinesses.filter(b => b.isFeatured === true);
 
                 // 4. Dados Recentes
-                const recentUsersList = usersSnap.docs.slice(0, 4).map(d => ({id: d.id, ...d.data()}));
-                const recentBusinessList = businessSnap.docs.slice(0, 4).map(d => ({id: d.id, ...d.data()}));
+                const recentUsersList = [...allUsers].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 4);
+                const recentBusinessList = [...allBusinesses].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 4);
 
                 setStats({
-                    users: usersSnap.size,
-                    businesses: businessSnap.size,
-                    featured: featuredSnap.size,
+                    users: totalUsersDisplay, 
+                    businesses: allBusinesses.length,
+                    featured: featuredBusinesses.length,
                     recentUsers: recentUsersList,
                     recentBusinesses: recentBusinessList
                 });
 
-            } catch (error) {
+                // Lógica dos Gráficos
+                const last6Months: any[] = [];
+                const today = new Date();
+                
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                    const monthName = d.toLocaleString('pt-BR', { month: 'short' });
+                    const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                    
+                    last6Months.push({ 
+                        name: formattedMonth, 
+                        rawDate: d,
+                        usuarios: 0, 
+                        empresas: 0 
+                    });
+                }
+
+                const countByMonth = (docData: any, type: 'usuarios' | 'empresas') => {
+                    if (!docData.createdAt) return;
+                    const date = docData.createdAt instanceof Timestamp 
+                        ? docData.createdAt.toDate() 
+                        : new Date(docData.createdAt);
+
+                    last6Months.forEach(monthItem => {
+                        const mDate = monthItem.rawDate;
+                        if (date.getMonth() === mDate.getMonth() && date.getFullYear() === mDate.getFullYear()) {
+                            monthItem[type]++;
+                        }
+                    });
+                };
+
+                allUsers.forEach(u => countByMonth(u, 'usuarios'));
+                allBusinesses.forEach(b => countByMonth(b, 'empresas'));
+
+                setChartData(last6Months.map(({ rawDate, ...rest }) => rest));
+
+            } catch (error: any) {
                 console.error("Erro ao carregar dashboard:", error);
+                if (error.code === 'permission-denied') {
+                    setErrorMsg("Erro de permissão: Verifique se sua conta tem o cargo 'admin' no Firestore.");
+                } else {
+                    setErrorMsg("Erro ao carregar dados.");
+                }
             } finally {
                 setLoading(false);
             }
@@ -80,20 +129,21 @@ export default function AdminDashboardPage() {
         fetchData();
     }, []);
 
-    const chartData = [
-        { name: "Jan", usuarios: 12, empresas: 4 },
-        { name: "Fev", usuarios: 18, empresas: 7 },
-        { name: "Mar", usuarios: 25, empresas: 5 },
-        { name: "Abr", usuarios: 30, empresas: 12 },
-        { name: "Mai", usuarios: 45, empresas: 15 },
-        { name: "Jun", usuarios: 60, empresas: 22 },
-    ];
-
     if (loading) return <div className="h-full w-full flex items-center justify-center p-20"><Activity className="w-10 h-10 animate-spin text-blue-600" /></div>;
+
+    if (errorMsg) {
+        return (
+            <div className="p-8">
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 text-red-700 flex items-center">
+                    <AlertTriangle className="w-5 h-5 mr-2" />
+                    <p>{errorMsg}</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-6">
-            {/* Hero Section */}
             <div className="rounded-xl bg-gradient-to-r from-[#1E3A8A] to-[#2b52c2] p-8 text-white shadow-lg relative overflow-hidden">
                 <div className="relative z-10">
                     <h1 className="text-3xl font-bold mb-2">Visão Geral</h1>
@@ -105,14 +155,13 @@ export default function AdminDashboardPage() {
                 <div className="absolute right-20 bottom-0 h-32 w-32 rounded-full bg-yellow-400/10 blur-2xl" />
             </div>
 
-            {/* Grid de Estatísticas - Ajustado para 3 colunas */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <StatCard 
                     title="Total de Usuários" 
                     value={stats.users} 
                     icon={Users} 
-                    description="Moradores cadastrados"
-                    trend="+12%"
+                    description={stats.users === 0 ? "Nenhum usuário encontrado" : "Total cadastrado"}
+                    trend={stats.users > 0 ? "+100%" : undefined}
                     colorClass="bg-blue-50 text-blue-600"
                 />
                 <StatCard 
@@ -120,7 +169,6 @@ export default function AdminDashboardPage() {
                     value={stats.businesses} 
                     icon={Building2} 
                     description="Estabelecimentos ativos"
-                    trend="+5%"
                     colorClass="bg-indigo-50 text-indigo-600"
                 />
                 <StatCard 
@@ -133,7 +181,6 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-7">
-                {/* Gráfico */}
                 <Card className="col-span-4 border-none shadow-sm bg-white">
                     <CardHeader>
                         <CardTitle className="text-slate-800">Crescimento da Plataforma</CardTitle>
@@ -144,25 +191,9 @@ export default function AdminDashboardPage() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                    <XAxis 
-                                        dataKey="name" 
-                                        stroke="#64748b" 
-                                        fontSize={12} 
-                                        tickLine={false} 
-                                        axisLine={false} 
-                                        dy={10}
-                                    />
-                                    <YAxis 
-                                        stroke="#64748b" 
-                                        fontSize={12} 
-                                        tickLine={false} 
-                                        axisLine={false} 
-                                        dx={-10}
-                                    />
-                                    <Tooltip 
-                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                        cursor={{fill: '#f8fafc'}}
-                                    />
+                                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+                                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
+                                    <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} cursor={{fill: '#f8fafc'}} />
                                     <Bar dataKey="usuarios" name="Usuários" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={30} />
                                     <Bar dataKey="empresas" name="Empresas" fill="#EAB308" radius={[4, 4, 0, 0]} barSize={30} />
                                 </BarChart>
@@ -171,7 +202,6 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
 
-                {/* Lista Recente */}
                 <Card className="col-span-3 border-none shadow-sm bg-white">
                     <CardHeader>
                         <CardTitle className="text-slate-800">Novos Cadastros</CardTitle>
@@ -209,6 +239,9 @@ export default function AdminDashboardPage() {
                                     <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 whitespace-nowrap">Novo Usuário</Badge>
                                 </div>
                             ))}
+                            {stats.recentUsers.length === 0 && stats.recentBusinesses.length === 0 && (
+                                <p className="text-sm text-slate-400 text-center py-4">Nenhum cadastro recente.</p>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

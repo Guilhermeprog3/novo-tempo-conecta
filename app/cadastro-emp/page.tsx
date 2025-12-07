@@ -1,4 +1,3 @@
-// app/empresario/cadastro/page.tsx
 "use client"
 
 import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, Store, MapPin, Clock, Globe, FileText, Loader2, AlertTriangle } from "lucide-react"
@@ -201,6 +200,7 @@ export default function EmpresarioCadastroPage() {
         ownerId: user.uid,
         rating: 0,
         reviewCount: 0,
+        createdAt: new Date(), // <--- ADICIONADO AQUI: Data de criação para o gráfico
       };
       // @ts-ignore
       delete dataToSave.password;

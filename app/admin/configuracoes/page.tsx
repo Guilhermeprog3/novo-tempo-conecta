@@ -24,8 +24,12 @@ export default function AdminSettingsPage() {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    
+    // Estados de visibilidade das senhas
     const [showCurrentPass, setShowCurrentPass] = useState(false);
     const [showNewPass, setShowNewPass] = useState(false);
+    const [showConfirmPass, setShowConfirmPass] = useState(false); // Novo estado
+    
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
@@ -40,43 +44,49 @@ export default function AdminSettingsPage() {
         setLoading(true);
 
         if (newPassword !== confirmPassword) {
-            toast.error("As senhas não coincidem.");
+            toast.error("A nova senha e a confirmação não coincidem.");
             setLoading(false);
             return;
         }
 
         if (newPassword.length < 6) {
-            toast.error("A senha deve ter no mínimo 6 caracteres.");
+            toast.error("A nova senha deve ter no mínimo 6 caracteres.");
             setLoading(false);
             return;
         }
 
         if (!auth.currentUser || !auth.currentUser.email) {
-            toast.error("Erro de autenticação.");
+            toast.error("Sessão inválida. Faça login novamente.");
             setLoading(false);
             return;
         }
 
         try {
-            // 1. Reautenticar o usuário
+            // 1. Reautenticar o usuário para garantir que é ele mesmo
             const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
             await reauthenticateWithCredential(auth.currentUser, credential);
 
             // 2. Atualizar senha
             await updatePassword(auth.currentUser, newPassword);
             
-            toast.success("Senha atualizada com sucesso!");
+            toast.success("Sua senha foi alterada com sucesso!");
+            
+            // Limpar formulário e fechar modal
             setIsDialogOpen(false);
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
 
         } catch (error: any) {
-            console.error(error);
-            if (error.code === 'auth/wrong-password') {
-                toast.error("A senha atual está incorreta.");
+            console.error("Erro ao alterar senha:", error);
+            
+            // Tratamento de erros específicos do Firebase
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                toast.error("A senha atual digitada está incorreta.");
+            } else if (error.code === 'auth/too-many-requests') {
+                toast.error("Muitas tentativas falhas. Aguarde alguns instantes.");
             } else {
-                toast.error("Erro ao atualizar senha. Tente novamente.");
+                toast.error("Ocorreu um erro ao atualizar a senha. Tente novamente.");
             }
         } finally {
             setLoading(false);
@@ -89,13 +99,11 @@ export default function AdminSettingsPage() {
 
     return (
         <>
-            {/* CORREÇÃO: Toaster movido para fora da div com space-y-6 */}
             <Toaster />
             
             <div className="space-y-6">
                 
-                {/* 1. Header Hero (Estilo Zelus) */}
-                {/* Agora este é o primeiro filho direto da div space-y-6, então não terá margem no topo */}
+                {/* 1. Header Hero */}
                 <div className="rounded-xl bg-[#1E3A8A] p-8 text-white shadow-lg">
                     <h1 className="text-3xl font-bold mb-2">Configurações</h1>
                     <p className="text-blue-100 opacity-90">
@@ -184,6 +192,7 @@ export default function AdminSettingsPage() {
                                                     value={currentPassword}
                                                     onChange={(e) => setCurrentPassword(e.target.value)}
                                                     required
+                                                    className="pr-10"
                                                 />
                                                 <button type="button" onClick={() => setShowCurrentPass(!showCurrentPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                                                     {showCurrentPass ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
@@ -200,6 +209,7 @@ export default function AdminSettingsPage() {
                                                     onChange={(e) => setNewPassword(e.target.value)}
                                                     required
                                                     placeholder="Mínimo 6 caracteres"
+                                                    className="pr-10"
                                                 />
                                                 <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                                                     {showNewPass ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
@@ -208,17 +218,27 @@ export default function AdminSettingsPage() {
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="confirm">Confirmar Nova Senha</Label>
-                                            <Input 
-                                                id="confirm" 
-                                                type="password" 
-                                                value={confirmPassword}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                required
-                                            />
+                                            <div className="relative">
+                                                <Input 
+                                                    id="confirm" 
+                                                    type={showConfirmPass ? "text" : "password"} 
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    required
+                                                    className="pr-10"
+                                                />
+                                                <button type="button" onClick={() => setShowConfirmPass(!showConfirmPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                                    {showConfirmPass ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
+                                                </button>
+                                            </div>
                                         </div>
                                         <DialogFooter className="pt-4">
                                             <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                                            <Button type="submit" disabled={loading} className="bg-[#1E3A8A] hover:bg-blue-900">
+                                            <Button 
+                                                type="submit" 
+                                                disabled={loading} 
+                                                className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold"
+                                            >
                                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                                 Salvar Alteração
                                             </Button>

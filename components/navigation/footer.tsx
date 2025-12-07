@@ -33,16 +33,6 @@ export function Footer() {
                   Mapa Interativo
                 </Link>
               </li>
-              <li>
-                <Link href="/favoritos" className="hover:text-primary transition-colors">
-                  Meus Favoritos
-                </Link>
-              </li>
-              <li>
-                <Link href="/cadastro" className="hover:text-primary transition-colors">
-                  Cadastrar Morador
-                </Link>
-              </li>
             </ul>
           </div>
           <div>
