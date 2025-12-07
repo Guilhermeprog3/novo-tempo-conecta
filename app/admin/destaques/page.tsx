@@ -1,4 +1,3 @@
-// app/admin/destaques/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -134,9 +133,10 @@ export default function DestaquesPage() {
                     <div className="flex gap-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            {/* CORREÇÃO AQUI: Adicionado 'text-slate-900' e 'placeholder:text-slate-400' */}
                             <Input
                                 placeholder="Digite o nome da empresa..."
-                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-600"
+                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-600 text-slate-900 placeholder:text-slate-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />

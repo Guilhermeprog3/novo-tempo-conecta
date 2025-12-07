@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
-import { Search, MapPin, Star, Clock, SlidersHorizontal, Grid, List, Loader2, X, Store } from "lucide-react"
+import { Search, MapPin, Star, Clock, SlidersHorizontal, Grid, List, Loader2, X, Store, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,12 +12,10 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import Link from "next/link"
 import { db } from "@/lib/firebase"
-// CORREÇÃO 1: Importar 'query' e 'where'
 import { collection, getDocs, query, where } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Header } from "@/components/navigation/header"
-import { Footer } from "@/components/navigation/footer"
 
 type Business = {
   id: string;
@@ -48,7 +46,7 @@ const categories = [
 ];
 
 function SearchResults() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const router = useRouter();
   const [showFilters, setShowFilters] = useState(false);
   
   const [allBusinesses, setAllBusinesses] = useState<Business[]>([]);
@@ -56,29 +54,40 @@ function SearchResults() {
 
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
-  const initialCategory = searchParams.get("categoria");
+  const initialCategories = searchParams.getAll("categoria");
 
   const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
+  
   const [minRating, setMinRating] = useState([0]);
   const [isOpen, setIsOpen] = useState(false);
   const [sortBy, setSortBy] = useState("relevance");
 
   useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (searchTerm) {
+      params.set("q", searchTerm);
+    }
+
+    selectedCategories.forEach(category => {
+      params.append("categoria", category);
+    });
+
+    router.replace(`/busca?${params.toString()}`, { scroll: false });
+  }, [searchTerm, selectedCategories, router]);
+
+  useEffect(() => {
     const fetchBusinesses = async () => {
         try {
-            // CORREÇÃO 2: Modificar a consulta para filtrar por 'isPublic == true'
             const businessesRef = collection(db, "businesses");
             const q = query(businessesRef, where("isPublic", "==", true));
             const querySnapshot = await getDocs(q);
-            // --- Fim da Correção ---
             
             const businessesList = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             })) as Business[];
-
-            // console.log('DADOS BRUTOS DO FIREBASE (BUSCA):', businessesList); // Debug
 
             setAllBusinesses(businessesList);
         } catch (error) {
@@ -100,15 +109,12 @@ function SearchResults() {
 
   const filteredAndSortedBusinesses = allBusinesses
     .filter(business => {
-        // Correção de segurança para campos nulos
         const matchesSearch = (business.businessName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
                               (business.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
         
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(business.category);
         const matchesRating = !business.rating || business.rating >= minRating[0];
         const matchesOpen = !isOpen || business.isOpen === true;
-
-        // Filtro de visibilidade (já tratado no query, mas bom ter como redundância)
         const isPublic = business.isPublic === true;
 
         return matchesSearch && matchesCategory && matchesRating && matchesOpen && isPublic;
@@ -124,7 +130,22 @@ function SearchResults() {
         }
     });
 
-  // console.log('RESULTADOS FILTRADOS (BUSCA):', filteredAndSortedBusinesses); // Debug
+  const renderStars = (rating: number = 0) => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-3 h-3 ${
+              star <= Math.round(rating)
+                ? "text-yellow-400 fill-yellow-400"
+                : "text-white/30" 
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -183,10 +204,6 @@ function SearchResults() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center space-x-2">
-                <Button variant={viewMode === "grid" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("grid")}><Grid className="w-4 h-4" /></Button>
-                <Button variant={viewMode === "list" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("list")}><List className="w-4 h-4" /></Button>
-              </div>
             </div>
             <p className="text-sm text-muted-foreground mt-2">
               {loading ? 'Buscando...' : `${filteredAndSortedBusinesses.length} resultados encontrados`}
@@ -194,40 +211,58 @@ function SearchResults() {
           </div>
 
           {loading ? (
-               <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
+               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {Array.from({ length: 6 }).map((_, index) => (
-                      <Card key={index}><Skeleton className="h-48 w-full" /><CardHeader><Skeleton className="h-5 w-3/4" /></CardHeader><CardContent><Skeleton className="h-4 w-full" /></CardContent></Card>
+                      <Card key={index} className="bg-[#1E3A8A] border-blue-700">
+                        <Skeleton className="h-48 w-full bg-blue-900/50" />
+                        <CardHeader><Skeleton className="h-5 w-3/4 bg-blue-900/50" /></CardHeader>
+                        <CardContent><Skeleton className="h-4 w-full bg-blue-900/50" /></CardContent>
+                      </Card>
                   ))}
                </div>
           ) : filteredAndSortedBusinesses.length > 0 ? (
-              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredAndSortedBusinesses.map((business) => (
                       <Link href={`/estabelecimento/${business.id}`} key={business.id} className="h-full">
-                          <Card className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full ${viewMode === "list" ? "flex" : "flex flex-col"}`}>
-                              <div className={`${viewMode === "list" ? "w-48 flex-shrink-0" : "h-48"} bg-muted`}>
+                          <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col bg-[#1E3A8A] border-blue-700 text-white">
+                              <div className="h-48 bg-blue-900/50 flex items-center justify-center">
                                   {business.images && business.images.length > 0 ? (
                                       <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
                                   ) : (
-                                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10"><Store className="w-16 h-16 text-muted-foreground/50" /></div>
+                                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                                        <Store className="w-16 h-16 text-white/20" strokeWidth={1.5} />
+                                      </div>
                                   )}
                               </div>
                               <div className="flex flex-col flex-1">
-                                  <CardHeader className={viewMode === "list" ? "pb-2" : ""}>
+                                  <CardHeader>
                                       <div className="flex items-start justify-between">
-                                          <CardTitle className="text-lg">{business.businessName}</CardTitle>
-                                          <div className="flex items-center ml-2 flex-shrink-0">
-                                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                              <span className="ml-1 text-sm font-medium">{business.rating || 'N/A'}</span>
+                                          <div className="flex-1">
+                                            <CardTitle className="text-lg text-white">{business.businessName}</CardTitle>
+                                            <CardDescription className="flex items-center pt-1">
+                                                <Badge variant="secondary" className="mr-2 text-xs">
+                                                    {categories.find(c => c.value === business.category)?.label || business.category}
+                                                </Badge>
+                                            </CardDescription>
+                                          </div>
+                                          
+                                          <div className="flex flex-col items-end pl-2">
+                                              {renderStars(business.rating)}
+                                              <span className="text-[10px] text-white/60 mt-1">
+                                                {business.rating && business.rating > 0 ? business.rating.toFixed(1) : 'Sem avaliações'}
+                                              </span>
                                           </div>
                                       </div>
-                                      <CardDescription className="flex items-center pt-1"><Badge variant="secondary" className="mr-2 text-xs">{categories.find(c => c.value === business.category)?.label || business.category}</Badge></CardDescription>
                                   </CardHeader>
                                   <CardContent className="flex-grow flex flex-col justify-between">
-                                      <p className="text-sm text-muted-foreground mb-3">{business.description?.substring(0, 100)}{business.description && business.description.length > 100 && '...'}</p>
+                                      <p className="text-sm text-white/80 mb-3">
+                                          {business.description?.substring(0, 100)}{business.description && business.description.length > 100 && '...'}
+                                      </p>
                                       <div className="flex items-center justify-between text-sm">
-                                          <div className="flex items-center text-muted-foreground"><MapPin className="w-4 h-4 mr-1" />{business.address?.split(',')[0]}</div>
-                                          <div className={`flex items-center ${business.isOpen === undefined ? 'text-muted-foreground' : business.isOpen ? "text-green-600" : "text-red-600"}`}>
-                                              <Clock className="w-3 h-3 mr-1" />{business.isOpen === undefined ? 'Não informado' : business.isOpen ? "Aberto" : "Fechado"}
+                                          <div className="flex items-center text-white/80"><MapPin className="w-4 h-4 mr-1" />{business.address?.split(',')[0]}</div>
+                                          <div className="flex items-center text-white/80">
+                                              <Clock className="w-3 h-3 mr-1" />
+                                              <span>{business.hours || 'Não informado'}</span>
                                           </div>
                                       </div>
                                   </CardContent>

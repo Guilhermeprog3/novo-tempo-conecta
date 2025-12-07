@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -10,8 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { SearchBar } from "@/components/search-bar"
 import { db } from "@/lib/firebase"
-// CORREÇÃO 1: Importar 'where' do firestore
-import { collection, getDocs, query, limit, orderBy, where } from "firebase/firestore"
+import { collection, getDocs, query, limit, where } from "firebase/firestore"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
 
@@ -24,7 +22,8 @@ type Business = {
   rating?: number;
   hours?: string;
   images?: string[];
-  isPublic?: boolean; // Adicionado para consistência
+  isPublic?: boolean;
+  isFeatured?: boolean;
 };
 
 export default function HomePage() {
@@ -44,18 +43,14 @@ export default function HomePage() {
       try {
         const businessesCollection = collection(db, "businesses");
         
-        // CORREÇÃO 2: Criar a consulta base que filtra por 'isPublic'
         const publicQuery = query(businessesCollection, where("isPublic", "==", true));
-
-        // CORREÇÃO 3: Usar a consulta pública para obter a contagem
         const allBusinessSnapshot = await getDocs(publicQuery);
         setStats({ businessCount: allBusinessSnapshot.size });
 
-        // CORREÇÃO 4: Usar a consulta pública para obter os destaques
-        // (Adicionei orderBy por rating para "destaques" fazerem mais sentido)
         const featuredQuery = query(
-            publicQuery, 
-            orderBy("rating", "desc"), // Opcional, mas recomendado
+            businessesCollection,
+            where("isPublic", "==", true),
+            where("isFeatured", "==", true),
             limit(3)
         );
         
@@ -75,6 +70,23 @@ export default function HomePage() {
 
     fetchData();
   }, []);
+
+  const renderStars = (rating: number = 0) => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-3 h-3 ${
+              star <= Math.round(rating)
+                ? "text-yellow-400 fill-yellow-400"
+                : "text-white/30"
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,25 +120,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 px-4 bg-background">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">{loading ? <Skeleton className="h-10 w-24 mx-auto" /> : `${stats.businessCount}+`}</div>
-              <div className="text-muted-foreground">Negócios Cadastrados</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">2.5k+</div>
-              <div className="text-muted-foreground">Avaliações</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">5k+</div>
-              <div className="text-muted-foreground">Moradores Conectados</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">
@@ -145,7 +138,7 @@ export default function HomePage() {
                   <CardContent className="space-y-2"><Skeleton className="h-4 w-full bg-blue-900/50" /><Skeleton className="h-4 w-full bg-blue-900/50" /></CardContent>
                 </Card>
               ))
-            ) : (
+            ) : featuredBusinesses.length > 0 ? (
               featuredBusinesses.map((business) => (
                 <Link href={`/estabelecimento/${business.id}`} key={business.id}>
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col bg-[#1E3A8A] border-blue-700 text-white">
@@ -153,7 +146,7 @@ export default function HomePage() {
                       {business.images && business.images.length > 0 ? (
                         <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
                       ) : (
-                        <Store className="w-16 h-16 text-white/30" />
+                        <Store className="w-16 h-16 text-white/20" strokeWidth={1.5} />
                       )}
                     </div>
                     <CardHeader>
@@ -165,9 +158,11 @@ export default function HomePage() {
                             <span className="truncate">{business.address}</span>
                           </CardDescription>
                         </div>
-                        <div className="flex items-center text-white flex-shrink-0 pl-2">
-                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="ml-1 text-sm font-medium">{business.rating || 'N/A'}</span>
+                        <div className="flex flex-col items-end pl-2">
+                           {renderStars(business.rating)}
+                           <span className="text-[10px] text-white/60 mt-1">
+                             {business.rating && business.rating > 0 ? business.rating.toFixed(1) : 'Sem avaliações'}
+                           </span>
                         </div>
                       </div>
                     </CardHeader>
@@ -189,6 +184,10 @@ export default function HomePage() {
                   </Card>
                 </Link>
               ))
+            ) : (
+               <div className="col-span-full text-center py-10">
+                  <p className="text-muted-foreground">Nenhum destaque definido no momento.</p>
+               </div>
             )}
           </div>
         </div>
