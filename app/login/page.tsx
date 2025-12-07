@@ -55,24 +55,29 @@ export default function LoginPage() {
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
-            // --- CORREÇÃO PARA CIDADÃO ---
             const userData = userDocSnap.data();
             
-            // 1. Salva os dados no localStorage para o Header consumir
+            // Salva os dados no localStorage
             const userForStorage = {
                 name: userData.name,
                 email: userData.email,
-                avatar: userData.avatar || null 
+                avatar: userData.avatar || null,
+                role: userData.role || 'user' // Garante que a role seja salva
             };
             localStorage.setItem("user", JSON.stringify(userForStorage));
-            localStorage.setItem("userType", "user"); // Define o tipo de usuário
+            
+            // VERIFICAÇÃO DE ADMIN
+            if (userData.role === 'admin') {
+                localStorage.setItem("userType", "admin");
+                window.location.href = '/admin/dashboard';
+                return;
+            }
 
-            // 2. Redireciona para a página inicial (/)
+            // Usuário Comum
+            localStorage.setItem("userType", "user");
             window.location.href = '/'; 
-            // --- FIM DA CORREÇÃO ---
             return;
         }
-
         throw new Error("Dados do usuário não encontrados.");
 
     // --- INÍCIO DA MODIFICAÇÃO (BLOCO CATCH MELHORADO) ---
