@@ -53,9 +53,9 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
   }
 
   const navItems = [
-    { href: "/", label: "Início" },
-    { href: "/mapa", label: "Mapa" },
+    { href: "/", label: "Início" },    
     { href: "/sobre", label: "Sobre" },
+    { href: "/mapa", label: "Mapa" },
     { href: "/contato", label: "Contato" },
   ]
 
