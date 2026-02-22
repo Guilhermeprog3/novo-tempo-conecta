@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Search, Download, Trash2, Loader2, Store, Globe, Filter, X, MapPin, Mail, Phone } from "lucide-react"
+// Adicionado o ícone Plus para o botão de cadastro
+import { Search, Download, Trash2, Loader2, Store, Globe, Filter, X, MapPin, Mail, Phone, Plus } from "lucide-react"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import Link from "next/link" // Importado para navegação
 
 type Business = {
     id: string;
@@ -52,10 +54,8 @@ export default function AdminEmpresasPage() {
         try {
             await deleteDoc(doc(db, "businesses", id));
             setBusinesses(prev => prev.filter(b => b.id !== id));
-            alert("Empresa excluída com sucesso.");
         } catch (error) {
             console.error(error);
-            alert("Erro ao excluir.");
         }
     };
 
@@ -113,11 +113,20 @@ export default function AdminEmpresasPage() {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg">
-                <h1 className="text-3xl font-bold mb-2">Gerenciamento de Empresas</h1>
-                <p className="text-white/80">
-                    Filtre, visualize e gerencie todos os estabelecimentos comerciais parceiros.
-                </p>
+            {/* Cabeçalho atualizado com o botão de adicionar */}
+            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold mb-2">Gerenciamento de Empresas</h1>
+                    <p className="text-white/80">
+                        Filtre, visualize e gerencie todos os estabelecimentos comerciais parceiros.
+                    </p>
+                </div>
+                <Link href="/admin/empresas/novo">
+                    <Button className="bg-[#00CCFF] hover:bg-[#00CCFF]/90 text-[#001529] font-bold shadow-lg h-12 px-6">
+                        <Plus className="w-5 h-5 mr-2" />
+                        Nova Empresa
+                    </Button>
+                </Link>
             </div>
 
              <Card className="border-none shadow-sm bg-white">
@@ -150,9 +159,6 @@ export default function AdminEmpresasPage() {
                         </Select>
                         <Button variant="ghost" onClick={() => {setSearchTerm(''); setFilterCategory('all')}} className="text-slate-500 hover:text-[#00CCFF]">
                             <X className="w-4 h-4 mr-2" /> Limpar
-                        </Button>
-                        <Button className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] font-semibold shadow-sm">
-                            <Search className="w-4 h-4 mr-2" /> Aplicar Busca
                         </Button>
                     </div>
                 </CardContent>
