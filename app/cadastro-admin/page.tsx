@@ -1,4 +1,3 @@
-// app/cadastro-admin/page.tsx
 "use client"
 
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Loader2, AlertTriangle, Shield } from "lucide-react"
@@ -119,11 +118,11 @@ export default function AdminCadastroPage() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="w-full max-w-md">
-            <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
+            <Card className="shadow-lg bg-[#002240] border-[#00CCFF]/20 text-white">
               <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
                   <Shield className="w-8 h-8 text-green-400" />
                 </div>
                 <CardTitle className="text-2xl font-bold text-white">Administrador Cadastrado!</CardTitle>
@@ -133,10 +132,10 @@ export default function AdminCadastroPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
-                  <Button className="w-full" asChild>
+                  <Button className="w-full bg-[#00CCFF] text-[#002240] hover:bg-[#00CCFF]/80 font-bold" asChild>
                     <Link href="/login">Ir para o Login</Link>
                   </Button>
-                  <Button variant="outline" className="w-full bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white" onClick={() => setIsSuccess(false)}>
+                  <Button variant="outline" className="w-full bg-transparent text-white border-white/50 hover:bg-[#00CCFF]/10 hover:text-[#00CCFF] hover:border-[#00CCFF]" onClick={() => setIsSuccess(false)}>
                     Cadastrar Novo Admin
                   </Button>
                 </div>
@@ -152,13 +151,13 @@ export default function AdminCadastroPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           
-          <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
+          <Card className="shadow-lg bg-[#002240] border-[#00CCFF]/20 text-white">
             <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-primary-foreground" />
+              <div className="w-16 h-16 bg-[#00CCFF] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-[#002240]" />
               </div>
               <CardTitle className="text-2xl font-bold text-white">Cadastro de Administrador</CardTitle>
               <CardDescription className="text-white/80">Tela temporária: Crie uma conta de administrador (role 'admin').</CardDescription>
@@ -167,57 +166,57 @@ export default function AdminCadastroPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white/90">E-mail do Administrador</Label>
+                  <Label htmlFor="email" className="text-[#00CCFF]">E-mail do Administrador</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
-                    <Input id="email" type="email" placeholder="admin@email.com" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required value={formData.email} onChange={handleChange} aria-invalid={!!errors.email} />
+                    <Input id="email" type="email" placeholder="admin@email.com" className="pl-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]" required value={formData.email} onChange={handleChange} aria-invalid={!!errors.email} />
                   </div>
-                  {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
+                  {errors.email && <p className="text-sm text-red-400 mt-1">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white/90">Senha</Label>
+                  <Label htmlFor="password" className="text-[#00CCFF]">Senha</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Mínimo 6 caracteres"
-                      className="pl-10 pr-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60"
+                      className="pl-10 pr-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]"
                       required
                       value={formData.password}
                       onChange={handleChange}
                       aria-invalid={!!errors.password}
                     />
                     <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <EyeOff className="w-4 h-4 text-white/60" /> : <Eye className="w-4 h-4 text-white/60" />}
+                      {showPassword ? <EyeOff className="w-4 h-4 text-[#00CCFF]" /> : <Eye className="w-4 h-4 text-white/60" />}
                     </Button>
                   </div>
-                  {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+                  {errors.password && <p className="text-sm text-red-400 mt-1">{errors.password}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-white/90">Confirmar Senha</Label>
+                  <Label htmlFor="confirmPassword" className="text-[#00CCFF]">Confirmar Senha</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirme a senha"
-                      className="pl-10 pr-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60"
+                      className="pl-10 pr-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]"
                       required
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       aria-invalid={!!errors.confirmPassword}
                     />
                     <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4 text-white/60" /> : <Eye className="w-4 h-4 text-white/60" />}
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4 text-[#00CCFF]" /> : <Eye className="w-4 h-4 text-white/60" />}
                     </Button>
                   </div>
-                  {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>}
+                  {errors.confirmPassword && <p className="text-sm text-red-400 mt-1">{errors.confirmPassword}</p>}
                 </div>
 
-                <Button type="submit" className="w-full mt-6" size="lg" disabled={loading}>
+                <Button type="submit" className="w-full mt-6 bg-[#00CCFF] text-[#002240] hover:bg-[#00CCFF]/80 font-bold" size="lg" disabled={loading}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   {loading ? "Cadastrando..." : "Cadastrar Administrador"}
                 </Button>

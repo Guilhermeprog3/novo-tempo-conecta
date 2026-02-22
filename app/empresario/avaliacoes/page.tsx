@@ -1,4 +1,3 @@
-// app/empresario/avaliacoes/page.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -31,7 +30,7 @@ const StarRating = ({ rating }: { rating: number }) => {
                     <Star
                         key={starNumber}
                         className={`w-4 h-4 ${
-                            starNumber <= rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+                            starNumber <= rating ? 'text-[#F7B000] fill-[#F7B000]' : 'text-slate-300'
                         }`}
                     />
                 );
@@ -97,7 +96,7 @@ export default function AvaliacoesPage() {
     }
 
     if (loading) {
-        return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
+        return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00CCFF]" /></div>;
     }
 
     if (error) {
@@ -106,40 +105,40 @@ export default function AvaliacoesPage() {
 
     return (
         <div className="space-y-6">
-            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
-                <CardHeader>
+            <Card className="shadow-sm bg-white border border-slate-200 rounded-xl">
+                <CardHeader className="border-b border-slate-100 pb-4">
                     <CardTitle className="text-slate-900 text-lg">Avaliações Recebidas</CardTitle>
                     <CardDescription className="text-slate-500">
                         Veja o que os clientes estão dizendo sobre o seu negócio.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                     {reviews.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center text-center text-gray-500 py-16">
-                            <MessageSquare className="w-12 h-12 mb-4 text-gray-300" />
+                        <div className="flex flex-col items-center justify-center text-center text-slate-500 py-16">
+                            <MessageSquare className="w-12 h-12 mb-4 text-slate-300" />
                             <h3 className="text-lg font-semibold">Nenhuma avaliação ainda</h3>
                             <p className="text-sm">Quando um cliente avaliar seu negócio, ela aparecerá aqui.</p>
                         </div>
                     ) : (
                         <ul className="space-y-6">
                             {reviews.map((review) => (
-                                <li key={review.id} className="p-4 border rounded-lg bg-gray-50/80">
+                                <li key={review.id} className="p-4 border border-slate-100 rounded-lg bg-slate-50/80">
                                     <div className="flex items-start space-x-4">
-                                        <Avatar>
+                                        <Avatar className="border border-slate-200">
                                             <AvatarImage src={review.userAvatar} alt={review.userName} />
-                                            <AvatarFallback>{getInitials(review.userName)}</AvatarFallback>
+                                            <AvatarFallback className="bg-slate-200 text-slate-600 font-bold">{getInitials(review.userName)}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between">
                                                 <h4 className="font-semibold text-slate-800">{review.userName}</h4>
-                                                <span className="text-xs text-gray-500">
+                                                <span className="text-xs text-slate-500">
                                                     {review.createdAt.toLocaleDateString('pt-BR')}
                                                 </span>
                                             </div>
                                             <div className="my-1">
                                                 <StarRating rating={review.rating} />
                                             </div>
-                                            <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">
+                                            <p className="text-sm text-slate-700 mt-2 whitespace-pre-wrap">
                                                 {review.comment}
                                             </p>
                                         </div>

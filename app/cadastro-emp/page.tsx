@@ -18,7 +18,7 @@ import { Header } from "@/components/navigation/header"
 
 const MapWithNoSSR = dynamic(() => import("./MapRegistrationComponent"), { 
   ssr: false,
-  loading: () => <div className="h-[300px] w-full bg-blue-900/10 animate-pulse flex items-center justify-center">A carregar mapa...</div>
+  loading: () => <div className="h-[300px] w-full bg-white/5 border border-[#00CCFF]/30 text-[#00CCFF] animate-pulse flex items-center justify-center">A carregar mapa...</div>
 });
 
 export default function EmpresarioCadastroPage() {
@@ -54,15 +54,17 @@ export default function EmpresarioCadastroPage() {
     <>
       <Header />
       <div className="container mx-auto max-w-2xl py-8">
-        <Card className="bg-[#1E3A8A] text-white">
-          <CardHeader><CardTitle>Registo de Estabelecimento</CardTitle></CardHeader>
+        <Card className="bg-[#002240] border-[#00CCFF]/20 text-white">
+          <CardHeader><CardTitle className="text-white text-2xl">Registo de Estabelecimento</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input placeholder="E-mail" onChange={e => setFormData({...formData, email: e.target.value})} className="bg-blue-900/50 text-white" />
-              <Input type="password" placeholder="Senha" onChange={e => setFormData({...formData, password: e.target.value})} className="bg-blue-900/50 text-white" />
-              <MapWithNoSSR position={position} setPosition={setPosition} />
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin" /> : "Registar"}
+              <Input placeholder="E-mail" onChange={e => setFormData({...formData, email: e.target.value})} className="bg-white/5 border-[#00CCFF]/30 text-white focus-visible:ring-[#00CCFF]" />
+              <Input type="password" placeholder="Senha" onChange={e => setFormData({...formData, password: e.target.value})} className="bg-white/5 border-[#00CCFF]/30 text-white focus-visible:ring-[#00CCFF]" />
+              <div className="pt-2">
+                <MapWithNoSSR position={position} setPosition={setPosition} />
+              </div>
+              <Button type="submit" className="w-full bg-[#00CCFF] text-[#002240] hover:bg-[#00CCFF]/80 mt-4" disabled={loading}>
+                {loading ? <Loader2 className="animate-spin" /> : "Registar Estabelecimento"}
               </Button>
             </form>
           </CardContent>

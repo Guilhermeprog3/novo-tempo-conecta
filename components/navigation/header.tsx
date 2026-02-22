@@ -60,7 +60,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
   ]
 
   return (
-    <header className="border-b sticky top-0 z-[9999] shadow-sm bg-gradient-to-r from-[#1E3A8A] to-[#254A9E]">
+    <header className="border-b sticky top-0 z-[9999] shadow-sm bg-[#002240] border-[#F7B000]/20">
       <div className="container mx-auto px-4 py-4">
         
         <div className="flex items-center justify-between">
@@ -82,8 +82,8 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 href={item.href}
                 className={`transition-colors font-medium ${
                   isActive(item.href)
-                    ? "text-primary"
-                    : "text-white hover:text-white/80"
+                    ? "text-[#F7B000]"
+                    : "text-white hover:text-[#F7B000]"
                 }`}
               >
                 {item.label}
@@ -101,12 +101,12 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 
                 <DropdownMenuTrigger asChild>
                   <button className="relative h-10 w-10 rounded-full overflow-hidden hover:opacity-80 transition">
-                    <Avatar className="h-10 w-10 border border-gray-600">
+                    <Avatar className="h-10 w-10 border border-[#F7B000]/50">
                       <AvatarImage
                         src={user?.avatar || "/avatar-mulher-brasileira.jpg"}
                         alt={user?.name || "Usuário"}
                       />
-                      <AvatarFallback className="bg-blue-600 text-white font-bold">
+                      <AvatarFallback className="bg-[#F7B000] text-[#002240] font-bold">
                         {user?.name?.charAt(0) || "U"}
                       </AvatarFallback>
                     </Avatar>
@@ -114,103 +114,103 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
-  align="end"
-  sideOffset={8}
-  className="
-    w-56 
-    rounded-xl 
-    border border-white/10 
-    bg-[#14285a] 
-    text-white 
-    shadow-lg shadow-black/40
-    backdrop-blur-md
-    animate-in fade-in-0 zoom-in-95
-  "
-  style={{ zIndex: 999999 }}
->
-  <DropdownMenuLabel className="px-4 py-3 text-sm text-white/90">
-    <div className="flex flex-col leading-tight">
-      <span className="font-semibold">{user?.name || "Usuário"}</span>
-      <span className="text-xs text-white/60">{user?.email}</span>
-    </div>
-  </DropdownMenuLabel>
+                  align="end"
+                  sideOffset={8}
+                  className="
+                    w-56 
+                    rounded-xl 
+                    border border-[#F7B000]/20 
+                    bg-[#002240] 
+                    text-white 
+                    shadow-lg shadow-black/40
+                    backdrop-blur-md
+                    animate-in fade-in-0 zoom-in-95
+                  "
+                  style={{ zIndex: 999999 }}
+                >
+                  <DropdownMenuLabel className="px-4 py-3 text-sm text-white/90">
+                    <div className="flex flex-col leading-tight">
+                      <span className="font-semibold">{user?.name || "Usuário"}</span>
+                      <span className="text-xs text-[#F7B000]">{user?.email}</span>
+                    </div>
+                  </DropdownMenuLabel>
 
-  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuSeparator className="bg-white/10" />
 
-  <DropdownMenuItem asChild>
-    <Link
-      href="/usuario/dashboard"
-      className="
-        flex items-center px-3 py-2 rounded-md transition 
-        hover:bg-blue-600/40 hover:text-white
-      "
-    >
-      <User className="mr-2 h-4 w-4" /> Meu Perfil
-    </Link>
-  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/usuario/dashboard"
+                      className="
+                        flex items-center px-3 py-2 rounded-md transition 
+                        hover:bg-[#F7B000]/20 hover:text-[#F7B000]
+                      "
+                    >
+                      <User className="mr-2 h-4 w-4" /> Meu Perfil
+                    </Link>
+                  </DropdownMenuItem>
 
-  <DropdownMenuItem asChild>
-    <Link
-      href="/usuario/favoritos"
-      className="
-        flex items-center px-3 py-2 rounded-md transition 
-        hover:bg-blue-600/40 hover:text-white
-      "
-    >
-      <Heart className="mr-2 h-4 w-4" /> Favoritos
-    </Link>
-  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/usuario/favoritos"
+                      className="
+                        flex items-center px-3 py-2 rounded-md transition 
+                        hover:bg-[#F7B000]/20 hover:text-[#F7B000]
+                      "
+                    >
+                      <Heart className="mr-2 h-4 w-4" /> Favoritos
+                    </Link>
+                  </DropdownMenuItem>
 
-  <DropdownMenuItem asChild>
-    <Link
-      href="/usuario/avaliacoes"
-      className="
-        flex items-center px-3 py-2 rounded-md transition 
-        hover:bg-blue-600/40 hover:text-white
-      "
-    >
-      <Star className="mr-2 h-4 w-4" /> Minhas Avaliações
-    </Link>
-  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/usuario/avaliacoes"
+                      className="
+                        flex items-center px-3 py-2 rounded-md transition 
+                        hover:bg-[#F7B000]/20 hover:text-[#F7B000]
+                      "
+                    >
+                      <Star className="mr-2 h-4 w-4" /> Minhas Avaliações
+                    </Link>
+                  </DropdownMenuItem>
 
-  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuSeparator className="bg-white/10" />
 
-  <DropdownMenuItem asChild>
-    <Link
-      href="/usuario/configuracoes"
-      className="
-        flex items-center px-3 py-2 rounded-md transition 
-        hover:bg-blue-600/40 hover:text-white
-      "
-    >
-      <Settings className="mr-2 h-4 w-4" /> Configurações
-    </Link>
-  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/usuario/configuracoes"
+                      className="
+                        flex items-center px-3 py-2 rounded-md transition 
+                        hover:bg-[#F7B000]/20 hover:text-[#F7B000]
+                      "
+                    >
+                      <Settings className="mr-2 h-4 w-4" /> Configurações
+                    </Link>
+                  </DropdownMenuItem>
 
-  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuSeparator className="bg-white/10" />
 
-  <DropdownMenuItem
-    onClick={handleLogout}
-    className="
-      flex items-center px-3 py-2 text-red-400 rounded-md transition 
-      hover:bg-red-600/20 hover:text-red-300 cursor-pointer
-    "
-  >
-    <LogOut className="mr-2 h-4 w-4" /> Sair
-  </DropdownMenuItem>
-</DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="
+                      flex items-center px-3 py-2 text-red-400 rounded-md transition 
+                      hover:bg-red-600/20 hover:text-red-300 cursor-pointer
+                    "
+                  >
+                    <LogOut className="mr-2 h-4 w-4" /> Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
 
               </DropdownMenu>
 
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 hover:text-white">
+                <Button variant="ghost" size="sm" asChild className="text-white hover:bg-[#F7B000]/20 hover:text-[#F7B000]">
                   <Link href="/login">Entrar</Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white">
+                <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50 hover:border-[#F7B000] hover:bg-[#F7B000]/10 hover:text-[#F7B000]">
                   <Link href="/cadastro">Cadastrar Cidadão</Link>
                 </Button>
-                <Button size="sm" asChild>
+                <Button size="sm" asChild className="bg-[#F7B000] text-[#002240] hover:bg-[#F7B000]/80">
                   <Link href="/cadastro-emp">Cadastrar Negócio</Link>
                 </Button>
               </>
@@ -220,7 +220,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
           <Button
             variant="ghost"
             size="sm"
-            className="md:hidden text-white hover:bg-white/10 hover:text-white"
+            className="md:hidden text-white hover:bg-[#F7B000]/20 hover:text-[#F7B000]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -228,7 +228,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-blue-700/50 bg-[#1E3A8A] -mx-4 px-4">
+          <div className="md:hidden mt-4 pb-4 border-t border-[#F7B000]/20 bg-[#002240] -mx-4 px-4">
             <nav className="flex flex-col space-y-2 mt-4">
               {navItems.map((item) => (
                 <Link
@@ -236,8 +236,8 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                   href={item.href}
                   className={`px-3 py-2 rounded transition-colors font-medium ${
                     isActive(item.href)
-                      ? "text-primary bg-primary/10"
-                      : "text-white"
+                      ? "text-[#F7B000] bg-[#F7B000]/10"
+                      : "text-white hover:text-[#F7B000]"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -246,28 +246,28 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               ))}
             </nav>
 
-            <div className="flex flex-col space-y-2 mt-4 pt-4 border-t border-blue-700/50">
+            <div className="flex flex-col space-y-2 mt-4 pt-4 border-t border-[#F7B000]/20">
               {!isMounted ? (
                 <div className="h-10 w-full" />
               ) : isLoggedIn ? (
                 <>
-                  <div className="flex items-center space-x-3 px-2 py-3 border rounded-lg border-blue-700/50">
+                  <div className="flex items-center space-x-3 px-2 py-3 border rounded-lg border-[#F7B000]/20">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={user?.avatar || "/avatar-mulher-brasileira.jpg"}
                         alt={user?.name || "Usuário"}
                       />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                      <AvatarFallback className="bg-[#F7B000] text-[#002240]">
                         {user?.name?.charAt(0) || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="text-sm font-medium text-white">{user?.name || "Usuário"}</p>
-                      <p className="text-xs text-white/80">{user?.email}</p>
+                      <p className="text-xs text-[#F7B000]">{user?.email}</p>
                     </div>
                   </div>
 
-                  <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50">
+                  <Button variant="outline" size="sm" asChild className="bg-transparent text-[#F7B000] border-[#F7B000]/50 hover:bg-[#F7B000]/10">
                     <Link href="/usuario/dashboard" onClick={() => setMobileMenuOpen(false)}>
                       <User className="mr-2 h-4 w-4" /> Meu Perfil
                     </Link>
@@ -287,19 +287,19 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 </>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50">
+                  <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50 hover:border-[#F7B000] hover:text-[#F7B000]">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                       Entrar
                     </Link>
                   </Button>
 
-                  <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50">
+                  <Button variant="outline" size="sm" asChild className="bg-transparent text-white border-white/50 hover:border-[#F7B000] hover:text-[#F7B000]">
                     <Link href="/cadastro" onClick={() => setMobileMenuOpen(false)}>
                       Cadastrar Cidadão
                     </Link>
                   </Button>
 
-                  <Button size="sm" asChild>
+                  <Button size="sm" asChild className="bg-[#F7B000] text-[#002240] hover:bg-[#F7B000]/80">
                     <Link href="/cadastro-emp" onClick={() => setMobileMenuOpen(false)}>
                       Cadastrar Negócio
                     </Link>

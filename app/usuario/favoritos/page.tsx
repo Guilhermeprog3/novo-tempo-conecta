@@ -100,7 +100,7 @@ export default function FavoritosPage() {
   if (loading) {
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
-            <Loader2 className="h-12 w-12 animate-spin text-[#1E3A8A]" />
+            <Loader2 className="h-12 w-12 animate-spin text-[#00CCFF]" />
         </div>
     )
   }
@@ -110,13 +110,13 @@ export default function FavoritosPage() {
       <Header />
 
       {/* Hero Section */}
-      <div className="bg-[#1E3A8A] pb-24 pt-10 px-4 relative overflow-hidden">
+      <div className="bg-[#002240] pb-24 pt-10 px-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div className="container mx-auto max-w-5xl relative z-10">
             <div className="flex justify-between items-center text-white mb-6">
                 <div>
                     <h1 className="text-3xl font-bold">Locais Favoritos</h1>
-                    <p className="text-blue-200">Seus lugares preferidos salvos para acesso rápido</p>
+                    <p className="text-white/80">Seus lugares preferidos salvos para acesso rápido</p>
                 </div>
                 <div className="flex bg-white/10 rounded-lg p-1">
                     <Button 
@@ -153,7 +153,7 @@ export default function FavoritosPage() {
                         <p className="text-slate-500 mb-6 max-w-xs mx-auto">
                         Comece a explorar o Novo Tempo e salve seus lugares preferidos.
                         </p>
-                        <Button asChild className="bg-[#1E3A8A] hover:bg-blue-900 text-white">
+                        <Button asChild className="bg-[#002240] hover:bg-[#002240]/90 text-white">
                             <Link href="/busca">Explorar Agora</Link>
                         </Button>
                     </CardContent>
@@ -180,7 +180,7 @@ export default function FavoritosPage() {
                         <div className="flex-1">
                             <div className="flex justify-between items-start mb-1">
                                 <h3 className="font-bold text-slate-900 line-clamp-1">{favorite.name}</h3>
-                                <div className="flex items-center text-yellow-500 text-xs font-bold">
+                                <div className="flex items-center text-[#F7B000] text-xs font-bold">
                                     <Star className="w-3 h-3 fill-current mr-1" />
                                     {favorite.rating.toFixed(1)}
                                 </div>
@@ -191,11 +191,11 @@ export default function FavoritosPage() {
                         </div>
                         
                         <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
-                            <Button size="sm" asChild variant="outline" className="text-[#1E3A8A] border-blue-100 hover:bg-blue-50 h-8 text-xs">
+                            <Button size="sm" asChild variant="outline" className="text-[#002240] border-[#00CCFF]/30 hover:bg-[#00CCFF]/10 h-8 text-xs">
                                 <Link href={`/estabelecimento/${favorite.id}`}>Ver Perfil</Link>
                             </Button>
                             <div className="flex gap-1">
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#1E3A8A] hover:bg-blue-50">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10">
                                     <Share2 className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleRemoveFavorite(favorite.id)}>
@@ -214,32 +214,32 @@ export default function FavoritosPage() {
           <div className="lg:col-span-4 space-y-6">
             <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden">
               <div className="bg-slate-50 p-4 border-b border-slate-200">
-                  <h3 className="font-bold text-[#1E3A8A]">Acesso Rápido</h3>
+                  <h3 className="font-bold text-[#002240]">Acesso Rápido</h3>
               </div>
               <CardContent className="p-2">
                 <nav className="flex flex-col space-y-1">
-                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12">
+                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12">
                         <Link href="/usuario/dashboard">
                             <Edit3 className="h-5 w-5 mr-3 text-slate-400" />
                             Meu Perfil
                         </Link>
                     </Button>
                     <Separator className="bg-slate-100" />
-                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12">
+                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12">
                         <Link href="/usuario/avaliacoes">
-                            <Star className="h-5 w-5 mr-3 text-yellow-500" />
+                            <Star className="h-5 w-5 mr-3 text-[#F7B000]" />
                             Minhas Avaliações
                         </Link>
                     </Button>
                     <Separator className="bg-slate-100" />
-                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12 bg-blue-50 text-[#1E3A8A]">
+                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12 bg-[#00CCFF]/10 text-[#002240]">
                         <Link href="/usuario/favoritos">
                             <Heart className="h-5 w-5 mr-3 text-red-500" />
                             Locais Favoritos
                         </Link>
                     </Button>
                     <Separator className="bg-slate-100" />
-                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12">
+                    <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12">
                         <Link href="/usuario/configuracoes">
                             <Shield className="h-5 w-5 mr-3 text-slate-400" />
                             Configurações
@@ -249,13 +249,13 @@ export default function FavoritosPage() {
               </CardContent>
             </Card>
 
-            <div className="bg-gradient-to-r from-[#1E3A8A] to-blue-700 rounded-xl p-5 text-white shadow-md relative overflow-hidden">
-                <div className="absolute top-0 right-0 -mt-2 -mr-2 w-16 h-16 bg-yellow-400 rounded-full blur-2xl opacity-30"></div>
+            <div className="bg-gradient-to-r from-[#002240] to-[#002240]/90 rounded-xl p-5 text-white shadow-md relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mt-2 -mr-2 w-16 h-16 bg-[#F7B000] rounded-full blur-2xl opacity-30"></div>
                 <h4 className="font-bold text-lg mb-2">Descubra Novos Lugares</h4>
-                <p className="text-blue-100 text-sm mb-4">
+                <p className="text-white/80 text-sm mb-4">
                     Explore o bairro e encontre os melhores estabelecimentos perto de você.
                 </p>
-                <Button size="sm" asChild className="bg-yellow-400 text-blue-900 hover:bg-yellow-500 font-bold border-none w-full">
+                <Button size="sm" asChild className="bg-[#F7B000] text-[#002240] hover:bg-[#F7B000]/90 font-bold border-none w-full">
                     <Link href="/busca">Ir para o Mapa <ArrowRight className="ml-2 w-4 h-4" /></Link>
                 </Button>
             </div>

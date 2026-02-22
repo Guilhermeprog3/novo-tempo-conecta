@@ -1,4 +1,3 @@
-// app/cadastro/page.tsx
 "use client"
 
 import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, Loader2, AlertTriangle } from "lucide-react"
@@ -59,12 +58,10 @@ export default function CadastroPage() {
         return;
     }
 
-
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         const user = userCredential.user;
 
-        // --- INÍCIO DA MODIFICAÇÃO ---
         const userDataToSave = {
             uid: user.uid,
             name: formData.name,
@@ -74,18 +71,15 @@ export default function CadastroPage() {
         };
         await setDoc(doc(db, "users", user.uid), userDataToSave);
         
-        // 1. Salva os dados no localStorage para o Header consumir
         const userForStorage = {
             name: formData.name,
             email: formData.email,
-            avatar: null // Novo usuário não tem avatar ainda
+            avatar: null
         };
         localStorage.setItem("user", JSON.stringify(userForStorage));
-        localStorage.setItem("userType", "user"); // Define o tipo de usuário
+        localStorage.setItem("userType", "user"); 
 
-        // 2. Redireciona para a página inicial (/)
         window.location.href = '/';
-        // --- FIM DA MODIFICAÇÃO ---
 
     } catch (error: any) {
         console.error("Erro ao cadastrar:", error.code, error.message);
@@ -116,7 +110,7 @@ export default function CadastroPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
           <div className="mb-6">
             <Button variant="ghost" size="sm" asChild>
@@ -127,10 +121,10 @@ export default function CadastroPage() {
             </Button>
           </div>
 
-          <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
+          <Card className="shadow-lg bg-[#002240] border-[#00CCFF]/20 text-white">
             <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="w-8 h-8 text-primary-foreground" />
+              <div className="w-16 h-16 bg-[#00CCFF] rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="w-8 h-8 text-[#002240]" />
               </div>
               <CardTitle className="text-2xl font-bold text-white">Criar sua conta</CardTitle>
               <CardDescription className="text-white/80">Junte-se à comunidade do Novo Tempo e conecte-se com os negócios locais</CardDescription>
@@ -139,40 +133,40 @@ export default function CadastroPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-white/90">Nome completo</Label>
+                    <Label htmlFor="name" className="text-[#00CCFF]">Nome completo</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
-                      <Input id="name" type="text" placeholder="Seu nome completo" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required value={formData.name} onChange={handleChange} aria-invalid={!!errors.name} />
+                      <Input id="name" type="text" placeholder="Seu nome completo" className="pl-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]" required value={formData.name} onChange={handleChange} aria-invalid={!!errors.name} />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-white/90">Telefone</Label>
+                    <Label htmlFor="phone" className="text-[#00CCFF]">Telefone</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
-                      <Input id="phone" type="tel" placeholder="(11) 99999-9999" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required value={formData.phone} onChange={handleChange} aria-invalid={!!errors.phone}/>
+                      <Input id="phone" type="tel" placeholder="(11) 99999-9999" className="pl-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]" required value={formData.phone} onChange={handleChange} aria-invalid={!!errors.phone}/>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white/90">E-mail</Label>
+                  <Label htmlFor="email" className="text-[#00CCFF]">E-mail</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
-                    <Input id="email" type="email" placeholder="seu@email.com" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required value={formData.email} onChange={handleChange} aria-invalid={!!errors.email}/>
+                    <Input id="email" type="email" placeholder="seu@email.com" className="pl-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]" required value={formData.email} onChange={handleChange} aria-invalid={!!errors.email}/>
                   </div>
-                  {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
+                  {errors.email && <p className="text-sm text-red-400 mt-1">{errors.email}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-white/90">Senha</Label>
+                    <Label htmlFor="password" className="text-[#00CCFF]">Senha</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Mínimo 6 caracteres"
-                        className="pl-10 pr-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60"
+                        className="pl-10 pr-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]"
                         required
                         value={formData.password}
                         onChange={handleChange}
@@ -185,21 +179,21 @@ export default function CadastroPage() {
                         className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4 text-white/60" /> : <Eye className="w-4 h-4 text-white/60" />}
+                        {showPassword ? <EyeOff className="w-4 h-4 text-[#00CCFF]" /> : <Eye className="w-4 h-4 text-white/60" />}
                       </Button>
                     </div>
-                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+                    {errors.password && <p className="text-sm text-red-400 mt-1">{errors.password}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-white/90">Confirmar senha</Label>
+                    <Label htmlFor="confirmPassword" className="text-[#00CCFF]">Confirmar senha</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
                       <Input
                         id="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirme sua senha"
-                        className="pl-10 pr-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60"
+                        className="pl-10 pr-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]"
                         required
                         value={formData.confirmPassword}
                         onChange={handleChange}
@@ -212,29 +206,29 @@ export default function CadastroPage() {
                         className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4 text-white/60" /> : <Eye className="w-4 h-4 text-white/60" />}
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4 text-[#00CCFF]" /> : <Eye className="w-4 h-4 text-white/60" />}
                       </Button>
                     </div>
-                    {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && <p className="text-sm text-red-400 mt-1">{errors.confirmPassword}</p>}
                   </div>
                 </div>
 
 
                 <div className="flex items-start space-x-2 pt-2">
-                  <Checkbox id="terms" className="mt-1 border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" checked={formData.terms} onCheckedChange={(checked) => setFormData(prev => ({...prev, terms: !!checked}))} aria-invalid={!!errors.terms} />
+                  <Checkbox id="terms" className="mt-1 border-[#00CCFF]/50 data-[state=checked]:bg-[#00CCFF] data-[state=checked]:text-[#002240]" checked={formData.terms} onCheckedChange={(checked) => setFormData(prev => ({...prev, terms: !!checked}))} aria-invalid={!!errors.terms} />
                   <Label htmlFor="terms" className="text-sm text-white/80 leading-relaxed">
                     Concordo com os{" "}
-                    <Link href="/termos-de-uso" className="text-yellow-400 hover:underline">
+                    <Link href="/termos-de-uso" className="text-[#F7B000] hover:underline">
                       Termos de Uso
                     </Link>{" "}
                     e{" "}
-                    <Link href="/politica-de-privacidade" className="text-yellow-400 hover:underline">
+                    <Link href="/politica-de-privacidade" className="text-[#F7B000] hover:underline">
                       Política de Privacidade
                     </Link>
                   </Label>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                <Button type="submit" className="w-full bg-[#00CCFF] text-[#002240] hover:bg-[#00CCFF]/80" size="lg" disabled={loading}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   {loading ? "Criando conta..." : "Criar conta"}
                 </Button>
@@ -249,7 +243,7 @@ export default function CadastroPage() {
               <div className="text-center">
                 <p className="text-sm text-white/80">
                   Já tem uma conta?{" "}
-                  <Link href="/login" className="text-yellow-400 hover:underline font-medium">
+                  <Link href="/login" className="text-[#F7B000] hover:underline font-medium">
                     Faça login aqui
                   </Link>
                 </p>

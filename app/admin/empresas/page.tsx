@@ -67,24 +67,15 @@ export default function AdminEmpresasPage() {
     }
 
     const exportToCSV = () => {
-        // Data e Hora atuais
         const now = new Date();
         const dateStr = now.toLocaleDateString('pt-BR');
         const timeStr = now.toLocaleTimeString('pt-BR');
-
-        // Construção das linhas
         const csvRows = [];
-
-        // 1. Título e Metadados
         csvRows.push(['Relatório de Empresas - Novo Tempo Conecta']);
         csvRows.push([`Gerado em: ${dateStr} às ${timeStr}`]);
         csvRows.push([]);
-
-        // 2. Cabeçalhos
         const headers = ["Nome da Empresa", "Categoria", "Email", "Telefone", "Endereço", "Site/Instagram", "Data Cadastro"];
         csvRows.push(headers.join(","));
-
-        // 3. Dados
         businesses.forEach(b => {
             const row = [
                 `"${b.businessName}"`,
@@ -97,18 +88,11 @@ export default function AdminEmpresasPage() {
             ];
             csvRows.push(row.join(","));
         });
-
-        // Unir conteúdo
         const csvContent = csvRows.join("\n");
-
-        // Blob com BOM para acentos
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
-        
-        // Nome do arquivo formatado
         const fileName = `relatorio_empresas_${dateStr.replace(/\//g, '-')}.csv`;
-
         link.setAttribute("href", url);
         link.setAttribute("download", fileName);
         document.body.appendChild(link);
@@ -124,14 +108,14 @@ export default function AdminEmpresasPage() {
     });
 
     const getCategoryStyle = (category: string) => {
-        return "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200";
+        return "bg-[#00CCFF]/10 text-[#00CCFF] hover:bg-[#00CCFF]/20 border-[#00CCFF]/20";
     };
 
     return (
         <div className="space-y-6">
-            <div className="rounded-xl bg-[#1E3A8A] p-8 text-white shadow-lg">
+            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg">
                 <h1 className="text-3xl font-bold mb-2">Gerenciamento de Empresas</h1>
-                <p className="text-blue-100 opacity-90">
+                <p className="text-white/80">
                     Filtre, visualize e gerencie todos os estabelecimentos comerciais parceiros.
                 </p>
             </div>
@@ -139,7 +123,7 @@ export default function AdminEmpresasPage() {
              <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-4 text-slate-700 font-semibold">
-                        <Filter className="w-5 h-5 text-blue-600" />
+                        <Filter className="w-5 h-5 text-[#00CCFF]" />
                         <span>Filtros de Busca</span>
                     </div>
                     <div className="flex flex-col md:flex-row gap-4">
@@ -147,7 +131,7 @@ export default function AdminEmpresasPage() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                             <Input
                                 placeholder="Buscar por nome ou e-mail da empresa..."
-                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-600 text-slate-900 placeholder:text-slate-400"
+                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-[#00CCFF] text-slate-900 placeholder:text-slate-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -164,10 +148,10 @@ export default function AdminEmpresasPage() {
                                 <SelectItem value="saude">Saúde</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button variant="ghost" onClick={() => {setSearchTerm(''); setFilterCategory('all')}} className="text-slate-500 hover:text-blue-700">
+                        <Button variant="ghost" onClick={() => {setSearchTerm(''); setFilterCategory('all')}} className="text-slate-500 hover:text-[#00CCFF]">
                             <X className="w-4 h-4 mr-2" /> Limpar
                         </Button>
-                        <Button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold shadow-sm">
+                        <Button className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] font-semibold shadow-sm">
                             <Search className="w-4 h-4 mr-2" /> Aplicar Busca
                         </Button>
                     </div>
@@ -183,7 +167,7 @@ export default function AdminEmpresasPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                     {loading ? (
-                         <div className="flex justify-center p-12"><Loader2 className="h-10 w-10 animate-spin text-blue-600" /></div>
+                         <div className="flex justify-center p-12"><Loader2 className="h-10 w-10 animate-spin text-[#00CCFF]" /></div>
                     ) : (
                         <div className="rounded-md">
                             <Table>
@@ -213,7 +197,7 @@ export default function AdminEmpresasPage() {
                                                         <div className="flex flex-col">
                                                             <span className="font-semibold text-slate-900">{b.businessName}</span>
                                                             {b.website && (
-                                                                <a href={b.website.startsWith('http') ? b.website : `https://${b.website}`} target="_blank" className="flex items-center text-xs text-blue-600 hover:underline mt-0.5">
+                                                                <a href={b.website.startsWith('http') ? b.website : `https://${b.website}`} target="_blank" className="flex items-center text-xs text-[#00CCFF] hover:underline mt-0.5">
                                                                     <Globe className="w-3 h-3 mr-1" /> Website
                                                                 </a>
                                                             )}

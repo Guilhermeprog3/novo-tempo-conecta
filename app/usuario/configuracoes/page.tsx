@@ -25,13 +25,13 @@ export default function UsuarioConfiguracoes() {
       <Header />
       
       {/* Hero Section */}
-      <div className="bg-[#1E3A8A] pb-24 pt-10 px-4 relative overflow-hidden">
+      <div className="bg-[#002240] pb-24 pt-10 px-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div className="container mx-auto max-w-5xl relative z-10">
             <div className="flex justify-between items-center text-white mb-6">
                 <div>
                     <h1 className="text-3xl font-bold">Configurações</h1>
-                    <p className="text-blue-200">Personalize sua experiência na plataforma</p>
+                    <p className="text-white/80">Personalize sua experiência na plataforma</p>
                 </div>
             </div>
         </div>
@@ -44,7 +44,7 @@ export default function UsuarioConfiguracoes() {
            <div className="lg:col-span-8 space-y-6">
                 <Card className="border border-slate-200 shadow-sm bg-white">
                     <CardHeader className="border-b border-slate-100 pb-4">
-                        <CardTitle className="flex items-center gap-2 text-[#1E3A8A] text-lg font-bold">
+                        <CardTitle className="flex items-center gap-2 text-[#002240] text-lg font-bold">
                             <Bell className="h-5 w-5" /> Notificações
                         </CardTitle>
                     </CardHeader>
@@ -59,7 +59,7 @@ export default function UsuarioConfiguracoes() {
                                         <Label htmlFor="email-reviews" className="text-base text-slate-700">Respostas às minhas avaliações</Label>
                                         <p className="text-xs text-slate-500">Seja notificado quando um estabelecimento responder.</p>
                                     </div>
-                                    <Switch id="email-reviews" checked={notifications.emailReviews} onCheckedChange={(v) => setNotifications(p => ({...p, emailReviews: v}))} className="data-[state=checked]:bg-[#1E3A8A]" />
+                                    <Switch id="email-reviews" checked={notifications.emailReviews} onCheckedChange={(v) => setNotifications(p => ({...p, emailReviews: v}))} className="data-[state=checked]:bg-[#00CCFF]" />
                                 </div>
                                 <Separator />
                                 <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ export default function UsuarioConfiguracoes() {
                                         <Label htmlFor="email-promotions" className="text-base text-slate-700">Novidades e Destaques</Label>
                                         <p className="text-xs text-slate-500">Receba notícias sobre novos locais no bairro.</p>
                                     </div>
-                                    <Switch id="email-promotions" checked={notifications.emailPromotions} onCheckedChange={(v) => setNotifications(p => ({...p, emailPromotions: v}))} className="data-[state=checked]:bg-[#1E3A8A]" />
+                                    <Switch id="email-promotions" checked={notifications.emailPromotions} onCheckedChange={(v) => setNotifications(p => ({...p, emailPromotions: v}))} className="data-[state=checked]:bg-[#00CCFF]" />
                                 </div>
                             </div>
                         </div>
@@ -76,7 +76,7 @@ export default function UsuarioConfiguracoes() {
 
                 <Card className="border border-slate-200 shadow-sm bg-white">
                     <CardHeader className="border-b border-slate-100 pb-4">
-                        <CardTitle className="flex items-center gap-2 text-[#1E3A8A] text-lg font-bold">
+                        <CardTitle className="flex items-center gap-2 text-[#002240] text-lg font-bold">
                             <Eye className="h-5 w-5" /> Privacidade
                         </CardTitle>
                     </CardHeader>
@@ -87,7 +87,7 @@ export default function UsuarioConfiguracoes() {
                                     <Label htmlFor="profile-visible" className="text-base text-slate-700">Perfil Público</Label>
                                     <p className="text-xs text-slate-500">Permitir que outros usuários vejam suas avaliações agrupadas.</p>
                                 </div>
-                                <Switch id="profile-visible" checked={privacy.profileVisible} onCheckedChange={(v) => setPrivacy(p => ({...p, profileVisible: v}))} className="data-[state=checked]:bg-[#1E3A8A]" />
+                                <Switch id="profile-visible" checked={privacy.profileVisible} onCheckedChange={(v) => setPrivacy(p => ({...p, profileVisible: v}))} className="data-[state=checked]:bg-[#00CCFF]" />
                             </div>
                             <Separator />
                             <div className="flex items-center justify-between">
@@ -95,14 +95,14 @@ export default function UsuarioConfiguracoes() {
                                     <Label htmlFor="show-email" className="text-base text-slate-700">Mostrar E-mail</Label>
                                     <p className="text-xs text-slate-500">Exibir seu endereço de e-mail no seu perfil público.</p>
                                 </div>
-                                <Switch id="show-email" checked={privacy.showEmail} onCheckedChange={(v) => setPrivacy(p => ({...p, showEmail: v}))} className="data-[state=checked]:bg-[#1E3A8A]" />
+                                <Switch id="show-email" checked={privacy.showEmail} onCheckedChange={(v) => setPrivacy(p => ({...p, showEmail: v}))} className="data-[state=checked]:bg-[#00CCFF]" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <div className="flex justify-end">
-                  <Button size="lg" className="bg-[#1E3A8A] hover:bg-blue-900 text-white shadow-md">
+                  <Button size="lg" className="bg-[#002240] hover:bg-[#002240]/90 text-[#00CCFF] shadow-md border border-[#00CCFF]/30">
                     <Save className="h-4 w-4 mr-2" />
                     Salvar Alterações
                   </Button>
@@ -113,32 +113,32 @@ export default function UsuarioConfiguracoes() {
            <div className="lg:col-span-4 space-y-6">
                 <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden">
                     <div className="bg-slate-50 p-4 border-b border-slate-200">
-                        <h3 className="font-bold text-[#1E3A8A]">Acesso Rápido</h3>
+                        <h3 className="font-bold text-[#002240]">Acesso Rápido</h3>
                     </div>
                     <CardContent className="p-2">
                         <nav className="flex flex-col space-y-1">
-                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12">
+                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12">
                                 <Link href="/usuario/dashboard">
                                     <Edit3 className="h-5 w-5 mr-3 text-slate-400" />
                                     Meu Perfil
                                 </Link>
                             </Button>
                             <Separator className="bg-slate-100" />
-                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12">
+                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12">
                                 <Link href="/usuario/avaliacoes">
-                                    <Star className="h-5 w-5 mr-3 text-yellow-500" />
+                                    <Star className="h-5 w-5 mr-3 text-[#F7B000]" />
                                     Minhas Avaliações
                                 </Link>
                             </Button>
                             <Separator className="bg-slate-100" />
-                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12">
+                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12">
                                 <Link href="/usuario/favoritos">
                                     <Heart className="h-5 w-5 mr-3 text-red-500" />
                                     Locais Favoritos
                                 </Link>
                             </Button>
                             <Separator className="bg-slate-100" />
-                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#1E3A8A] hover:bg-blue-50 font-medium h-12 bg-blue-50 text-[#1E3A8A]">
+                            <Button asChild variant="ghost" className="justify-start w-full text-slate-600 hover:text-[#00CCFF] hover:bg-[#00CCFF]/10 font-medium h-12 bg-[#00CCFF]/10 text-[#002240]">
                                 <Link href="/usuario/configuracoes">
                                     <Shield className="h-5 w-5 mr-3 text-slate-400" />
                                     Configurações
@@ -150,10 +150,10 @@ export default function UsuarioConfiguracoes() {
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
                     <div className="flex items-start gap-3">
-                        <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                        <Shield className="h-5 w-5 text-[#00CCFF] mt-0.5" />
                         <div>
-                            <h4 className="text-sm font-semibold text-blue-900">Segurança da Conta</h4>
-                            <p className="text-xs text-blue-700 mt-1 leading-relaxed">
+                            <h4 className="text-sm font-semibold text-[#002240]">Segurança da Conta</h4>
+                            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                                 Nunca compartilhamos seus dados pessoais com terceiros sem sua permissão explícita.
                             </p>
                         </div>

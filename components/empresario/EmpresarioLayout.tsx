@@ -1,4 +1,3 @@
-// src/components/empresario/EmpresarioLayout.tsx
 "use client"
 
 import React, { useState, useEffect } from "react";
@@ -62,51 +61,54 @@ export function EmpresarioLayout({ children }: { children: React.ReactNode }) {
         { href: "/empresario/configuracoes", label: "Configurações", icon: Settings },
     ];
     
-    const NavLink = ({ href, label, icon: Icon } : typeof navLinks[0]) => (
-        <Link
-            href={href}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
-                pathname === href
-                    ? 'bg-blue-700 text-white'
-                    : 'text-blue-200 hover:text-white hover:bg-blue-700/50'
-            }`}
-        >
-            <Icon className="h-4 w-4" />
-            {label}
-        </Link>
-    );
+    const NavLink = ({ href, label, icon: Icon } : typeof navLinks[0]) => {
+        const isActive = pathname === href;
+        return (
+            <Link
+                href={href}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all font-medium text-sm ${
+                    isActive
+                        ? 'bg-[#00CCFF]/10 text-white border-l-4 border-[#F7B000]'
+                        : 'text-white/80 hover:text-[#00CCFF] hover:bg-white/5'
+                }`}
+            >
+                <Icon className={`h-4 w-4 ${isActive ? 'text-[#F7B000]' : 'text-[#00CCFF]'}`} />
+                {label}
+            </Link>
+        )
+    };
 
     if (loading) {
         return (
-            <div className="flex h-screen w-full items-center justify-center bg-gray-50">
-                <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+            <div className="flex h-screen w-full items-center justify-center bg-slate-50">
+                <Loader2 className="h-12 w-12 animate-spin text-[#00CCFF]" />
             </div>
         );
     }
 
     return (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-            <div className="hidden border-r bg-[#1E3A8A] md:block md:sticky md:top-0 h-screen">
+            <div className="hidden border-r border-[#00CCFF]/20 bg-[#002240] md:block md:sticky md:top-0 h-screen">
                 <div className="flex h-full max-h-screen flex-col">
-                    <div className="flex h-14 items-center gap-3 border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
+                    <div className="flex h-14 items-center gap-3 border-b border-[#00CCFF]/20 px-4 lg:h-[60px] lg:px-6">
                         <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-blue-600 text-white font-bold">
+                            <AvatarFallback className="bg-[#00CCFF] text-[#002240] font-bold">
                                 {getInitials(businessData?.businessName)}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="text-white font-semibold">{businessData?.businessName}</span>
+                        <span className="text-white font-semibold truncate">{businessData?.businessName}</span>
                     </div>
                     
-                    <div className="flex-1 py-2">
-                        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                    <div className="flex-1 py-4">
+                        <nav className="grid items-start px-2 text-sm font-medium lg:px-4 space-y-1">
                             {navLinks.map(link => <NavLink key={link.href} {...link} />)}
                         </nav>
                     </div>
-                    <div className="mt-auto p-4 border-t border-white/20">
+                    <div className="mt-auto p-4 border-t border-[#00CCFF]/20">
                          <Button
                             onClick={handleLogout}
                             variant="ghost"
-                            className="w-full justify-start gap-3 rounded-lg px-3 py-2 text-red-300 hover:bg-red-500/20 hover:text-red-300"
+                            className="w-full justify-start gap-3 rounded-lg px-3 py-2 text-red-400 hover:bg-red-500/20 hover:text-red-300"
                         >
                             <LogOut className="h-4 w-4" />
                             Sair
@@ -116,30 +118,30 @@ export function EmpresarioLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex flex-col">
-                <header className="flex h-14 items-center gap-4 border-b bg-[#1E3A8A] px-4 text-white lg:h-[60px] lg:px-6">
+                <header className="flex h-14 items-center gap-4 border-b border-[#00CCFF]/20 bg-[#002240] px-4 text-white lg:h-[60px] lg:px-6">
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="shrink-0 md:hidden hover:bg-blue-700/50">
+                            <Button variant="ghost" size="icon" className="shrink-0 md:hidden hover:bg-[#00CCFF]/10 hover:text-[#00CCFF]">
                                 <Menu className="h-5 w-5" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="left" className="flex flex-col bg-[#1E3A8A] text-white border-r-0 p-0">
-                            <div className="flex h-14 items-center gap-3 border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
+                        <SheetContent side="left" className="flex flex-col bg-[#002240] text-white border-r border-[#00CCFF]/20 p-0">
+                            <div className="flex h-14 items-center gap-3 border-b border-[#00CCFF]/20 px-4 lg:h-[60px] lg:px-6">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarFallback className="bg-blue-600 text-white font-bold">
+                                    <AvatarFallback className="bg-[#00CCFF] text-[#002240] font-bold">
                                         {getInitials(businessData?.businessName)}
                                     </AvatarFallback>
                                 </Avatar>
-                                <span className="text-white font-semibold">{businessData?.businessName}</span>
+                                <span className="text-white font-semibold truncate">{businessData?.businessName}</span>
                             </div>
                             <nav className="grid gap-2 text-lg font-medium p-4">
                                 {navLinks.map(link => <NavLink key={link.href} {...link} />)}
                             </nav>
-                            <div className="mt-auto border-t border-white/20 pt-4">
+                            <div className="mt-auto border-t border-[#00CCFF]/20 p-4">
                                 <Button
                                     onClick={handleLogout}
                                     variant="ghost"
-                                    className="w-full justify-start gap-3 rounded-lg px-3 py-2 text-red-300 hover:bg-red-500/20 hover:text-red-300"
+                                    className="w-full justify-start gap-3 rounded-lg px-3 py-2 text-red-400 hover:bg-red-500/20 hover:text-red-300"
                                 >
                                     <LogOut className="h-4 w-4" />
                                     Sair
@@ -148,22 +150,21 @@ export function EmpresarioLayout({ children }: { children: React.ReactNode }) {
                         </SheetContent>
                     </Sheet>
                     <Link href="/empresario/dashboard" className="flex items-center gap-2 font-semibold text-white">
-                        <MapPin className="h-6 w-6 text-yellow-400" />
-                        <span className="hidden sm:inline-block">Novo Tempo Conecta</span>
+                        <MapPin className="h-6 w-6 text-[#F7B000]" />
+                        <span className="hidden sm:inline-block">Painel do Negócio</span>
                     </Link>
                     <div className="ml-auto">
-                        {/* ===== CORREÇÃO AQUI: Adicionado modal={false} ===== */}
                         <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 hover:bg-blue-700/50">
+                                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 hover:bg-[#00CCFF]/10 border border-[#00CCFF]/30">
                                     <Avatar className="h-8 w-8">
-                                        <AvatarFallback className="bg-blue-600 text-white font-bold">
+                                        <AvatarFallback className="bg-[#00CCFF] text-[#002240] font-bold">
                                             {getInitials(businessData?.businessName)}
                                         </AvatarFallback>
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="border-[#00CCFF]/20">
                                 <DropdownMenuLabel>{businessData?.businessName}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild><Link href="/empresario/configuracoes">Configurações</Link></DropdownMenuItem>
@@ -174,7 +175,7 @@ export function EmpresarioLayout({ children }: { children: React.ReactNode }) {
                     </div>
                 </header>
                 
-                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto bg-muted/40">
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto bg-slate-50">
                     {children}
                 </main>
             </div>

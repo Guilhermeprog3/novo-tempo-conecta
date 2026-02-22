@@ -13,7 +13,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0 0 0);
 
-  --primary: oklch(86.7% 0.1815 104.43);
+  --primary: #F7B000; /* Atualizado para o novo Azul Claro */
   --primary-foreground: oklch(0 0 0);
 
   --secondary: oklch(0.6 0.18 250);
@@ -30,7 +30,7 @@
 
   --border: oklch(0.9 0.03 250);
   --input: oklch(0.9 0.03 250);
-  --ring: oklch(0.35 0.15 250);
+  --ring: #00CCFF; /* Atualizado para combinar com a primary */
   --radius: 0.625rem;
 }
 
@@ -44,7 +44,7 @@
   --popover: oklch(0.22 0.06 250);
   --popover-foreground: oklch(0.95 0.02 250);
 
-  --primary: oklch(0.8 0.2 85);
+  --primary: #00CCFF; /* Atualizado para o novo Azul Claro */
   --primary-foreground: oklch(0 0 0);
 
   --secondary: oklch(0.6 0.18 250);
@@ -61,7 +61,7 @@
 
   --border: oklch(0.3 0.08 250);
   --input: oklch(0.3 0.08 250);
-  --ring: oklch(0.6 0.18 250);
+  --ring: #00CCFF; /* Atualizado para combinar com a primary */
 }
 
 @theme inline {

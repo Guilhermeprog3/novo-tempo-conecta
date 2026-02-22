@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Search, Download, Trash2, Loader2, Filter, X } from "lucide-react"
 import { db } from "@/lib/firebase"
@@ -27,7 +26,6 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
-    const [filterRole, setFilterRole] = useState("all");
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -42,7 +40,6 @@ export default function AdminUsersPage() {
                 })) as User[];
             
             const onlyUsers = usersList.filter(u => u.role !== 'admin');
-            
             setUsers(onlyUsers);
         } catch (error) {
             console.error("Erro ao buscar usuários:", error);
@@ -51,9 +48,7 @@ export default function AdminUsersPage() {
         }
     };
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
+    useEffect(() => { fetchUsers(); }, []);
 
     const handleDeleteUser = async (userId: string) => {
         try {
@@ -74,47 +69,24 @@ export default function AdminUsersPage() {
     }
 
     const exportToCSV = () => {
-        // Data e Hora atuais para o relatório
         const now = new Date();
         const dateStr = now.toLocaleDateString('pt-BR');
         const timeStr = now.toLocaleTimeString('pt-BR');
-
-        // Construção das linhas do CSV
         const csvRows = [];
-
-        // 1. Título e Metadados
-        csvRows.push(['Relatório de Usuários - Novo Tempo Conecta']); // Título
-        csvRows.push([`Gerado em: ${dateStr} às ${timeStr}`]);      // Data
-        csvRows.push([]);                                            // Linha em branco
-
-        // 2. Cabeçalhos da Tabela
+        csvRows.push(['Relatório de Usuários - Novo Tempo Conecta']);
+        csvRows.push([`Gerado em: ${dateStr} às ${timeStr}`]);
+        csvRows.push([]);
         const headers = ["Nome", "Email", "Telefone", "Data Cadastro", "Status", "ID"];
         csvRows.push(headers.join(","));
-
-        // 3. Dados dos Usuários
         users.forEach(user => {
-            const row = [
-                `"${user.name}"`, // Aspas para proteger nomes com vírgulas
-                user.email,
-                user.phone || "N/A",
-                formatDate(user.createdAt),
-                "Ativo",
-                user.id
-            ];
+            const row = [`"${user.name}"`, user.email, user.phone || "N/A", formatDate(user.createdAt), "Ativo", user.id];
             csvRows.push(row.join(","));
         });
-
-        // Unir tudo com quebra de linha
         const csvContent = csvRows.join("\n");
-
-        // Criar Blob com BOM (\uFEFF) para garantir que acentos funcionem no Excel
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        
-        // Nome do arquivo formatado
         const fileName = `relatorio_usuarios_${dateStr.replace(/\//g, '-')}.csv`;
-        
         link.setAttribute("href", url);
         link.setAttribute("download", fileName);
         document.body.appendChild(link);
@@ -132,9 +104,9 @@ export default function AdminUsersPage() {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-xl bg-[#1E3A8A] p-8 text-white shadow-lg">
+            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg">
                 <h1 className="text-3xl font-bold mb-2">Gerenciamento de Usuários</h1>
-                <p className="text-blue-100 opacity-90">
+                <p className="text-white/80">
                     Visualize, filtre e gerencie todos os moradores registrados na plataforma Novo Tempo Conecta.
                 </p>
             </div>
@@ -142,7 +114,7 @@ export default function AdminUsersPage() {
             <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-4 text-slate-700 font-semibold">
-                        <Filter className="w-5 h-5 text-blue-600" />
+                        <Filter className="w-5 h-5 text-[#00CCFF]" />
                         <span>Filtros de Busca</span>
                     </div>
                     <div className="flex flex-col md:flex-row gap-4">
@@ -150,13 +122,13 @@ export default function AdminUsersPage() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                             <Input
                                 placeholder="Buscar por nome ou e-mail..."
-                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-600 text-slate-900 placeholder:text-slate-400"
+                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-[#00CCFF] text-slate-900 placeholder:text-slate-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                         
-                        <Button variant="ghost" onClick={() => setSearchTerm('')} className="text-slate-500 hover:text-blue-700">
+                        <Button variant="ghost" onClick={() => setSearchTerm('')} className="text-slate-500 hover:text-[#00CCFF]">
                             <X className="w-4 h-4 mr-2" /> Limpar
                         </Button>
                     </div>
@@ -172,7 +144,7 @@ export default function AdminUsersPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                     {loading ? (
-                        <div className="flex justify-center p-12"><Loader2 className="h-10 w-10 animate-spin text-blue-600" /></div>
+                        <div className="flex justify-center p-12"><Loader2 className="h-10 w-10 animate-spin text-[#00CCFF]" /></div>
                     ) : (
                         <div className="relative w-full overflow-auto">
                             <Table>
@@ -199,7 +171,7 @@ export default function AdminUsersPage() {
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-10 w-10 border border-slate-200">
                                                             <AvatarImage src={user.avatar} />
-                                                            <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
+                                                            <AvatarFallback className="bg-[#00CCFF]/10 text-[#00CCFF] font-bold">
                                                                 {getInitials(user.name)}
                                                             </AvatarFallback>
                                                         </Avatar>

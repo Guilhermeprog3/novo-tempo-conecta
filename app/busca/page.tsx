@@ -138,7 +138,7 @@ function SearchResults() {
             key={star}
             className={`w-3 h-3 ${
               star <= Math.round(rating)
-                ? "text-yellow-400 fill-yellow-400"
+                ? "text-[#F7B000] fill-[#F7B000]"
                 : "text-white/30" 
             }`}
           />
@@ -151,11 +151,13 @@ function SearchResults() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
         <aside className={`lg:w-80 ${showFilters ? "block" : "hidden lg:block"}`}>
-          <Card className="sticky top-24 bg-gradient-to-r from-[#1E3A8A] to-[#254A9E] text-white border-none">
+          <Card className="sticky top-24 bg-[#002240] text-white border-none">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-white">
                 <span>Filtros</span>
-                <Button variant="ghost" size="sm" className="lg:hidden text-white hover:bg-white/10 hover:text-white" onClick={() => setShowFilters(false)}><X className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="sm" className="lg:hidden text-white hover:bg-white/10 hover:text-[#00CCFF]" onClick={() => setShowFilters(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -164,7 +166,7 @@ function SearchResults() {
                 <div className="space-y-2">
                   {categories.map((category) => (
                     <div key={category.value} className="flex items-center space-x-2">
-                      <Checkbox id={category.value} onCheckedChange={(checked) => handleCategoryChange(category.value, !!checked)} checked={selectedCategories.includes(category.value)} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
+                      <Checkbox id={category.value} onCheckedChange={(checked) => handleCategoryChange(category.value, !!checked)} checked={selectedCategories.includes(category.value)} className="border-[#00CCFF]/50 data-[state=checked]:bg-[#00CCFF] data-[state=checked]:text-[#002240]" />
                       <Label htmlFor={category.value} className="text-sm font-normal text-white/90">{category.label}</Label>
                     </div>
                   ))}
@@ -176,7 +178,7 @@ function SearchResults() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="open" checked={isOpen} onCheckedChange={(checked) => setIsOpen(!!checked)} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
+                  <Checkbox id="open" checked={isOpen} onCheckedChange={(checked) => setIsOpen(!!checked)} className="border-[#00CCFF]/50 data-[state=checked]:bg-[#00CCFF] data-[state=checked]:text-[#002240]" />
                   <Label htmlFor="open" className="text-sm font-normal text-white/90">Aberto agora</Label>
                 </div>
               </div>
@@ -188,13 +190,13 @@ function SearchResults() {
           <div className="mb-6">
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input placeholder="Busque por 'pizza', 'farmácia', 'salão'..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00CCFF] w-4 h-4" />
+                <Input placeholder="Busque por 'pizza', 'farmácia', 'salão'..." className="pl-10 focus-visible:ring-[#00CCFF]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               </div>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal className="w-4 h-4 mr-2" />Filtros</Button>
+                <Button variant="ghost" size="sm" className="lg:hidden hover:text-[#00CCFF]" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal className="w-4 h-4 mr-2" />Filtros</Button>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-48"><SelectValue placeholder="Ordenar por" /></SelectTrigger>
                   <SelectContent>
@@ -213,10 +215,10 @@ function SearchResults() {
           {loading ? (
                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {Array.from({ length: 6 }).map((_, index) => (
-                      <Card key={index} className="bg-[#1E3A8A] border-blue-700">
-                        <Skeleton className="h-48 w-full bg-blue-900/50" />
-                        <CardHeader><Skeleton className="h-5 w-3/4 bg-blue-900/50" /></CardHeader>
-                        <CardContent><Skeleton className="h-4 w-full bg-blue-900/50" /></CardContent>
+                      <Card key={index} className="bg-[#002240] border-[#00CCFF]/20">
+                        <Skeleton className="h-48 w-full bg-white/10" />
+                        <CardHeader><Skeleton className="h-5 w-3/4 bg-white/10" /></CardHeader>
+                        <CardContent><Skeleton className="h-4 w-full bg-white/10" /></CardContent>
                       </Card>
                   ))}
                </div>
@@ -224,13 +226,13 @@ function SearchResults() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredAndSortedBusinesses.map((business) => (
                       <Link href={`/estabelecimento/${business.id}`} key={business.id} className="h-full">
-                          <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col bg-[#1E3A8A] border-blue-700 text-white">
-                              <div className="h-48 bg-blue-900/50 flex items-center justify-center">
+                          <Card className="overflow-hidden hover:shadow-lg hover:shadow-[#00CCFF]/10 transition-shadow cursor-pointer h-full flex flex-col bg-[#002240] border-[#00CCFF]/20 text-white">
+                              <div className="h-48 bg-white/5 flex items-center justify-center">
                                   {business.images && business.images.length > 0 ? (
                                       <img src={business.images[0]} alt={business.businessName} className="w-full h-full object-cover" />
                                   ) : (
-                                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-                                        <Store className="w-16 h-16 text-white/20" strokeWidth={1.5} />
+                                      <div className="w-full h-full flex items-center justify-center bg-white/5">
+                                        <Store className="w-16 h-16 text-[#00CCFF]/20" strokeWidth={1.5} />
                                       </div>
                                   )}
                               </div>
@@ -240,7 +242,7 @@ function SearchResults() {
                                           <div className="flex-1">
                                             <CardTitle className="text-lg text-white">{business.businessName}</CardTitle>
                                             <CardDescription className="flex items-center pt-1">
-                                                <Badge variant="secondary" className="mr-2 text-xs">
+                                                <Badge variant="secondary" className="mr-2 text-xs bg-[#00CCFF]/10 text-[#00CCFF] hover:bg-[#00CCFF]/20">
                                                     {categories.find(c => c.value === business.category)?.label || business.category}
                                                 </Badge>
                                             </CardDescription>
@@ -259,9 +261,12 @@ function SearchResults() {
                                           {business.description?.substring(0, 100)}{business.description && business.description.length > 100 && '...'}
                                       </p>
                                       <div className="flex items-center justify-between text-sm">
-                                          <div className="flex items-center text-white/80"><MapPin className="w-4 h-4 mr-1" />{business.address?.split(',')[0]}</div>
                                           <div className="flex items-center text-white/80">
-                                              <Clock className="w-3 h-3 mr-1" />
+                                            <MapPin className="w-4 h-4 mr-1 text-[#00CCFF]" />
+                                            {business.address?.split(',')[0]}
+                                          </div>
+                                          <div className="flex items-center text-white/80">
+                                              <Clock className="w-3 h-3 mr-1 text-[#00CCFF]" />
                                               <span>{business.hours || 'Não informado'}</span>
                                           </div>
                                       </div>
@@ -286,7 +291,7 @@ function SearchResults() {
 
 export default function BuscaPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-12 w-12 animate-spin" /></div>}>
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-12 w-12 animate-spin text-[#00CCFF]" /></div>}>
       <div className="min-h-screen bg-background flex flex-col">
         <Header 
             title="Buscar Estabelecimentos"

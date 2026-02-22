@@ -1,4 +1,3 @@
-// guilhermeprog3/novo-tempo-conecta/app/mapa/MapComponent.tsx
 "use client";
 
 import React, { useEffect } from 'react';
@@ -38,16 +37,16 @@ if (typeof window !== 'undefined') {
 
 const getCategoryIcon = (category: string) => {
     let iconComponent = <MapPin size={18} color="white" />;
-    let color = "#4B5563";
+    let color = "#002240"; // Azul Escuro padrão para categoria genérica
 
     const cat = category.toLowerCase();
-    if (cat === "restaurante") { iconComponent = <Utensils size={18} color="white" />; color = "#F59E0B"; }
-    else if (cat === "comércio" || cat === "comercio") { iconComponent = <Store size={18} color="white" />; color = "#3B82F6"; }
-    else if (cat === "serviços" || cat === "servicos") { iconComponent = <Wrench size={18} color="white" />; color = "#6B7280"; }
+    if (cat === "restaurante") { iconComponent = <Utensils size={18} color="#002240" />; color = "#F7B000"; } // Novo Amarelo com ícone azul escuro
+    else if (cat === "comércio" || cat === "comercio") { iconComponent = <Store size={18} color="#002240" />; color = "#00CCFF"; } // Novo Azul Claro
+    else if (cat === "serviços" || cat === "servicos") { iconComponent = <Wrench size={18} color="white" />; color = "#002240"; }
     else if (cat === "saúde" || cat === "saude") { iconComponent = <Heart size={18} color="white" />; color = "#EF4444"; }
 
     const iconHtml = ReactDOMServer.renderToString(
-        <div style={{ backgroundColor: color, borderRadius: '50%', padding: '6px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ backgroundColor: color, borderRadius: '50%', padding: '6px', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '2px solid white' }}>
             {iconComponent}
         </div>
     );
@@ -77,7 +76,7 @@ export default function MapComponent({ businesses, userPosition, setUserPosition
                 <Marker key={b.id} position={[b.location.latitude, b.location.longitude]} icon={getCategoryIcon(b.category)}>
                     <Popup>
                         <div className="font-bold">{b.businessName}</div>
-                        <Link href={`/estabelecimento/${b.id}`} className="text-blue-500 underline">Ver mais</Link>
+                        <Link href={`/estabelecimento/${b.id}`} className="text-[#00CCFF] hover:text-[#002240] underline">Ver mais</Link>
                     </Popup>
                 </Marker>
             ))}

@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-// CORREÇÃO: Adicionado 'CardDescription' na lista de importações
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Users, Building2, Star, Activity, TrendingUp, AlertTriangle } from "lucide-react"
 import { db } from "@/lib/firebase"
@@ -17,7 +16,7 @@ function StatCard({ title, value, icon: Icon, description, trend, colorClass }: 
                 <CardTitle className="text-sm font-medium text-slate-600">
                     {title}
                 </CardTitle>
-                <div className={`h-9 w-9 rounded-full flex items-center justify-center ${colorClass || 'bg-blue-50 text-blue-600'}`}>
+                <div className={`h-9 w-9 rounded-full flex items-center justify-center ${colorClass || 'bg-[#00CCFF]/10 text-[#00CCFF]'}`}>
                     <Icon className="h-5 w-5" />
                 </div>
             </CardHeader>
@@ -129,7 +128,7 @@ export default function AdminDashboardPage() {
         fetchData();
     }, []);
 
-    if (loading) return <div className="h-full w-full flex items-center justify-center p-20"><Activity className="w-10 h-10 animate-spin text-blue-600" /></div>;
+    if (loading) return <div className="h-full w-full flex items-center justify-center p-20"><Activity className="w-10 h-10 animate-spin text-[#00CCFF]" /></div>;
 
     if (errorMsg) {
         return (
@@ -144,15 +143,15 @@ export default function AdminDashboardPage() {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-xl bg-gradient-to-r from-[#1E3A8A] to-[#2b52c2] p-8 text-white shadow-lg relative overflow-hidden">
+            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg relative overflow-hidden">
                 <div className="relative z-10">
                     <h1 className="text-3xl font-bold mb-2">Visão Geral</h1>
-                    <p className="text-blue-100 opacity-90 max-w-xl">
+                    <p className="text-white/80 max-w-xl">
                         Acompanhe o crescimento da plataforma Novo Tempo Conecta em tempo real.
                     </p>
                 </div>
                 <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
-                <div className="absolute right-20 bottom-0 h-32 w-32 rounded-full bg-yellow-400/10 blur-2xl" />
+                <div className="absolute right-20 bottom-0 h-32 w-32 rounded-full bg-[#F7B000]/10 blur-2xl" />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -162,21 +161,21 @@ export default function AdminDashboardPage() {
                     icon={Users} 
                     description={stats.users === 0 ? "Nenhum usuário encontrado" : "Total cadastrado"}
                     trend={stats.users > 0 ? "+100%" : undefined}
-                    colorClass="bg-blue-50 text-blue-600"
+                    colorClass="bg-[#00CCFF]/10 text-[#00CCFF]"
                 />
                 <StatCard 
                     title="Total de Empresas" 
                     value={stats.businesses} 
                     icon={Building2} 
                     description="Estabelecimentos ativos"
-                    colorClass="bg-indigo-50 text-indigo-600"
+                    colorClass="bg-[#00CCFF]/10 text-[#00CCFF]"
                 />
                 <StatCard 
                     title="Empresas em Destaque" 
                     value={stats.featured} 
                     icon={Star} 
                     description="Exibidos na home"
-                    colorClass="bg-yellow-50 text-yellow-600"
+                    colorClass="bg-[#F7B000]/10 text-[#F7B000]"
                 />
             </div>
 
@@ -194,8 +193,8 @@ export default function AdminDashboardPage() {
                                     <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dy={10} />
                                     <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
                                     <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} cursor={{fill: '#f8fafc'}} />
-                                    <Bar dataKey="usuarios" name="Usuários" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={30} />
-                                    <Bar dataKey="empresas" name="Empresas" fill="#EAB308" radius={[4, 4, 0, 0]} barSize={30} />
+                                    <Bar dataKey="usuarios" name="Usuários" fill="#00CCFF" radius={[4, 4, 0, 0]} barSize={30} />
+                                    <Bar dataKey="empresas" name="Empresas" fill="#F7B000" radius={[4, 4, 0, 0]} barSize={30} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -214,14 +213,14 @@ export default function AdminDashboardPage() {
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <Avatar className="h-9 w-9 border border-slate-100 bg-white">
                                             <AvatarImage src={b.images?.[0]} className="object-cover" />
-                                            <AvatarFallback className="bg-indigo-50 text-indigo-600 text-xs font-bold">EMP</AvatarFallback>
+                                            <AvatarFallback className="bg-[#00CCFF]/10 text-[#00CCFF] text-xs font-bold">EMP</AvatarFallback>
                                         </Avatar>
                                         <div className="space-y-0.5 truncate">
                                             <p className="text-sm font-medium text-slate-900 truncate">{b.businessName}</p>
                                             <p className="text-xs text-slate-500 truncate">{b.category}</p>
                                         </div>
                                     </div>
-                                    <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 whitespace-nowrap">Nova Empresa</Badge>
+                                    <Badge variant="secondary" className="bg-[#00CCFF]/10 text-[#00CCFF] hover:bg-[#00CCFF]/20 whitespace-nowrap">Nova Empresa</Badge>
                                 </div>
                             ))}
                             {stats.recentUsers.map((u: any) => (
@@ -229,14 +228,14 @@ export default function AdminDashboardPage() {
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <Avatar className="h-9 w-9 border border-slate-100 bg-white">
                                             <AvatarImage src={u.avatar} className="object-cover" />
-                                            <AvatarFallback className="bg-blue-50 text-blue-600 text-xs font-bold">US</AvatarFallback>
+                                            <AvatarFallback className="bg-[#00CCFF]/10 text-[#00CCFF] text-xs font-bold">US</AvatarFallback>
                                         </Avatar>
                                         <div className="space-y-0.5 truncate">
                                             <p className="text-sm font-medium text-slate-900 truncate">{u.name}</p>
                                             <p className="text-xs text-slate-500 truncate">{u.email}</p>
                                         </div>
                                     </div>
-                                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 whitespace-nowrap">Novo Usuário</Badge>
+                                    <Badge variant="secondary" className="bg-[#00CCFF]/10 text-[#00CCFF] hover:bg-[#00CCFF]/20 whitespace-nowrap">Novo Usuário</Badge>
                                 </div>
                             ))}
                             {stats.recentUsers.length === 0 && stats.recentBusinesses.length === 0 && (

@@ -26,13 +26,12 @@ export default function SobrePage() {
       {/* 1. HERO SECTION */}
       <section className="relative overflow-hidden bg-white py-20 lg:py-28">
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <Badge className="mb-6 bg-blue-100 text-[#1E3A8A] hover:bg-blue-200 px-4 py-1 text-sm font-bold border-none">
+          <Badge className="mb-6 bg-[#00CCFF]/10 text-[#002240] hover:bg-[#00CCFF]/20 px-4 py-1 text-sm font-bold border-none transition-colors">
             Conectando Pessoas e Negócios
           </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight text-balance">
+          <h1 className="text-4xl md:text-6xl font-bold text-[#002240] mb-6 tracking-tight text-balance">
             Impulsionando o Desenvolvimento do <br/>
-            {/* CORREÇÃO: Voltando para o amarelo (yellow-500 para melhor leitura no branco) */}
-            <span className="text-yellow-500">Novo Tempo</span>
+            <span className="text-[#F7B000]">Novo Tempo</span>
           </h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
             Uma plataforma digital criada para fortalecer o comércio local, 
@@ -53,13 +52,14 @@ export default function SobrePage() {
                 <div className="relative bg-white p-12 rounded-3xl shadow-xl border border-slate-100 flex items-center justify-center">
                   <GraduationCap className="w-32 h-32 text-green-600" strokeWidth={1.5} />
                 </div>
-                <div className="absolute -bottom-6 -right-6 bg-[#1E3A8A] text-white p-4 rounded-xl shadow-lg flex items-center gap-3">
-                  <div className="bg-yellow-400 p-2 rounded-full">
-                    <Lightbulb className="w-5 h-5 text-blue-900" />
+                {/* Cartão flutuante com a nova paleta */}
+                <div className="absolute -bottom-6 -right-6 bg-[#002240] text-white p-4 rounded-xl shadow-lg flex items-center gap-3">
+                  <div className="bg-[#F7B000] p-2 rounded-full">
+                    <Lightbulb className="w-5 h-5 text-[#002240]" />
                   </div>
                   <div>
-                    <p className="text-xs text-blue-200 font-medium">Inovação</p>
-                    <p className="font-bold">Tecnologia Social</p>
+                    <p className="text-xs text-[#00CCFF] font-medium">Inovação</p>
+                    <p className="font-bold text-white">Tecnologia Social</p>
                   </div>
                 </div>
               </div>
@@ -72,7 +72,7 @@ export default function SobrePage() {
                 <span>Iniciativa Acadêmica</span>
               </div>
               
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#002240]">
                 Uma realização do <span className="text-green-600">IFMA</span> Campus Timon
               </h2>
               

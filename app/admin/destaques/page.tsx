@@ -66,24 +66,22 @@ export default function DestaquesPage() {
         }
     };
 
-    if (loading) return <div className="flex h-full justify-center items-center"><Loader2 className="animate-spin h-10 w-10 text-blue-600" /></div>;
+    if (loading) return <div className="flex h-full justify-center items-center"><Loader2 className="animate-spin h-10 w-10 text-[#00CCFF]" /></div>;
 
     return (
         <div className="space-y-6">
-            {/* 1. Header Hero */}
-            <div className="rounded-xl bg-[#1E3A8A] p-8 text-white shadow-lg">
+            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg">
                 <h1 className="text-3xl font-bold mb-2">Destaques da Página Inicial</h1>
-                <p className="text-blue-100 opacity-90">
+                <p className="text-white/80">
                     Gerencie quais empresas aparecem em evidência no topo do site. Selecione até 3 opções.
                 </p>
             </div>
 
-            {/* 2. Destaques Atuais */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[0, 1, 2].map((i) => {
                     const business = featuredBusinesses[i];
                     return (
-                        <Card key={i} className={`relative transition-all duration-300 ${business ? 'border-blue-500 bg-white shadow-md ring-2 ring-blue-100' : 'border-2 border-dashed border-slate-300 bg-slate-50/50'}`}>
+                        <Card key={i} className={`relative transition-all duration-300 ${business ? 'border-[#00CCFF] bg-white shadow-md ring-2 ring-[#00CCFF]/20' : 'border-2 border-dashed border-slate-300 bg-slate-50/50'}`}>
                             <CardContent className="flex flex-col items-center justify-center min-h-[160px] p-6">
                                 {business ? (
                                     <>
@@ -96,14 +94,14 @@ export default function DestaquesPage() {
                                             <X className="w-4 h-4" />
                                         </Button>
                                         
-                                        <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-3 text-yellow-600">
+                                        <div className="w-12 h-12 rounded-full bg-[#F7B000]/10 flex items-center justify-center mb-3 text-[#F7B000]">
                                             <Star className="w-6 h-6 fill-current" />
                                         </div>
                                         
                                         <h3 className="font-bold text-lg text-slate-800 text-center line-clamp-1 mb-1">
                                             {business.businessName}
                                         </h3>
-                                        <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100">
+                                        <Badge variant="secondary" className="bg-[#00CCFF]/10 text-[#00CCFF] border-[#00CCFF]/20">
                                             {business.category}
                                         </Badge>
                                         <p className="text-xs text-slate-400 mt-3 font-medium uppercase tracking-wider">Destaque {i + 1}</p>
@@ -123,20 +121,18 @@ export default function DestaquesPage() {
                 })}
             </div>
 
-            {/* 3. Filtros de Busca */}
             <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-4 text-slate-700 font-semibold">
-                        <Filter className="w-5 h-5 text-blue-600" />
+                        <Filter className="w-5 h-5 text-[#00CCFF]" />
                         <span>Buscar Empresa para Adicionar</span>
                     </div>
                     <div className="flex gap-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            {/* CORREÇÃO AQUI: Adicionado 'text-slate-900' e 'placeholder:text-slate-400' */}
                             <Input
                                 placeholder="Digite o nome da empresa..."
-                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-600 text-slate-900 placeholder:text-slate-400"
+                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-[#00CCFF] text-slate-900 placeholder:text-slate-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -145,7 +141,6 @@ export default function DestaquesPage() {
                 </CardContent>
             </Card>
 
-            {/* 4. Lista de Seleção */}
             <Card className="border-none shadow-sm bg-white overflow-hidden">
                 <CardHeader className="border-b bg-slate-50/50 px-6 py-4">
                     <CardTitle className="text-lg text-slate-800">Empresas Disponíveis</CardTitle>
@@ -182,7 +177,7 @@ export default function DestaquesPage() {
                                             className={`
                                                 ${featuredBusinesses.length >= 3 
                                                     ? "bg-slate-100 text-slate-400 hover:bg-slate-100" 
-                                                    : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                                                    : "bg-[#00CCFF] text-[#002240] hover:bg-[#00CCFF]/90 shadow-sm"
                                                 }
                                             `}
                                         >

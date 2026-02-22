@@ -1,4 +1,3 @@
-// app/login/page.tsx
 "use client"
 
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Loader2, AlertTriangle } from "lucide-react"
@@ -30,13 +29,10 @@ export default function LoginPage() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Verifica se é um empresário
         const businessDocRef = doc(db, "businesses", user.uid);
         const businessDocSnap = await getDoc(businessDocRef);
 
         if (businessDocSnap.exists()) {
-            // --- CORREÇÃO PARA EMPRESÁRIO ---
-            // Salva dados no localStorage para o Header
             const businessData = businessDocSnap.data();
             const userForStorage = {
                 name: businessData.businessName,
@@ -44,48 +40,42 @@ export default function LoginPage() {
                 avatar: businessData.avatar || null 
             };
             localStorage.setItem("user", JSON.stringify(userForStorage));
-            localStorage.setItem("userType", "business"); // Define o tipo
+            localStorage.setItem("userType", "business"); 
             
-            window.location.href = '/empresario/dashboard'; // Mantém redirect de empresário
+            window.location.href = '/empresario/dashboard'; 
             return;
         }
 
-        // Verifica se é um usuário padrão
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
             
-            // Salva os dados no localStorage
             const userForStorage = {
                 name: userData.name,
                 email: userData.email,
                 avatar: userData.avatar || null,
-                role: userData.role || 'user' // Garante que a role seja salva
+                role: userData.role || 'user' 
             };
             localStorage.setItem("user", JSON.stringify(userForStorage));
             
-            // VERIFICAÇÃO DE ADMIN
             if (userData.role === 'admin') {
                 localStorage.setItem("userType", "admin");
                 window.location.href = '/admin/dashboard';
                 return;
             }
 
-            // Usuário Comum
             localStorage.setItem("userType", "user");
             window.location.href = '/'; 
             return;
         }
         throw new Error("Dados do usuário não encontrados.");
 
-    // --- INÍCIO DA MODIFICAÇÃO (BLOCO CATCH MELHORADO) ---
     } catch (error: any) {
-        console.error("Erro detalhado ao fazer login:", error.code, error.message); // Log mais detalhado
+        console.error("Erro detalhado ao fazer login:", error.code, error.message);
         let errorMessage: string;
 
-        // Trata erros específicos do Firebase Auth
         switch (error.code) {
             case 'auth/user-not-found':
             case 'auth/wrong-password':
@@ -98,23 +88,19 @@ export default function LoginPage() {
             case 'auth/network-request-failed':
                 errorMessage = "Erro de rede. Verifique sua conexão e tente novamente.";
                 break;
-            // Erro comum do Firestore
             case 'permission-denied':
                 errorMessage = "Erro de permissão. Não foi possível verificar os dados da conta.";
                 break;
             default:
-                // Trata o erro customizado do 'try'
                 if (error.message === "Dados do usuário não encontrados.") {
                     errorMessage = "Sua conta foi autenticada, mas não encontramos um perfil (cidadão ou empresa) associado. Entre em contato com o suporte.";
                 } else {
-                    // Erro genérico
                     errorMessage = "Ocorreu um erro inesperado. Tente novamente mais tarde.";
                 }
                 break;
         }
         
         setErrors({ form: errorMessage });
-    // --- FIM DA MODIFICAÇÃO ---
     } finally {
         setLoading(false);
     }
@@ -123,12 +109,12 @@ export default function LoginPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <Card className="shadow-lg bg-[#1E3A8A] border-blue-700 text-white">
+          <Card className="shadow-lg bg-[#002240] border-[#00CCFF]/20 text-white">
             <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8 text-primary-foreground" />
+              <div className="w-16 h-16 bg-[#00CCFF] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-[#002240]" />
               </div>
               <CardTitle className="text-2xl font-bold text-white">Entrar na sua conta</CardTitle>
               <CardDescription className="text-white/80">Acesse para explorar ou gerenciar seu negócio</CardDescription>
@@ -136,22 +122,22 @@ export default function LoginPage() {
             <CardContent className="space-y-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white/90">E-mail</Label>
+                  <Label htmlFor="email" className="text-[#00CCFF]">E-mail</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
-                    <Input id="email" type="email" placeholder="seu@email.com" className="pl-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Input id="email" type="email" placeholder="seu@email.com" className="pl-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]" required value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white/90">Senha</Label>
+                  <Label htmlFor="password" className="text-[#00CCFF]">Senha</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Sua senha"
-                      className="pl-10 pr-10 bg-blue-900/50 border-blue-700 text-white placeholder:text-white/60"
+                      className="pl-10 pr-10 bg-white/5 border-[#00CCFF]/30 text-white placeholder:text-white/50 focus-visible:ring-[#00CCFF]"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -164,7 +150,7 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="w-4 h-4 text-white/60" />
+                        <EyeOff className="w-4 h-4 text-[#00CCFF]" />
                       ) : (
                         <Eye className="w-4 h-4 text-white/60" />
                       )}
@@ -174,17 +160,17 @@ export default function LoginPage() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="remember" className="border-white/50 data-[state=checked]:bg-primary" />
+                    <Checkbox id="remember" className="border-[#00CCFF]/50 data-[state=checked]:bg-[#00CCFF] data-[state=checked]:text-[#002240]" />
                     <Label htmlFor="remember" className="text-sm text-white/80">
                       Lembrar de mim
                     </Label>
                   </div>
-                  <Link href="/esqueceu-senha" className="text-sm text-yellow-400 hover:underline">
+                  <Link href="/esqueceu-senha" className="text-sm text-[#F7B000] hover:underline">
                     Esqueceu a senha?
                   </Link>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                <Button type="submit" className="w-full bg-[#00CCFF] text-[#002240] hover:bg-[#00CCFF]/80" size="lg" disabled={loading}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Entrar
                 </Button>
@@ -199,23 +185,23 @@ export default function LoginPage() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-blue-600" />
+                  <span className="w-full border-t border-[#00CCFF]/20" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-[#1E3A8A] px-2 text-white/80">Ou</span>
+                  <span className="bg-[#002240] px-2 text-white/80">Ou</span>
                 </div>
               </div>
 
               <div className="text-center space-y-4">
                 <p className="text-sm text-white/80">
                   Não tem uma conta?{" "}
-                  <Link href="/cadastro" className="text-yellow-400 hover:underline font-medium">
+                  <Link href="/cadastro" className="text-[#F7B000] hover:underline font-medium">
                     Cadastre-se como morador
                   </Link>
                 </p>
                 <p className="text-sm text-white/80">
                   É um empresário?{" "}
-                  <Link href="/empresario/cadastro" className="text-yellow-400 hover:underline font-medium">
+                  <Link href="/cadastro-emp" className="text-[#F7B000] hover:underline font-medium">
                     Cadastre seu negócio
                   </Link>
                 </p>

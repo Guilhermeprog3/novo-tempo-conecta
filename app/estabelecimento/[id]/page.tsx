@@ -292,16 +292,16 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
 
   const renderStars = (rating: number) => {
     return [...Array(5)].map((_, i) => (
-      <Star key={i} className={`h-4 w-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-slate-300"}`} />
+      <Star key={i} className={`h-4 w-4 ${i < rating ? "fill-[#F7B000] text-[#F7B000]" : "text-slate-300"}`} />
     ))
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="h-12 w-12 animate-spin text-[#1E3A8A]" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="h-12 w-12 animate-spin text-[#00CCFF]" /></div>;
 
   if (!business) return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
           <h1 className="text-2xl font-bold mb-4 text-slate-900">Estabelecimento não encontrado</h1>
-          <Button asChild className="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold"><Link href="/">Voltar</Link></Button>
+          <Button asChild className="bg-[#F7B000] hover:bg-[#F7B000]/80 text-[#002240] font-bold"><Link href="/">Voltar</Link></Button>
       </div>
   );
 
@@ -309,7 +309,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
     <div className="min-h-screen bg-slate-50 font-sans">
       <Header />
 
-      <div className="bg-[#1E3A8A] pb-32 pt-10 px-4 relative overflow-hidden">
+      <div className="bg-[#002240] pb-32 pt-10 px-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
         <div className="container mx-auto max-w-6xl relative z-10">
             <div className="flex items-center text-blue-200 text-sm mb-6">
@@ -323,13 +323,13 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
                     <div className="flex items-center gap-3 mb-3">
-                        <Badge className="bg-yellow-400 text-blue-900 hover:bg-yellow-500 font-bold border-none">{business.category}</Badge>
+                        <Badge className="bg-[#F7B000] text-[#002240] hover:bg-[#F7B000]/90 font-bold border-none">{business.category}</Badge>
                         {business.isOpen ? <Badge className="bg-green-500 border-none">Aberto Agora</Badge> : <Badge variant="outline" className="text-blue-100 border-blue-300">Fechado</Badge>}
                     </div>
                     <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight">{business.businessName}</h1>
                     <div className="flex items-center gap-4 text-blue-100 text-sm">
                         <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                            <Star className="w-4 h-4 text-[#F7B000] fill-[#F7B000]" />
                             <span className="font-bold text-white text-lg">{business.rating?.toFixed(1) || 'N/A'}</span>
                             <span className="ml-1 opacity-80">({business.reviewCount || 0} avaliações)</span>
                         </div>
@@ -341,10 +341,10 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                 </div>
                 
                 <div className="flex gap-3 w-full md:w-auto">
-                    <Button onClick={handleShare} className="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold shadow-md flex-1 md:flex-none">
+                    <Button onClick={handleShare} className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] font-bold shadow-md flex-1 md:flex-none">
                         <Share2 className="w-4 h-4 mr-2" /> Compartilhar
                     </Button>
-                    <Button onClick={handleToggleFavorite} disabled={favLoading} className={`font-bold shadow-md flex-1 md:flex-none border transition-colors ${isFavorite ? "bg-white text-red-500 hover:bg-slate-100 border-white" : "bg-yellow-500 hover:bg-yellow-600 text-blue-900 border-transparent"}`}>
+                    <Button onClick={handleToggleFavorite} disabled={favLoading} className={`font-bold shadow-md flex-1 md:flex-none border transition-colors ${isFavorite ? "bg-white text-red-500 hover:bg-slate-100 border-white" : "bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] border-transparent"}`}>
                         {favLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Heart className={`w-4 h-4 mr-2 ${isFavorite ? "fill-current" : ""}`} />}
                         {isFavorite ? "Salvo" : "Salvar"}
                     </Button>
@@ -358,7 +358,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
           
           <div className="lg:col-span-2 space-y-8">
             <Card className="border-none shadow-md bg-white overflow-hidden">
-                <CardHeader className="border-b border-slate-100 pb-4"><CardTitle className="text-lg font-bold text-[#1E3A8A] flex items-center gap-2"><Camera className="h-5 w-5" /> Galeria</CardTitle></CardHeader>
+                <CardHeader className="border-b border-slate-100 pb-4"><CardTitle className="text-lg font-bold text-[#002240] flex items-center gap-2"><Camera className="h-5 w-5" /> Galeria</CardTitle></CardHeader>
                 <CardContent className="p-6">
                     {business.images && business.images.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -385,7 +385,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                             <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Especialidades</h3>
                             <div className="flex flex-wrap gap-2">
                                 {business.specialties.map((specialty, index) => (
-                                    <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1 text-sm font-normal">{specialty}</Badge>
+                                    <Badge key={index} variant="secondary" className="bg-blue-50 text-[#002240] hover:bg-blue-100 px-3 py-1 text-sm font-normal">{specialty}</Badge>
                                 ))}
                             </div>
                         </div>
@@ -396,11 +396,11 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             <Card className="border-none shadow-sm bg-white border border-slate-200">
                 <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 pb-6">
                     <div>
-                        <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2"><MessageSquare className="h-5 w-5 text-[#1E3A8A]" /> Avaliações</CardTitle>
+                        <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2"><MessageSquare className="h-5 w-5 text-[#002240]" /> Avaliações</CardTitle>
                         <CardDescription className="mt-1">{reviews.length} comentários</CardDescription>
                     </div>
                     {!showReviewForm && (
-                        <Button onClick={handleToggleReviewForm} className="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold shadow-md">
+                        <Button onClick={handleToggleReviewForm} className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] font-bold shadow-md">
                             {userReview ? "Editar sua avaliação" : "Avaliar agora"}
                         </Button>
                     )}
@@ -414,17 +414,16 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                                     <span className="block text-sm font-medium text-slate-700 mb-2">Sua nota</span>
                                     <div className="flex items-center gap-2">
                                         {[1, 2, 3, 4, 5].map((star) => (
-                                            <Star key={star} className={`w-8 h-8 cursor-pointer transition-transform hover:scale-110 ${star <= userRating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300'}`} onClick={() => setUserRating(star)} />
+                                            <Star key={star} className={`w-8 h-8 cursor-pointer transition-transform hover:scale-110 ${star <= userRating ? 'text-[#F7B000] fill-[#F7B000]' : 'text-slate-300'}`} onClick={() => setUserRating(star)} />
                                         ))}
                                     </div>
                                 </div>
                                 <div className="mb-4">
                                     <span className="block text-sm font-medium text-slate-700 mb-2">Seu comentário</span>
-                                    <Textarea placeholder="Conte como foi sua experiência..." className="bg-white border-slate-300 focus-visible:ring-[#1E3A8A] text-slate-900 placeholder:text-slate-400" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={4} />
+                                    <Textarea placeholder="Conte como foi sua experiência..." className="bg-white border-slate-300 focus-visible:ring-[#00CCFF] text-slate-900 placeholder:text-slate-400" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={4} />
                                 </div>
                                 <div className="flex justify-end gap-2">
                                     <Button type="button" variant="outline" onClick={() => setShowReviewForm(false)} className="border-slate-300 text-slate-700 hover:bg-slate-50">Cancelar</Button>
-                                    {/* BOTÃO AMARELO */}
                                     <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold">Salvar Avaliação</Button>
                                 </div>
                             </form>
@@ -436,7 +435,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                             reviews.map(review => (
                                 <div key={review.id} className="flex gap-4 border-b border-slate-100 pb-6 last:border-0 last:pb-0">
                                     <Avatar className="h-10 w-10 border border-slate-200">
-                                        <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">{review.userName.charAt(0)}</AvatarFallback>
+                                        <AvatarFallback className="bg-blue-100 text-[#002240] font-bold">{review.userName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1">
                                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1">
@@ -493,10 +492,10 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             <Card className="border border-slate-200 shadow-sm bg-white">
               <CardHeader className="bg-slate-50 border-b border-slate-100 py-4"><CardTitle className="text-base font-bold text-slate-800">Canais de Atendimento</CardTitle></CardHeader>
               <CardContent className="p-5 space-y-4">
-                 <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 shadow-md h-12 text-md font-bold" asChild><a href={`tel:${business.businessPhone}`}><Phone className="w-4 h-4 mr-2" /> Ligar Agora</a></Button>
-                 {business.whatsapp && <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 shadow-md h-12 text-md font-bold" asChild><a href={`https://wa.me/55${business.whatsapp.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"><MessageSquare className="w-4 h-4 mr-2" /> WhatsApp</a></Button>}
+                 <Button className="w-full bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] shadow-md h-12 text-md font-bold" asChild><a href={`tel:${business.businessPhone}`}><Phone className="w-4 h-4 mr-2" /> Ligar Agora</a></Button>
+                 {business.whatsapp && <Button className="w-full bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] shadow-md h-12 text-md font-bold" asChild><a href={`https://wa.me/55${business.whatsapp.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"><MessageSquare className="w-4 h-4 mr-2" /> WhatsApp</a></Button>}
                  <Separator className="my-2" />
-                 {business.website && <a href={business.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-slate-600 hover:text-[#1E3A8A] transition-colors p-2 hover:bg-slate-50 rounded-lg"><div className="bg-slate-100 p-2 rounded-full"><Globe className="w-4 h-4 text-slate-500" /></div><span className="truncate flex-1 font-medium">Visitar Site / Instagram</span><ArrowRight className="w-4 h-4 opacity-50" /></a>}
+                 {business.website && <a href={business.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-slate-600 hover:text-[#002240] transition-colors p-2 hover:bg-slate-50 rounded-lg"><div className="bg-slate-100 p-2 rounded-full"><Globe className="w-4 h-4 text-slate-500" /></div><span className="truncate flex-1 font-medium">Visitar Site / Instagram</span><ArrowRight className="w-4 h-4 opacity-50" /></a>}
                  <div className="flex items-center gap-3 text-sm text-slate-600 p-2"><div className="bg-slate-100 p-2 rounded-full"><Phone className="w-4 h-4 text-slate-500" /></div><span className="font-medium">{business.businessPhone}</span></div>
               </CardContent>
             </Card>
@@ -516,7 +515,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
               </div>
               <CardContent className="p-5">
                 <p className="text-sm text-slate-600 mb-4">{business.address}</p>
-                <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold shadow-md" asChild><a href={`https://www.google.com/maps/dir/?api=1&destination=${business.location.latitude},${business.location.longitude}`} target="_blank" rel="noopener noreferrer"><Navigation className="w-4 h-4 mr-2" /> Traçar Rota</a></Button>
+                <Button className="w-full bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] font-bold shadow-md" asChild><a href={`https://www.google.com/maps/dir/?api=1&destination=${business.location.latitude},${business.location.longitude}`} target="_blank" rel="noopener noreferrer"><Navigation className="w-4 h-4 mr-2" /> Traçar Rota</a></Button>
               </CardContent>
             </Card>
           </div>

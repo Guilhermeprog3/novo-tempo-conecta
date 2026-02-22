@@ -29,12 +29,12 @@ const InfoItem = ({ icon, label, value, fullWidth = false }: {
     fullWidth?: boolean
 }) => (
     <div className={`flex items-start space-x-4 ${fullWidth ? 'md:col-span-2' : ''}`}>
-        <div className="flex-shrink-0 bg-blue-100 p-3 rounded-lg text-blue-700 mt-1">
+        <div className="flex-shrink-0 bg-[#00CCFF]/10 p-3 rounded-lg text-[#00CCFF] mt-1">
             {icon}
         </div>
         <div>
-            <p className="font-semibold text-gray-800">{label}</p>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{value || 'Não informado'}</p>
+            <p className="font-semibold text-slate-800">{label}</p>
+            <p className="text-sm text-slate-600 whitespace-pre-wrap">{value || 'Não informado'}</p>
         </div>
     </div>
 );
@@ -59,25 +59,25 @@ export default function EmpresarioDashboardPage() {
     }, []);
 
     if (loading) {
-        return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
+        return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00CCFF]" /></div>;
     }
 
     return (
         <div className="space-y-6">
-            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+            <Card className="shadow-sm bg-white border border-slate-200 rounded-xl">
                 <CardHeader>
                     <CardTitle className="text-slate-900 text-lg">Ações Rápidas</CardTitle>
                     <CardDescription className="text-slate-500">Gerencie seu estabelecimento de forma eficiente.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Button className="h-24 p-4 flex-col items-center justify-center space-y-2 text-base bg-blue-700 text-white hover:bg-blue-800 transition-all duration-300" asChild>
+                        <Button className="h-24 p-4 flex-col items-center justify-center space-y-2 text-base bg-[#00CCFF] text-[#002240] font-bold hover:bg-[#00CCFF]/90 transition-all duration-300" asChild>
                             <Link href="/empresario/perfil">
                                 <Edit className="w-6 h-6" />
                                 <span>Editar Informações</span>
                             </Link>
                         </Button>
-                        <Button variant="outline" className="h-24 p-4 flex-col items-center justify-center space-y-2 text-base bg-transparent text-blue-700 border-blue-600 hover:bg-blue-50 hover:text-blue-800 transition-all duration-300" asChild>
+                        <Button variant="outline" className="h-24 p-4 flex-col items-center justify-center space-y-2 text-base bg-transparent text-[#00CCFF] border-[#00CCFF] hover:bg-[#00CCFF]/10 transition-all duration-300" asChild>
                             <Link href="/empresario/avaliacoes">
                                 <MessageSquare className="w-6 h-6" />
                                 <span>Responder Avaliações</span>
@@ -87,8 +87,7 @@ export default function EmpresarioDashboardPage() {
                 </CardContent>
             </Card>
 
-            {/* NOVOS CARDS DE INFORMAÇÕES DETALHADAS */}
-            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+            <Card className="shadow-sm bg-white border border-slate-200 rounded-xl">
                 <CardHeader>
                     <CardTitle className="text-slate-900 text-lg">Informações Básicas</CardTitle>
                 </CardHeader>
@@ -99,7 +98,7 @@ export default function EmpresarioDashboardPage() {
                 </CardContent>
             </Card>
             
-            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+            <Card className="shadow-sm bg-white border border-slate-200 rounded-xl">
                 <CardHeader>
                     <CardTitle className="text-slate-900 text-lg">Informações de Contato</CardTitle>
                 </CardHeader>
@@ -110,7 +109,7 @@ export default function EmpresarioDashboardPage() {
                 </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
+            <Card className="shadow-sm bg-white border border-slate-200 rounded-xl">
                 <CardHeader>
                     <CardTitle className="text-slate-900 text-lg">Localização e Horários</CardTitle>
                 </CardHeader>

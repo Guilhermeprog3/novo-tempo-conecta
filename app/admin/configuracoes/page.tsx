@@ -1,4 +1,3 @@
-// app/admin/configuracoes/page.tsx
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -8,9 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { 
-    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger 
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Mail, KeyRound, Edit, Loader2, Eye, EyeOff } from "lucide-react"
 import { auth } from "@/lib/firebase"
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, User as FirebaseUser } from "firebase/auth"
@@ -20,15 +17,13 @@ export default function AdminSettingsPage() {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(false);
     
-    // Estados do Formulário de Senha
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     
-    // Estados de visibilidade das senhas
     const [showCurrentPass, setShowCurrentPass] = useState(false);
     const [showNewPass, setShowNewPass] = useState(false);
-    const [showConfirmPass, setShowConfirmPass] = useState(false); // Novo estado
+    const [showConfirmPass, setShowConfirmPass] = useState(false);
     
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -62,16 +57,12 @@ export default function AdminSettingsPage() {
         }
 
         try {
-            // 1. Reautenticar o usuário para garantir que é ele mesmo
             const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
             await reauthenticateWithCredential(auth.currentUser, credential);
-
-            // 2. Atualizar senha
             await updatePassword(auth.currentUser, newPassword);
             
             toast.success("Sua senha foi alterada com sucesso!");
             
-            // Limpar formulário e fechar modal
             setIsDialogOpen(false);
             setCurrentPassword("");
             setNewPassword("");
@@ -79,8 +70,6 @@ export default function AdminSettingsPage() {
 
         } catch (error: any) {
             console.error("Erro ao alterar senha:", error);
-            
-            // Tratamento de erros específicos do Firebase
             if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                 toast.error("A senha atual digitada está incorreta.");
             } else if (error.code === 'auth/too-many-requests') {
@@ -103,15 +92,13 @@ export default function AdminSettingsPage() {
             
             <div className="space-y-6">
                 
-                {/* 1. Header Hero */}
-                <div className="rounded-xl bg-[#1E3A8A] p-8 text-white shadow-lg">
+                <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg">
                     <h1 className="text-3xl font-bold mb-2">Configurações</h1>
-                    <p className="text-blue-100 opacity-90">
+                    <p className="text-white/80">
                         Gerencie suas preferências e configurações de conta administrativa.
                     </p>
                 </div>
 
-                {/* 2. Cartão de Perfil */}
                 <Card className="border-none shadow-sm bg-white">
                     <CardContent className="p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
                         <Avatar className="h-20 w-20 border-4 border-slate-50 shadow-sm">
@@ -130,7 +117,7 @@ export default function AdminSettingsPage() {
                                 <span>{user?.email}</span>
                             </div>
                             <div className="pt-2 flex justify-center md:justify-start gap-2">
-                                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white border-none px-3 py-1">
+                                <Badge className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] border-none px-3 py-1">
                                     SUPER ADMIN
                                 </Badge>
                                 <Badge variant="outline" className="text-slate-500 border-slate-200">
@@ -141,7 +128,6 @@ export default function AdminSettingsPage() {
                     </CardContent>
                 </Card>
 
-                {/* 3. Configurações de Conta */}
                 <Card className="border-none shadow-sm bg-white">
                     <CardHeader className="border-b bg-slate-50/50 px-6 py-4">
                         <CardTitle className="text-lg text-slate-800">Conta</CardTitle>
@@ -149,20 +135,18 @@ export default function AdminSettingsPage() {
                     </CardHeader>
                     <CardContent className="p-6 space-y-8">
                         
-                        {/* Linha: Informações Pessoais */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h3 className="font-semibold text-slate-900">Informações Pessoais</h3>
                                 <p className="text-sm text-slate-500">Nome de exibição e e-mail de contato.</p>
                             </div>
-                            <Button variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 hover:text-yellow-800" disabled>
+                            <Button variant="outline" className="bg-[#F7B000]/10 text-[#F7B000] border-[#F7B000]/20 hover:bg-[#F7B000]/20" disabled>
                                 <Edit className="w-4 h-4 mr-2" /> Editar (Indisponível)
                             </Button>
                         </div>
 
                         <div className="h-px bg-slate-100 w-full" />
 
-                        {/* Linha: Alterar Senha */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h3 className="font-semibold text-slate-900">Alterar Senha</h3>
@@ -237,7 +221,7 @@ export default function AdminSettingsPage() {
                                             <Button 
                                                 type="submit" 
                                                 disabled={loading} 
-                                                className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold"
+                                                className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] font-semibold"
                                             >
                                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                                 Salvar Alteração

@@ -118,20 +118,20 @@ export default function ConfiguracoesPage() {
         <>
             <Toaster position="bottom-right" />
             <div className="space-y-6">
-                <Card className="shadow-lg bg-white border border-gray-200/80 rounded-2xl">
-                    <CardHeader>
+                <Card className="shadow-sm bg-white border border-slate-200 rounded-xl">
+                    <CardHeader className="border-b border-slate-100 pb-4">
                         <CardTitle className="text-slate-900 text-lg">Alterar Senha</CardTitle>
                         <CardDescription className="text-slate-500">
                             Para sua segurança, você precisa informar sua senha atual para definir uma nova.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-6">
                         <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                             <div className="space-y-2">
                                 <Label htmlFor="currentPassword">Senha Atual</Label>
                                 <div className="relative">
-                                    <Input id="currentPassword" type={showCurrentPass ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required />
-                                    <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full" onClick={() => setShowCurrentPass(!showCurrentPass)}>
+                                    <Input className="focus-visible:ring-[#00CCFF] pr-10" id="currentPassword" type={showCurrentPass ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required />
+                                    <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full text-slate-400 hover:text-slate-600" onClick={() => setShowCurrentPass(!showCurrentPass)}>
                                         {showCurrentPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </Button>
                                 </div>
@@ -139,8 +139,8 @@ export default function ConfiguracoesPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="newPassword">Nova Senha</Label>
                                 <div className="relative">
-                                    <Input id="newPassword" type={showNewPass ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
-                                     <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full" onClick={() => setShowNewPass(!showNewPass)}>
+                                    <Input className="focus-visible:ring-[#00CCFF] pr-10" id="newPassword" type={showNewPass ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+                                     <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full text-slate-400 hover:text-slate-600" onClick={() => setShowNewPass(!showNewPass)}>
                                         {showNewPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </Button>
                                 </div>
@@ -148,13 +148,13 @@ export default function ConfiguracoesPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
                                 <div className="relative">
-                                    <Input id="confirmPassword" type={showConfirmPass ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
-                                    <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full" onClick={() => setShowConfirmPass(!showConfirmPass)}>
+                                    <Input className="focus-visible:ring-[#00CCFF] pr-10" id="confirmPassword" type={showConfirmPass ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+                                    <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full text-slate-400 hover:text-slate-600" onClick={() => setShowConfirmPass(!showConfirmPass)}>
                                         {showConfirmPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </Button>
                                 </div>
                             </div>
-                            <Button type="submit" disabled={isSaving}>
+                            <Button type="submit" disabled={isSaving} className="bg-[#00CCFF] hover:bg-[#00CCFF]/90 text-[#002240] font-bold">
                                 {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
                                 Salvar Nova Senha
                             </Button>
@@ -162,22 +162,22 @@ export default function ConfiguracoesPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-lg bg-white border-destructive rounded-2xl">
-                    <CardHeader>
-                        <CardTitle className="text-destructive text-lg">Zona de Perigo</CardTitle>
+                <Card className="shadow-sm bg-white border border-red-200 rounded-xl">
+                    <CardHeader className="border-b border-red-100 bg-red-50/50 pb-4">
+                        <CardTitle className="text-red-600 text-lg">Zona de Perigo</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex items-center justify-between">
+                    <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-6">
                         <div>
-                            <h3 className="font-semibold text-slate-800">Excluir esta conta</h3>
-                            <p className="text-sm text-slate-500 max-w-md">
+                            <h3 className="font-semibold text-slate-800">Excluir este negócio</h3>
+                            <p className="text-sm text-slate-500 max-w-md mt-1">
                                 Uma vez que sua conta for excluída, todos os seus dados serão permanentemente removidos. Esta ação não pode ser desfeita.
                             </p>
                         </div>
                         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive">
+                                <Button variant="destructive" className="bg-red-600 hover:bg-red-700 w-full md:w-auto">
                                     <Trash2 className="mr-2 h-4 w-4" />
-                                    Excluir Conta
+                                    Excluir Negócio
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -191,17 +191,17 @@ export default function ConfiguracoesPage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="passwordForDelete">Para confirmar, digite sua senha</Label>
                                         <div className="relative">
-                                            <Input id="passwordForDelete" type={showPassForDelete ? 'text' : 'password'} value={passwordForDelete} onChange={e => setPasswordForDelete(e.target.value)} />
-                                            <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full" onClick={() => setShowPassForDelete(!showPassForDelete)}>
+                                            <Input className="focus-visible:ring-red-400 pr-10" id="passwordForDelete" type={showPassForDelete ? 'text' : 'password'} value={passwordForDelete} onChange={e => setPasswordForDelete(e.target.value)} />
+                                            <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 h-full text-slate-400 hover:text-slate-600" onClick={() => setShowPassForDelete(!showPassForDelete)}>
                                                 {showPassForDelete ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                             </Button>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="deleteInput">
-                                            Digite <strong className="text-destructive">DELETAR</strong> para confirmar.
+                                            Digite <strong className="text-red-600">DELETAR</strong> para confirmar.
                                         </Label>
-                                        <Input id="deleteInput" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} />
+                                        <Input className="focus-visible:ring-red-400" id="deleteInput" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} />
                                     </div>
                                 </div>
                                 <AlertDialogFooter>
@@ -209,7 +209,7 @@ export default function ConfiguracoesPage() {
                                     <AlertDialogAction
                                         onClick={handleDeleteAccount}
                                         disabled={deleteInput !== 'DELETAR' || !passwordForDelete || isDeleting}
-                                        className="bg-destructive hover:bg-destructive/90"
+                                        className="bg-red-600 hover:bg-red-700 border-none text-white"
                                     >
                                         {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Eu entendo, excluir minha conta
