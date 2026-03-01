@@ -4,271 +4,246 @@ import React, { useState } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Mail, Lock, Store, MapPin, Clock, Loader2, AlertTriangle, User, Info } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import Link from "next/link"
 import { auth, db } from '@/lib/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { Header } from "@/components/navigation/header"
-import Link from "next/link"
+import { AUTH_CSS } from "./AUTH_CSS"
 
-const MapWithNoSSR = dynamic(() => import("./MapRegistrationComponent"), { 
+const MapWithNoSSR = dynamic(() => import("./MapRegistrationComponent"), {
   ssr: false,
-  loading: () => <div className="h-[300px] w-full bg-white/5 border border-[#00CCFF]/30 text-[#00CCFF] animate-pulse flex items-center justify-center">Carregando mapa...</div>
-});
+  loading: () => (
+    <div style={{ height: 260, borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(255,255,255,0.09)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.3)", fontSize: "0.85rem" }}>
+      Carregando mapa...
+    </div>
+  )
+})
 
-const categories = [
-    { value: "restaurante", label: "Restaurantes e Gastronomia" },
-    { value: "comercio", label: "Loja e Varejo" },
-    { value: "mercado", label: "Mercados e Mercearias" },
-    { value: "saude", label: "Farmácias e Saúde" },
-    { value: "beleza", label: "Estética e Barbearia" },
-    { value: "servicos", label: "Prestação de Serviços" },
-    { value: "outro", label: "Outros Negócios" },
-];
+const CATEGORIES = [
+  { value: "restaurante", label: "Restaurantes e Gastronomia" },
+  { value: "comercio", label: "Loja e Varejo" },
+  { value: "mercado", label: "Mercados e Mercearias" },
+  { value: "saude", label: "Farmácias e Saúde" },
+  { value: "beleza", label: "Estética e Barbearia" },
+  { value: "servicos", label: "Prestação de Serviços" },
+  { value: "outro", label: "Outros Negócios" },
+]
 
-const daysOfWeek = [
-    { id: 'monday', label: 'Segunda-feira' },
-    { id: 'tuesday', label: 'Terça-feira' },
-    { id: 'wednesday', label: 'Quarta-feira' },
-    { id: 'thursday', label: 'Quinta-feira' },
-    { id: 'friday', label: 'Sexta-feira' },
-    { id: 'saturday', label: 'Sábado' },
-    { id: 'sunday', label: 'Domingo' },
-];
+const DAYS = [
+  { id: 'monday', label: 'Segunda' }, { id: 'tuesday', label: 'Terça' },
+  { id: 'wednesday', label: 'Quarta' }, { id: 'thursday', label: 'Quinta' },
+  { id: 'friday', label: 'Sexta' }, { id: 'saturday', label: 'Sábado' },
+  { id: 'sunday', label: 'Domingo' },
+]
 
 export default function EmpresarioCadastroPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [position, setPosition] = useState<{lat: number, lng: number} | null>(null);
-  const [errors, setErrors] = useState<any>({});
-  
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [showPass, setShowPass] = useState(false)
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
-    ownerName: '', email: '', businessName: '', category: '', 
+    ownerName: '', email: '', businessName: '', category: '',
     businessPhone: '', address: '', website: '', description: '',
     password: '', confirmPassword: '', terms: false
-  });
-
+  })
   const [openingHours, setOpeningHours] = useState(
-    daysOfWeek.map(day => ({ day: day.label, opens: '08:00', closes: '18:00', isOpen: false }))
-  );
+    DAYS.map(d => ({ day: d.label, opens: '08:00', closes: '18:00', isOpen: false }))
+  )
 
-  const handleOpeningHoursChange = (index: number, field: string, value: any) => {
-    const newHours = [...openingHours];
-    newHours[index] = { ...newHours[index], [field]: value };
-    setOpeningHours(newHours);
-  };
+  const set = (k: string, v: any) => setFormData(p => ({ ...p, [k]: v }))
+  const updateHours = (i: number, field: string, value: any) => {
+    const h = [...openingHours]; h[i] = { ...h[i], [field]: value }; setOpeningHours(h)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
-    if (!position) return setErrors({ auth: "Por favor, marque o local da sua loja no mapa." });
-    if (formData.password !== formData.confirmPassword) return setErrors({ auth: "As senhas não coincidem" });
-    if (!formData.terms) return setErrors({ auth: "Você precisa aceitar os termos de uso." });
-    
-    setLoading(true);
+    e.preventDefault(); setError('')
+    if (!position) { setError("Por favor, marque o local da sua loja no mapa."); return }
+    if (formData.password !== formData.confirmPassword) { setError("As senhas não coincidem."); return }
+    if (!formData.terms) { setError("Você precisa aceitar os termos de uso."); return }
+    setLoading(true)
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      
-      await setDoc(doc(db, "businesses", userCredential.user.uid), {
+      const cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+      await setDoc(doc(db, "businesses", cred.user.uid), {
         ...formData,
         openingHours: openingHours.filter(h => h.isOpen),
         location: { latitude: position.lat, longitude: position.lng },
-        role: 'business',
-        status: 'pending',
-        createdAt: new Date()
-      });
-      
-      router.push('/empresario/dashboard');
-    } catch (err: any) {
-      setErrors({ auth: err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const inputStyles = "bg-white/5 border-[#00CCFF]/30 text-white focus-visible:ring-[#00CCFF] placeholder:text-gray-500";
+        role: 'business', status: 'pending', createdAt: new Date()
+      })
+      router.push('/empresario/dashboard')
+    } catch (err: any) { setError(err.message) }
+    finally { setLoading(false) }
+  }
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen bg-[#001529] py-12 px-4">
-        <div className="container mx-auto max-w-2xl">
-          <Card className="bg-[#002240] border-[#00CCFF]/20 text-white shadow-2xl">
-            <CardHeader className="text-center border-b border-[#00CCFF]/10 mb-6">
-              <div className="mx-auto w-12 h-12 bg-[#00CCFF]/20 rounded-full flex items-center justify-center mb-2">
-                <Store className="text-[#00CCFF]" size={28} />
+      <style>{AUTH_CSS}</style>
+      <div className="auth-page">
+        <Header />
+        <div className="auth-bg" style={{ alignItems: "flex-start", paddingTop: "3rem" }}>
+          <div className="auth-orb1" /><div className="auth-orb2" /><div className="auth-grid" />
+
+          <div className="auth-card auth-card-wider">
+            {/* TOP */}
+            <div className="auth-card-top">
+              <div className="auth-card-top-orb" />
+              <div className="auth-icon-wrap" style={{ background: "rgba(247,176,0,0.1)", border: "1px solid rgba(247,176,0,0.2)" }}>
+                <Store size={25} color="#F7B000" />
               </div>
-              <CardTitle className="text-3xl font-bold text-[#00CCFF]">Cadastrar Minha Loja</CardTitle>
-              <CardDescription className="text-gray-400">Divulgue seu estabelecimento para a comunidade</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-8">
-                
-                {/* INFORMAÇÕES DA LOJA */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold uppercase text-[#00CCFF] flex items-center gap-2">
-                    <Info size={16} /> Informações do Negócio
-                  </h3>
-                  <div className="space-y-2">
-                    <Label>Nome do Estabelecimento *</Label>
-                    <Input placeholder="Ex: Panificadora Central" className={inputStyles} onChange={e => setFormData({...formData, businessName: e.target.value})} required />
+              <div className="auth-eyebrow">Empresário Parceiro</div>
+              <div className="auth-title">Cadastrar Minha Loja</div>
+              <div className="auth-subtitle">Divulgue seu estabelecimento para toda a comunidade</div>
+            </div>
+
+            <div className="auth-body">
+              <form onSubmit={handleSubmit}>
+
+                {/* INFORMAÇÕES DO NEGÓCIO + MAPA */}
+                <div className="auth-section-label"><Info size={12} /> Informações do Negócio</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <div className="auth-field">
+                      <label className="auth-label">Nome do Estabelecimento *</label>
+                      <div className="auth-input-wrap">
+                        <Store size={14} className="ai" />
+                        <input className="auth-input" placeholder="Ex: Panificadora Central" required onChange={e => set('businessName', e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="auth-form-grid cols2">
+                      <div className="auth-field">
+                        <label className="auth-label">Categoria *</label>
+                        <select required className="auth-select" onChange={e => set('category', e.target.value)}>
+                          <option value="">Selecione...</option>
+                          {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                        </select>
+                      </div>
+                      <div className="auth-field">
+                        <label className="auth-label">Telefone Comercial</label>
+                        <div className="auth-input-wrap">
+                          <input className="auth-input no-icon" placeholder="(00) 00000-0000" onChange={e => set('businessPhone', e.target.value)} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="auth-field">
+                      <label className="auth-label">Endereço *</label>
+                      <div className="auth-input-wrap">
+                        <MapPin size={14} className="ai" />
+                        <input className="auth-input" placeholder="Rua, Número, Bairro" required onChange={e => set('address', e.target.value)} />
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Categoria *</Label>
-                      <Select onValueChange={v => setFormData({...formData, category: v})} required>
-                        <SelectTrigger className={inputStyles}><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                        <SelectContent className="bg-[#002240] text-white border-[#00CCFF]/30">
-                          {categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+
+                  {/* MAPA */}
+                  <div className="auth-field">
+                    <label className="auth-label" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <MapPin size={12} color="#F7B000" /> Localização no Mapa *
+                    </label>
+                    <div style={{ height: 200, borderRadius: 14, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.09)", position: "relative", zIndex: 0 }}>
+                      <MapWithNoSSR position={position} setPosition={setPosition} />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Telefone Comercial</Label>
-                      <Input placeholder="(00) 00000-0000" className={inputStyles} onChange={e => setFormData({...formData, businessPhone: e.target.value})} />
-                    </div>
+                    <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.22)", marginTop: 5, textAlign: "center" }}>Clique para fixar a localização exata</div>
                   </div>
                 </div>
 
                 {/* HORÁRIOS */}
-                <div className="p-4 bg-white/5 rounded-lg border border-[#00CCFF]/10">
-                  <Label className="text-[#00CCFF] mb-4 flex items-center gap-2">
-                    <Clock size={16} /> Horário de Funcionamento
-                  </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {openingHours.map((hour, index) => (
-                      <div key={hour.day} className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Checkbox checked={hour.isOpen} onCheckedChange={v => handleOpeningHoursChange(index, 'isOpen', !!v)} />
-                          <span className="text-xs text-gray-300">{hour.day}</span>
-                        </div>
-                        {hour.isOpen && (
-                          <div className="flex gap-2 ml-6">
-                            <Input type="time" className="h-8 bg-black/20 text-xs border-[#00CCFF]/20 w-24" value={hour.opens} onChange={e => handleOpeningHoursChange(index, 'opens', e.target.value)} />
-                            <Input type="time" className="h-8 bg-black/20 text-xs border-[#00CCFF]/20 w-24" value={hour.closes} onChange={e => handleOpeningHoursChange(index, 'closes', e.target.value)} />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LOCALIZAÇÃO */}
-                <div className="space-y-2">
-                  <Label className="text-[#00CCFF] flex items-center gap-2">
-                    <MapPin size={16} /> Localização *
-                  </Label>
-                  <div className="h-[250px] rounded-lg overflow-hidden border border-[#00CCFF]/30 relative z-0">
-                    <MapWithNoSSR position={position} setPosition={setPosition} />
-                  </div>
-                </div>
-
-                {/* DADOS DO PROPRIETÁRIO */}
-                <div className="space-y-4 border-t border-white/5 pt-6">
-                  <h3 className="text-sm font-semibold uppercase text-[#00CCFF] flex items-center gap-2">
-                    <User size={16} /> Dados de Acesso
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Nome do Proprietário *</Label>
-                      <Input placeholder="Seu nome" className={inputStyles} onChange={e => setFormData({...formData, ownerName: e.target.value})} required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>E-mail *</Label>
-                      <Input type="email" placeholder="email@exemplo.com" className={inputStyles} onChange={e => setFormData({...formData, email: e.target.value})} required />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Senha *</Label>
-                      <div className="relative">
-                        <Input 
-                          type={showPassword ? "text" : "password"} 
-                          placeholder="Mínimo 6 caracteres" 
-                          className={inputStyles} 
-                          onChange={e => setFormData({...formData, password: e.target.value})} 
-                          required 
+                <div className="auth-section-label"><Clock size={12} /> Horário de Funcionamento</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: "7px", marginBottom: "1.5rem" }}>
+                  {openingHours.map((h, i) => (
+                    <div key={h.day} className={`auth-day-card ${h.isOpen ? 'active' : ''}`}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: h.isOpen ? 8 : 0 }}>
+                        <Checkbox
+                          checked={h.isOpen}
+                          onCheckedChange={v => updateHours(i, 'isOpen', !!v)}
+                          className="border-[rgba(255,255,255,0.18)] data-[state=checked]:bg-[#00CCFF] data-[state=checked]:border-[#00CCFF]"
                         />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
+                        <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>{h.day}</span>
                       </div>
+                      {h.isOpen && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                          <input type="time" className="auth-time-input" value={h.opens} onChange={e => updateHours(i, 'opens', e.target.value)} />
+                          <input type="time" className="auth-time-input" value={h.closes} onChange={e => updateHours(i, 'closes', e.target.value)} />
+                        </div>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <Label>Confirmar Senha *</Label>
-                      <Input type="password" placeholder="Repita a senha" className={inputStyles} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} required />
+                  ))}
+                </div>
+
+                {/* DADOS DE ACESSO */}
+                <div className="auth-section-label"><User size={12} /> Dados de Acesso</div>
+                <div className="auth-form-grid cols2" style={{ marginBottom: "1rem" }}>
+                  <div className="auth-field">
+                    <label className="auth-label">Nome do Proprietário *</label>
+                    <div className="auth-input-wrap">
+                      <User size={14} className="ai" />
+                      <input className="auth-input" placeholder="Seu nome" required onChange={e => set('ownerName', e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="auth-field">
+                    <label className="auth-label">E-mail *</label>
+                    <div className="auth-input-wrap">
+                      <Mail size={14} className="ai" />
+                      <input className="auth-input" type="email" placeholder="email@exemplo.com" required onChange={e => set('email', e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="auth-field">
+                    <label className="auth-label">Senha *</label>
+                    <div className="auth-input-wrap">
+                      <Lock size={14} className="ai" />
+                      <input className="auth-input pr" type={showPass ? "text" : "password"} placeholder="Mínimo 6 caracteres" required onChange={e => set('password', e.target.value)} />
+                      <button type="button" className="auth-eye-btn" onClick={() => setShowPass(p => !p)}>
+                        {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="auth-field">
+                    <label className="auth-label">Confirmar Senha *</label>
+                    <div className="auth-input-wrap">
+                      <Lock size={14} className="ai" />
+                      <input className="auth-input no-icon" type="password" placeholder="Repita a senha" required onChange={e => set('confirmPassword', e.target.value)} style={{ paddingLeft: 14 }} />
                     </div>
                   </div>
                 </div>
 
-                {errors.auth && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-500 text-sm font-medium">
-                    <AlertTriangle size={16} /> {errors.auth}
+                {/* TERMS */}
+                <div className="auth-terms" style={{ marginBottom: "1.4rem" }}>
+                  <Checkbox
+                    className="border-[rgba(255,255,255,0.18)] data-[state=checked]:bg-[#00CCFF] data-[state=checked]:border-[#00CCFF] mt-0.5 flex-shrink-0"
+                    checked={formData.terms}
+                    onCheckedChange={v => set('terms', !!v)}
+                  />
+                  <span>
+                    Concordo com os{" "}
+                    <Link href="/termos-de-uso" target="_blank" className="auth-lnk">Termos de Uso</Link>
+                    {" "}e a{" "}
+                    <Link href="/politica-de-privacidade" target="_blank" className="auth-lnk">Política de Privacidade</Link>
+                  </span>
+                </div>
+
+                {error && (
+                  <div className="auth-error" style={{ marginBottom: "1rem" }}>
+                    <AlertTriangle size={14} style={{ flexShrink: 0 }} /> {error}
                   </div>
                 )}
 
-                {/* TERMOS E SUBMIT */}
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="terms" 
-                      checked={formData.terms} 
-                      onCheckedChange={(v) => setFormData({...formData, terms: !!v})} 
-                      className="border-[#00CCFF] data-[state=checked]:bg-[#00CCFF]"
-                    />
-                    <Label htmlFor="terms" className="text-sm text-white font-normal leading-none cursor-pointer">
-                      Concordo com os{" "}
-                      <Link href="/termos-de-uso" target="_blank" className="text-[#F7B000] hover:underline font-medium">
-                        Termos de Uso
-                      </Link>
-                      {" "}e{" "}
-                      <Link href="/politica-de-privacidade" target="_blank" className="text-[#F7B000] hover:underline font-medium">
-                        Política de Privacidade
-                      </Link>
-                    </Label>
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-[#00CCFF] text-[#001529] hover:bg-[#00CCFF]/90 font-bold h-12 text-lg shadow-lg" 
-                    disabled={loading}
-                  >
-                    {loading ? <Loader2 className="animate-spin" /> : "Cadastrar Meu Negócio"}
-                  </Button>
-                </div>
-
-                {/* NAVEGAÇÃO FINAL */}
-                <div className="text-center pt-2 space-y-3">
-                  <p className="text-sm text-gray-400">
-                    Já tem uma conta?{" "}
-                    <Link href="/login" className="text-[#F7B000] hover:underline font-medium">
-                      Faça login aqui
-                    </Link>
-                  </p>
-                  <div className="border-t border-white/5 pt-4">
-                    <p className="text-sm text-gray-400">
-                      Não é um empresário?{" "}
-                      <Link href="/cadastro" className="text-[#F7B000] hover:underline font-medium">
-                        Cadastre-se como Cidadão
-                      </Link>
-                    </p>
-                  </div>
-                </div>
+                <button type="submit" className="auth-btn auth-btn-gold" disabled={loading}>
+                  {loading ? <Loader2 size={17} style={{ animation: "auth-spin 1s linear infinite" }} /> : <Store size={16} />}
+                  {loading ? "Cadastrando..." : "Cadastrar Meu Negócio"}
+                </button>
               </form>
-            </CardContent>
-          </Card>
+
+              <div className="auth-divider" style={{ marginTop: "1.8rem" }}>
+                <span className="auth-divider-text">Já tem conta?</span>
+              </div>
+              <div className="auth-foot">
+                <Link href="/login">Faça login aqui</Link><br />
+                Não é empresário? <Link href="/cadastro">Cadastre-se como Cidadão</Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
-  );
+  )
 }

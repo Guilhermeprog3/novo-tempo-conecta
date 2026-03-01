@@ -1,240 +1,164 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Mail, KeyRound, Edit, Loader2, Eye, EyeOff } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Mail, KeyRound, Edit, Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react"
 import { auth } from "@/lib/firebase"
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, User as FirebaseUser } from "firebase/auth"
 import { Toaster, toast } from "sonner"
+import { ADMIN_CSS } from "./AdminDashboardPage"
+
+const SETTINGS_CSS = `
+.cfg-profile{display:flex;align-items:center;gap:1.5rem;padding:2rem;border-bottom:1px solid #f0ece5;}
+.cfg-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.cfg-badge-gold{background:rgba(247,176,0,0.12);color:#a06000;border:1px solid rgba(247,176,0,0.25);padding:4px 12px;border-radius:100px;font-size:0.72rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;}
+.cfg-badge-outline{background:#f8f6f2;color:#5a6878;border:1px solid #e0dbd2;padding:4px 12px;border-radius:100px;font-size:0.72rem;font-weight:600;}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2rem;border-bottom:1px solid #f5f3f0;gap:1rem;flex-wrap:wrap;}
+.cfg-row:last-child{border-bottom:none;}
+.cfg-row-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;color:#002240;margin-bottom:3px;}
+.cfg-row-desc{font-size:0.78rem;color:#8a9aaa;}
+.cfg-pass-input-wrap{position:relative;}
+.cfg-pass-input-wrap input{padding-right:42px;}
+.cfg-eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#b0bec5;padding:0;}
+.cfg-eye-btn:hover{color:#5a6878;}
+`
 
 export default function AdminSettingsPage() {
-    const [user, setUser] = useState<FirebaseUser | null>(null);
-    const [loading, setLoading] = useState(false);
-    
-    const [currentPassword, setCurrentPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    
-    const [showCurrentPass, setShowCurrentPass] = useState(false);
-    const [showNewPass, setShowNewPass] = useState(false);
-    const [showConfirmPass, setShowConfirmPass] = useState(false);
-    
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [user, setUser] = useState<FirebaseUser | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showCurr, setShowCurr] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConf, setShowConf] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-    useEffect(() => {
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-            setUser(currentUser);
-        }
-    }, []);
+  useEffect(() => { if (auth.currentUser) setUser(auth.currentUser) }, [])
 
-    const handleChangePassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault(); setLoading(true)
+    if (newPassword !== confirmPassword) { toast.error("Senhas não coincidem."); setLoading(false); return }
+    if (newPassword.length < 6) { toast.error("Mínimo 6 caracteres."); setLoading(false); return }
+    if (!auth.currentUser?.email) { toast.error("Sessão inválida."); setLoading(false); return }
+    try {
+      const cred = EmailAuthProvider.credential(auth.currentUser.email, currentPassword)
+      await reauthenticateWithCredential(auth.currentUser, cred)
+      await updatePassword(auth.currentUser, newPassword)
+      toast.success("Senha alterada com sucesso!")
+      setIsDialogOpen(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword("")
+    } catch (err: any) {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') toast.error("Senha atual incorreta.")
+      else if (err.code === 'auth/too-many-requests') toast.error("Muitas tentativas. Aguarde.")
+      else toast.error("Erro ao atualizar senha.")
+    } finally { setLoading(false) }
+  }
 
-        if (newPassword !== confirmPassword) {
-            toast.error("A nova senha e a confirmação não coincidem.");
-            setLoading(false);
-            return;
-        }
+  const initials = (name: string | null | undefined) => name ? name.substring(0, 2).toUpperCase() : "AD"
 
-        if (newPassword.length < 6) {
-            toast.error("A nova senha deve ter no mínimo 6 caracteres.");
-            setLoading(false);
-            return;
-        }
+  return (
+    <>
+      <style>{ADMIN_CSS}{SETTINGS_CSS}</style>
+      <Toaster />
+      <div className="adm">
+        <div className="adm-hero">
+          <div className="adm-hero-orb1" /><div className="adm-hero-orb2" />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div className="adm-hero-eyebrow">Administração</div>
+            <div className="adm-hero-title">Configurações</div>
+            <div className="adm-hero-sub">Gerencie suas preferências e configurações de conta administrativa.</div>
+          </div>
+        </div>
 
-        if (!auth.currentUser || !auth.currentUser.email) {
-            toast.error("Sessão inválida. Faça login novamente.");
-            setLoading(false);
-            return;
-        }
-
-        try {
-            const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
-            await reauthenticateWithCredential(auth.currentUser, credential);
-            await updatePassword(auth.currentUser, newPassword);
-            
-            toast.success("Sua senha foi alterada com sucesso!");
-            
-            setIsDialogOpen(false);
-            setCurrentPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
-
-        } catch (error: any) {
-            console.error("Erro ao alterar senha:", error);
-            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                toast.error("A senha atual digitada está incorreta.");
-            } else if (error.code === 'auth/too-many-requests') {
-                toast.error("Muitas tentativas falhas. Aguarde alguns instantes.");
-            } else {
-                toast.error("Ocorreu um erro ao atualizar a senha. Tente novamente.");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getInitials = (name: string | null | undefined) => {
-        return name ? name.substring(0, 2).toUpperCase() : "AD";
-    };
-
-    return (
-        <>
-            <Toaster />
-            
-            <div className="space-y-6">
-                
-                <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg">
-                    <h1 className="text-3xl font-bold mb-2">Configurações</h1>
-                    <p className="text-white/80">
-                        Gerencie suas preferências e configurações de conta administrativa.
-                    </p>
-                </div>
-
-                <Card className="border-none shadow-sm bg-white">
-                    <CardContent className="p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
-                        <Avatar className="h-20 w-20 border-4 border-slate-50 shadow-sm">
-                            <AvatarImage src={user?.photoURL || ""} />
-                            <AvatarFallback className="bg-slate-200 text-slate-600 text-xl font-bold">
-                                {getInitials(user?.displayName)}
-                            </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1 text-center md:text-left space-y-1">
-                            <h2 className="text-xl font-bold text-slate-900 flex items-center justify-center md:justify-start gap-2">
-                                {user?.displayName || "Administrador"}
-                            </h2>
-                            <div className="flex items-center justify-center md:justify-start gap-2 text-slate-500">
-                                <Mail className="w-4 h-4" />
-                                <span>{user?.email}</span>
-                            </div>
-                            <div className="pt-2 flex justify-center md:justify-start gap-2">
-                                <Badge className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] border-none px-3 py-1">
-                                    SUPER ADMIN
-                                </Badge>
-                                <Badge variant="outline" className="text-slate-500 border-slate-200">
-                                    Acesso Total
-                                </Badge>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-none shadow-sm bg-white">
-                    <CardHeader className="border-b bg-slate-50/50 px-6 py-4">
-                        <CardTitle className="text-lg text-slate-800">Conta</CardTitle>
-                        <CardDescription>Gerencie suas informações de acesso e segurança.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-8">
-                        
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div>
-                                <h3 className="font-semibold text-slate-900">Informações Pessoais</h3>
-                                <p className="text-sm text-slate-500">Nome de exibição e e-mail de contato.</p>
-                            </div>
-                            <Button variant="outline" className="bg-[#F7B000]/10 text-[#F7B000] border-[#F7B000]/20 hover:bg-[#F7B000]/20" disabled>
-                                <Edit className="w-4 h-4 mr-2" /> Editar (Indisponível)
-                            </Button>
-                        </div>
-
-                        <div className="h-px bg-slate-100 w-full" />
-
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div>
-                                <h3 className="font-semibold text-slate-900">Alterar Senha</h3>
-                                <p className="text-sm text-slate-500">Mantenha sua conta segura com uma senha forte.</p>
-                            </div>
-                            
-                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50">
-                                        <KeyRound className="w-4 h-4 mr-2" /> Alterar Senha
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                        <DialogTitle>Alterar Senha</DialogTitle>
-                                        <DialogDescription>
-                                            Digite sua senha atual para confirmar e defina a nova senha.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <form onSubmit={handleChangePassword} className="space-y-4 py-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="current">Senha Atual</Label>
-                                            <div className="relative">
-                                                <Input 
-                                                    id="current" 
-                                                    type={showCurrentPass ? "text" : "password"} 
-                                                    value={currentPassword}
-                                                    onChange={(e) => setCurrentPassword(e.target.value)}
-                                                    required
-                                                    className="pr-10"
-                                                />
-                                                <button type="button" onClick={() => setShowCurrentPass(!showCurrentPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                                                    {showCurrentPass ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="new">Nova Senha</Label>
-                                            <div className="relative">
-                                                <Input 
-                                                    id="new" 
-                                                    type={showNewPass ? "text" : "password"} 
-                                                    value={newPassword}
-                                                    onChange={(e) => setNewPassword(e.target.value)}
-                                                    required
-                                                    placeholder="Mínimo 6 caracteres"
-                                                    className="pr-10"
-                                                />
-                                                <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                                                    {showNewPass ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="confirm">Confirmar Nova Senha</Label>
-                                            <div className="relative">
-                                                <Input 
-                                                    id="confirm" 
-                                                    type={showConfirmPass ? "text" : "password"} 
-                                                    value={confirmPassword}
-                                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                                    required
-                                                    className="pr-10"
-                                                />
-                                                <button type="button" onClick={() => setShowConfirmPass(!showConfirmPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                                                    {showConfirmPass ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <DialogFooter className="pt-4">
-                                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                                            <Button 
-                                                type="submit" 
-                                                disabled={loading} 
-                                                className="bg-[#F7B000] hover:bg-[#F7B000]/90 text-[#002240] font-semibold"
-                                            >
-                                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                Salvar Alteração
-                                            </Button>
-                                        </DialogFooter>
-                                    </form>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-
-                    </CardContent>
-                </Card>
+        {/* PROFILE CARD */}
+        <div className="adm-card" style={{ marginBottom: "1.5rem" }}>
+          <div className="cfg-profile">
+            <Avatar style={{ width: 72, height: 72, border: "3px solid #f0ece5", flexShrink: 0 }}>
+              <AvatarImage src={user?.photoURL || ""} />
+              <AvatarFallback style={{ background: "#f8f6f2", color: "#5a6878", fontSize: "1.3rem", fontWeight: 700 }}>
+                {initials(user?.displayName)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div style={{ fontFamily: "'Syne',sans-serif", fontSize: "1.2rem", fontWeight: 800, color: "#002240" }}>
+                {user?.displayName || "Administrador"}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#8a9aaa", fontSize: "0.85rem", marginTop: 4 }}>
+                <Mail size={13} /> {user?.email}
+              </div>
+              <div className="cfg-badges">
+                <span className="cfg-badge-gold"><ShieldCheck size={10} style={{ display: "inline", marginRight: 4 }} />Super Admin</span>
+                <span className="cfg-badge-outline">Acesso Total</span>
+              </div>
             </div>
-        </>
-    )
+          </div>
+        </div>
+
+        {/* SETTINGS */}
+        <div className="adm-card">
+          <div className="adm-card-header">
+            <div><div className="adm-card-title">Conta</div><div className="adm-card-sub">Gerencie suas informações de acesso e segurança.</div></div>
+          </div>
+
+          <div className="cfg-row">
+            <div>
+              <div className="cfg-row-title">Informações Pessoais</div>
+              <div className="cfg-row-desc">Nome de exibição e e-mail de contato.</div>
+            </div>
+            <button className="adm-btn adm-btn-outline" disabled style={{ opacity: 0.5 }}>
+              <Edit size={14} /> Editar (Indisponível)
+            </button>
+          </div>
+
+          <div className="cfg-row">
+            <div>
+              <div className="cfg-row-title">Alterar Senha</div>
+              <div className="cfg-row-desc">Mantenha sua conta segura com uma senha forte.</div>
+            </div>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <button className="adm-btn adm-btn-outline"><KeyRound size={14} /> Alterar Senha</button>
+              </DialogTrigger>
+              <DialogContent style={{ borderRadius: 20, maxWidth: 420 }}>
+                <DialogHeader>
+                  <DialogTitle style={{ fontFamily: "'Syne',sans-serif", color: "#002240" }}>Alterar Senha</DialogTitle>
+                  <DialogDescription>Digite sua senha atual para confirmar e defina a nova senha.</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleChangePassword}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "0.5rem 0 1rem" }}>
+                    {[
+                      { id: "curr", label: "Senha Atual", value: currentPassword, setter: setCurrentPassword, show: showCurr, toggle: () => setShowCurr(p => !p) },
+                      { id: "new", label: "Nova Senha", value: newPassword, setter: setNewPassword, show: showNew, toggle: () => setShowNew(p => !p), placeholder: "Mínimo 6 caracteres" },
+                      { id: "conf", label: "Confirmar Nova Senha", value: confirmPassword, setter: setConfirmPassword, show: showConf, toggle: () => setShowConf(p => !p) },
+                    ].map(f => (
+                      <div key={f.id}>
+                        <Label htmlFor={f.id} style={{ fontSize: "0.78rem", fontWeight: 600, color: "#5a6878" }}>{f.label}</Label>
+                        <div className="cfg-pass-input-wrap" style={{ marginTop: 5 }}>
+                          <Input id={f.id} type={f.show ? "text" : "password"} value={f.value} onChange={e => f.setter(e.target.value)} required placeholder={f.placeholder} style={{ paddingRight: 42 }} />
+                          <button type="button" className="cfg-eye-btn" onClick={f.toggle}>
+                            {f.show ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <DialogFooter>
+                    <button type="button" className="adm-btn adm-btn-outline" onClick={() => setIsDialogOpen(false)}>Cancelar</button>
+                    <button type="submit" className="adm-btn adm-btn-primary" disabled={loading}>
+                      {loading && <Loader2 size={14} style={{ animation: "adm-spin 1s linear infinite" }} />}
+                      Salvar Alteração
+                    </button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
+    </>
+  )
 }

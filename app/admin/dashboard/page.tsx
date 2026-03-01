@@ -1,250 +1,224 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Users, Building2, Star, Activity, TrendingUp, AlertTriangle } from "lucide-react"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, Timestamp } from "firebase/firestore"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 
-function StatCard({ title, value, icon: Icon, description, trend, colorClass }: any) {
-    return (
-        <Card className="border-none shadow-sm hover:shadow-md transition-all duration-200 bg-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-600">
-                    {title}
-                </CardTitle>
-                <div className={`h-9 w-9 rounded-full flex items-center justify-center ${colorClass || 'bg-[#00CCFF]/10 text-[#00CCFF]'}`}>
-                    <Icon className="h-5 w-5" />
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{value}</div>
-                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                    {trend && <span className="text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded flex items-center text-[10px]"><TrendingUp className="w-3 h-3 mr-1"/> {trend}</span>}
-                    <span className="truncate">{description}</span>
-                </p>
-            </CardContent>
-        </Card>
-    )
+export const ADMIN_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+.adm{font-family:'DM Sans',sans-serif;--navy:#002240;--navy2:#001830;--gold:#F7B000;--cyan:#00CCFF;--bg:#F4F1EC;}
+.adm-hero{background:var(--navy);border-radius:20px;padding:2rem 2.5rem;position:relative;overflow:hidden;margin-bottom:1.75rem;}
+.adm-hero-orb1{position:absolute;border-radius:50%;width:350px;height:350px;background:var(--cyan);opacity:0.07;filter:blur(80px);top:-120px;right:-80px;pointer-events:none;}
+.adm-hero-orb2{position:absolute;border-radius:50%;width:250px;height:250px;background:var(--gold);opacity:0.08;filter:blur(70px);bottom:-100px;left:20px;pointer-events:none;}
+.adm-hero-eyebrow{font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(0,204,255,0.65);margin-bottom:8px;}
+.adm-hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.85rem;color:#fff;margin-bottom:0.3rem;line-height:1.1;}
+.adm-hero-sub{color:rgba(255,255,255,0.5);font-size:0.88rem;font-weight:300;max-width:560px;}
+.adm-hero-actions{display:flex;align-items:center;gap:10px;margin-top:1.4rem;}
+.adm-card{background:#fff;border-radius:18px;box-shadow:0 2px 16px rgba(0,34,64,0.07);overflow:hidden;}
+.adm-card-header{padding:1.3rem 1.5rem;border-bottom:1px solid #f0ece5;display:flex;align-items:center;justify-content:space-between;}
+.adm-card-title{font-family:'Syne',sans-serif;font-size:0.97rem;font-weight:700;color:var(--navy);}
+.adm-card-sub{font-size:0.75rem;color:#8a9aaa;margin-top:2px;}
+.adm-card-body{padding:1.4rem 1.5rem;}
+.adm-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-bottom:1.75rem;}
+.adm-stat-card{background:#fff;border-radius:16px;padding:1.4rem 1.5rem;box-shadow:0 2px 12px rgba(0,34,64,0.06);transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s;}
+.adm-stat-card:hover{transform:translateY(-4px);box-shadow:0 12px 35px rgba(0,34,64,0.11);}
+.adm-stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.adm-stat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.adm-stat-label{font-size:0.72rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:#8a9aaa;}
+.adm-stat-value{font-family:'Syne',sans-serif;font-size:2.1rem;font-weight:800;color:var(--navy);line-height:1;margin-bottom:6px;}
+.adm-stat-foot{display:flex;align-items:center;gap:6px;}
+.adm-trend{display:inline-flex;align-items:center;gap:3px;font-size:0.7rem;font-weight:700;color:#22c55e;background:rgba(34,197,94,0.1);padding:2px 7px;border-radius:100px;}
+.adm-stat-desc{font-size:0.72rem;color:#a0b0c0;}
+.adm-search-wrap{position:relative;}
+.adm-search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.adm-search-input{width:100%;height:42px;padding:0 14px 0 38px;background:#f8f6f2;border:1.5px solid #ede9e0;border-radius:11px;font-size:0.875rem;font-family:'DM Sans',sans-serif;color:#1a2a3a;outline:none;transition:border-color 0.2s;}
+.adm-search-input::placeholder{color:#b0bec5;}
+.adm-search-input:focus{border-color:#00CCFF;background:#fff;}
+.adm-filter-wrap{display:flex;gap:10px;align-items:center;}
+.adm-select{height:42px;padding:0 12px;background:#f8f6f2;border:1.5px solid #ede9e0;border-radius:11px;font-size:0.875rem;font-family:'DM Sans',sans-serif;color:#1a2a3a;outline:none;cursor:pointer;}
+.adm-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:11px;font-size:0.83rem;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:transform 0.2s,box-shadow 0.2s,background 0.15s;}
+.adm-btn-primary{background:var(--gold);color:var(--navy);box-shadow:0 4px 16px rgba(247,176,0,0.25);}
+.adm-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(247,176,0,0.38);}
+.adm-btn-cyan{background:var(--cyan);color:var(--navy);}
+.adm-btn-cyan:hover{background:#00bbee;}
+.adm-btn-outline{background:#fff;color:#3a4a5a;border:1.5px solid #ede9e0;}
+.adm-btn-outline:hover{border-color:#00CCFF;color:#00CCFF;}
+.adm-btn-ghost{background:transparent;color:#7a8a9a;border:none;}
+.adm-btn-ghost:hover{background:#f0ece5;color:#3a4a5a;}
+.adm-btn-danger{background:rgba(239,68,68,0.08);color:#ef4444;border:1.5px solid rgba(239,68,68,0.15);}
+.adm-btn-danger:hover{background:rgba(239,68,68,0.14);}
+.adm-table-wrap{overflow-x:auto;}
+table.adm-table{width:100%;border-collapse:collapse;}
+.adm-table th{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8a9aaa;padding:12px 16px;text-align:left;background:#faf8f5;border-bottom:1px solid #f0ece5;}
+.adm-table td{padding:14px 16px;border-bottom:1px solid #f8f6f2;vertical-align:middle;}
+.adm-table tr:last-child td{border-bottom:none;}
+.adm-table tbody tr{transition:background 0.15s;}
+.adm-table tbody tr:hover{background:#fdfbf8;}
+.adm-name{font-size:0.9rem;font-weight:600;color:var(--navy);}
+.adm-meta{font-size:0.75rem;color:#8a9aaa;margin-top:2px;}
+.adm-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.68rem;font-weight:700;letter-spacing:0.06em;padding:3px 10px;border-radius:100px;}
+.adm-badge-green{background:rgba(34,197,94,0.1);color:#16a34a;}
+.adm-badge-cyan{background:rgba(0,204,255,0.1);color:#0088aa;}
+.adm-badge-gold{background:rgba(247,176,0,0.1);color:#a06000;}
+.adm-badge-rose{background:rgba(233,30,140,0.08);color:#b0006a;}
+.adm-loading{display:flex;align-items:center;justify-content:center;padding:4rem;gap:12px;color:#8a9aaa;font-size:0.88rem;}
+.adm-empty{text-align:center;padding:3rem;color:#a0b0c0;font-size:0.88rem;}
+.adm-slot-card{border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;transition:transform 0.2s,box-shadow 0.2s;}
+.adm-slot-card:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(0,34,64,0.1);}
+.adm-error{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:1.1rem 1.5rem;display:flex;align-items:center;gap:10px;color:#dc2626;font-size:0.88rem;margin-bottom:1.5rem;}
+@keyframes adm-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@media(max-width:900px){.adm-stat-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.adm-stat-grid{grid-template-columns:1fr;}}
+`
+
+function StatCard({ title, value, icon: Icon, description, trend, iconBg, iconColor }: any) {
+  return (
+    <div className="adm-stat-card">
+      <div className="adm-stat-top">
+        <span className="adm-stat-label">{title}</span>
+        <div className="adm-stat-icon" style={{ background: iconBg }}>
+          <Icon size={17} color={iconColor} />
+        </div>
+      </div>
+      <div className="adm-stat-value">{value}</div>
+      <div className="adm-stat-foot">
+        {trend && <span className="adm-trend"><TrendingUp size={9} />{trend}</span>}
+        <span className="adm-stat-desc">{description}</span>
+      </div>
+    </div>
+  )
 }
 
 export default function AdminDashboardPage() {
-    const [stats, setStats] = useState({
-        users: 0,
-        businesses: 0,
-        featured: 0,
-        recentUsers: [] as any[],
-        recentBusinesses: [] as any[]
-    });
-    const [chartData, setChartData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState("");
+  const [stats, setStats] = useState({ users: 0, businesses: 0, featured: 0, recentUsers: [] as any[], recentBusinesses: [] as any[] })
+  const [chartData, setChartData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState("")
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // 1. Buscar TODA a coleção de Usuários
-                const usersRef = collection(db, "users");
-                const usersSnap = await getDocs(usersRef);
-                
-                const allUsers = usersSnap.docs.map(doc => ({id: doc.id, ...doc.data() as any}));
-                
-                // Filtra admins para a contagem de "Usuários"
-                const nonAdminUsers = allUsers.filter(u => u.role !== 'admin');
-                // Se não houver usuários comuns, mostra o total geral para não ficar zerado em testes
-                const totalUsersDisplay = nonAdminUsers.length > 0 ? nonAdminUsers.length : allUsers.length; 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const usersSnap = await getDocs(collection(db, "users"))
+        const allUsers = usersSnap.docs.map(d => ({ id: d.id, ...d.data() as any }))
+        const nonAdmin = allUsers.filter(u => u.role !== 'admin')
+        const totalUsers = nonAdmin.length > 0 ? nonAdmin.length : allUsers.length
 
-                // 2. Buscar Empresas
-                const businessRef = collection(db, "businesses");
-                const businessSnap = await getDocs(businessRef);
-                const allBusinesses = businessSnap.docs.map(doc => ({id: doc.id, ...doc.data() as any}));
+        const bizSnap = await getDocs(collection(db, "businesses"))
+        const allBiz = bizSnap.docs.map(d => ({ id: d.id, ...d.data() as any }))
+        const featured = allBiz.filter(b => b.isFeatured === true)
 
-                // 3. Empresas em Destaque
-                const featuredBusinesses = allBusinesses.filter(b => b.isFeatured === true);
+        setStats({
+          users: totalUsers, businesses: allBiz.length, featured: featured.length,
+          recentUsers: [...allUsers].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 3),
+          recentBusinesses: [...allBiz].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 3),
+        })
 
-                // 4. Dados Recentes
-                const recentUsersList = [...allUsers].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 4);
-                const recentBusinessList = [...allBusinesses].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 4);
-
-                setStats({
-                    users: totalUsersDisplay, 
-                    businesses: allBusinesses.length,
-                    featured: featuredBusinesses.length,
-                    recentUsers: recentUsersList,
-                    recentBusinesses: recentBusinessList
-                });
-
-                // Lógica dos Gráficos
-                const last6Months: any[] = [];
-                const today = new Date();
-                
-                for (let i = 5; i >= 0; i--) {
-                    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                    const monthName = d.toLocaleString('pt-BR', { month: 'short' });
-                    const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                    
-                    last6Months.push({ 
-                        name: formattedMonth, 
-                        rawDate: d,
-                        usuarios: 0, 
-                        empresas: 0 
-                    });
-                }
-
-                const countByMonth = (docData: any, type: 'usuarios' | 'empresas') => {
-                    if (!docData.createdAt) return;
-                    const date = docData.createdAt instanceof Timestamp 
-                        ? docData.createdAt.toDate() 
-                        : new Date(docData.createdAt);
-
-                    last6Months.forEach(monthItem => {
-                        const mDate = monthItem.rawDate;
-                        if (date.getMonth() === mDate.getMonth() && date.getFullYear() === mDate.getFullYear()) {
-                            monthItem[type]++;
-                        }
-                    });
-                };
-
-                allUsers.forEach(u => countByMonth(u, 'usuarios'));
-                allBusinesses.forEach(b => countByMonth(b, 'empresas'));
-
-                setChartData(last6Months.map(({ rawDate, ...rest }) => rest));
-
-            } catch (error: any) {
-                console.error("Erro ao carregar dashboard:", error);
-                if (error.code === 'permission-denied') {
-                    setErrorMsg("Erro de permissão: Verifique se sua conta tem o cargo 'admin' no Firestore.");
-                } else {
-                    setErrorMsg("Erro ao carregar dados.");
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    if (loading) return <div className="h-full w-full flex items-center justify-center p-20"><Activity className="w-10 h-10 animate-spin text-[#00CCFF]" /></div>;
-
-    if (errorMsg) {
-        return (
-            <div className="p-8">
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 text-red-700 flex items-center">
-                    <AlertTriangle className="w-5 h-5 mr-2" />
-                    <p>{errorMsg}</p>
-                </div>
-            </div>
-        )
+        const last6: any[] = []
+        const today = new Date()
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
+          const n = d.toLocaleString('pt-BR', { month: 'short' })
+          last6.push({ name: n.charAt(0).toUpperCase() + n.slice(1), rawDate: d, usuarios: 0, empresas: 0 })
+        }
+        const count = (data: any, type: 'usuarios' | 'empresas') => {
+          if (!data.createdAt) return
+          const date = data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt)
+          last6.forEach(m => { if (date.getMonth() === m.rawDate.getMonth() && date.getFullYear() === m.rawDate.getFullYear()) m[type]++ })
+        }
+        allUsers.forEach(u => count(u, 'usuarios'))
+        allBiz.forEach(b => count(b, 'empresas'))
+        setChartData(last6.map(({ rawDate, ...rest }) => rest))
+      } catch (err: any) {
+        setErrorMsg(err.code === 'permission-denied' ? "Erro de permissão no Firestore." : "Erro ao carregar dados.")
+      } finally {
+        setLoading(false)
+      }
     }
+    fetchData()
+  }, [])
 
-    return (
-        <div className="space-y-6">
-            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg relative overflow-hidden">
-                <div className="relative z-10">
-                    <h1 className="text-3xl font-bold mb-2">Visão Geral</h1>
-                    <p className="text-white/80 max-w-xl">
-                        Acompanhe o crescimento da plataforma Novo Tempo Conecta em tempo real.
-                    </p>
-                </div>
-                <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
-                <div className="absolute right-20 bottom-0 h-32 w-32 rounded-full bg-[#F7B000]/10 blur-2xl" />
-            </div>
+  if (loading) return (
+    <><style>{ADMIN_CSS}</style>
+      <div className="adm adm-loading">
+        <Activity size={28} color="#00CCFF" style={{ animation: "adm-spin 1s linear infinite" }} /> Carregando...
+      </div>
+    </>
+  )
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard 
-                    title="Total de Usuários" 
-                    value={stats.users} 
-                    icon={Users} 
-                    description={stats.users === 0 ? "Nenhum usuário encontrado" : "Total cadastrado"}
-                    trend={stats.users > 0 ? "+100%" : undefined}
-                    colorClass="bg-[#00CCFF]/10 text-[#00CCFF]"
-                />
-                <StatCard 
-                    title="Total de Empresas" 
-                    value={stats.businesses} 
-                    icon={Building2} 
-                    description="Estabelecimentos ativos"
-                    colorClass="bg-[#00CCFF]/10 text-[#00CCFF]"
-                />
-                <StatCard 
-                    title="Empresas em Destaque" 
-                    value={stats.featured} 
-                    icon={Star} 
-                    description="Exibidos na home"
-                    colorClass="bg-[#F7B000]/10 text-[#F7B000]"
-                />
-            </div>
+  return (
+    <>
+      <style>{ADMIN_CSS}</style>
+      <div className="adm">
+        {errorMsg && <div className="adm-error"><AlertTriangle size={17} /> {errorMsg}</div>}
 
-            <div className="grid gap-6 md:grid-cols-7">
-                <Card className="col-span-4 border-none shadow-sm bg-white">
-                    <CardHeader>
-                        <CardTitle className="text-slate-800">Crescimento da Plataforma</CardTitle>
-                        <CardDescription>Novos cadastros nos últimos 6 meses</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pl-0">
-                        <div className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-                                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
-                                    <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} cursor={{fill: '#f8fafc'}} />
-                                    <Bar dataKey="usuarios" name="Usuários" fill="#00CCFF" radius={[4, 4, 0, 0]} barSize={30} />
-                                    <Bar dataKey="empresas" name="Empresas" fill="#F7B000" radius={[4, 4, 0, 0]} barSize={30} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="col-span-3 border-none shadow-sm bg-white">
-                    <CardHeader>
-                        <CardTitle className="text-slate-800">Novos Cadastros</CardTitle>
-                        <CardDescription>Últimas adições ao sistema</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-5">
-                            {stats.recentBusinesses.map((b: any) => (
-                                <div key={b.id} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <Avatar className="h-9 w-9 border border-slate-100 bg-white">
-                                            <AvatarImage src={b.images?.[0]} className="object-cover" />
-                                            <AvatarFallback className="bg-[#00CCFF]/10 text-[#00CCFF] text-xs font-bold">EMP</AvatarFallback>
-                                        </Avatar>
-                                        <div className="space-y-0.5 truncate">
-                                            <p className="text-sm font-medium text-slate-900 truncate">{b.businessName}</p>
-                                            <p className="text-xs text-slate-500 truncate">{b.category}</p>
-                                        </div>
-                                    </div>
-                                    <Badge variant="secondary" className="bg-[#00CCFF]/10 text-[#00CCFF] hover:bg-[#00CCFF]/20 whitespace-nowrap">Nova Empresa</Badge>
-                                </div>
-                            ))}
-                            {stats.recentUsers.map((u: any) => (
-                                <div key={u.id} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <Avatar className="h-9 w-9 border border-slate-100 bg-white">
-                                            <AvatarImage src={u.avatar} className="object-cover" />
-                                            <AvatarFallback className="bg-[#00CCFF]/10 text-[#00CCFF] text-xs font-bold">US</AvatarFallback>
-                                        </Avatar>
-                                        <div className="space-y-0.5 truncate">
-                                            <p className="text-sm font-medium text-slate-900 truncate">{u.name}</p>
-                                            <p className="text-xs text-slate-500 truncate">{u.email}</p>
-                                        </div>
-                                    </div>
-                                    <Badge variant="secondary" className="bg-[#00CCFF]/10 text-[#00CCFF] hover:bg-[#00CCFF]/20 whitespace-nowrap">Novo Usuário</Badge>
-                                </div>
-                            ))}
-                            {stats.recentUsers.length === 0 && stats.recentBusinesses.length === 0 && (
-                                <p className="text-sm text-slate-400 text-center py-4">Nenhum cadastro recente.</p>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+        <div className="adm-hero">
+          <div className="adm-hero-orb1" /><div className="adm-hero-orb2" />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div className="adm-hero-eyebrow">Painel Administrativo</div>
+            <div className="adm-hero-title">Visão Geral</div>
+            <div className="adm-hero-sub">Acompanhe o crescimento da plataforma em tempo real.</div>
+          </div>
         </div>
-    )
+
+        <div className="adm-stat-grid">
+          <StatCard title="Usuários" value={stats.users} icon={Users} description="cadastrados" trend={stats.users > 0 ? "ativo" : undefined} iconBg="rgba(0,204,255,0.1)" iconColor="#00CCFF" />
+          <StatCard title="Empresas" value={stats.businesses} icon={Building2} description="estabelecimentos" trend={stats.businesses > 0 ? "ativo" : undefined} iconBg="rgba(247,176,0,0.1)" iconColor="#F7B000" />
+          <StatCard title="Em Destaque" value={stats.featured} icon={Star} description="na home" iconBg="rgba(233,30,140,0.08)" iconColor="#E91E8C" />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "5fr 4fr", gap: "1.5rem" }}>
+          <div className="adm-card">
+            <div className="adm-card-header">
+              <div><div className="adm-card-title">Crescimento da Plataforma</div><div className="adm-card-sub">Últimos 6 meses</div></div>
+            </div>
+            <div style={{ padding: "1.5rem 1.5rem 1.5rem 0" }}>
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={chartData} margin={{ top: 8, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0ece5" />
+                  <XAxis dataKey="name" stroke="#b0bec5" fontSize={11} tickLine={false} axisLine={false} dy={8} />
+                  <YAxis stroke="#b0bec5" fontSize={11} tickLine={false} axisLine={false} dx={-4} />
+                  <Tooltip contentStyle={{ background: "#fff", borderRadius: 12, border: "none", boxShadow: "0 10px 40px rgba(0,34,64,0.12)", fontFamily: "DM Sans,sans-serif", fontSize: 12 }} cursor={{ fill: "#f8f6f2" }} />
+                  <Bar dataKey="usuarios" name="Usuários" fill="#00CCFF" radius={[6, 6, 0, 0]} barSize={22} />
+                  <Bar dataKey="empresas" name="Empresas" fill="#F7B000" radius={[6, 6, 0, 0]} barSize={22} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="adm-card">
+            <div className="adm-card-header">
+              <div><div className="adm-card-title">Novos Cadastros</div><div className="adm-card-sub">Recentes no sistema</div></div>
+            </div>
+            <div className="adm-card-body">
+              {[...stats.recentBusinesses.map(b => ({ ...b, _type: 'empresa' })), ...stats.recentUsers.map(u => ({ ...u, _type: 'usuario' }))].map(item => (
+                <div key={item.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f5f3f0" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+                    <Avatar style={{ width: 32, height: 32 }}>
+                      <AvatarImage src={item.images?.[0] || item.avatar} style={{ objectFit: "cover" }} />
+                      <AvatarFallback style={{ background: item._type === 'empresa' ? "rgba(247,176,0,0.1)" : "rgba(0,204,255,0.1)", color: item._type === 'empresa' ? "#F7B000" : "#00CCFF", fontSize: "0.65rem", fontWeight: 700 }}>
+                        {item._type === 'empresa' ? "EMP" : "USR"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div style={{ overflow: "hidden" }}>
+                      <div className="adm-name" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.82rem" }}>{item.businessName || item.name}</div>
+                      <div className="adm-meta">{item.category || item.email}</div>
+                    </div>
+                  </div>
+                  <span className="adm-badge" style={{ background: item._type === 'empresa' ? "rgba(247,176,0,0.1)" : "rgba(0,204,255,0.1)", color: item._type === 'empresa' ? "#a06000" : "#0088aa", flexShrink: 0 }}>
+                    {item._type === 'empresa' ? "Empresa" : "Usuário"}
+                  </span>
+                </div>
+              ))}
+              {stats.recentUsers.length === 0 && stats.recentBusinesses.length === 0 && (
+                <div className="adm-empty">Nenhum cadastro recente.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
 }

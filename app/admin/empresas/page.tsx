@@ -1,271 +1,188 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-// Adicionado o ícone Plus para o botão de cadastro
-import { Search, Download, Trash2, Loader2, Store, Globe, Filter, X, MapPin, Mail, Phone, Plus } from "lucide-react"
+import { Search, Download, Trash2, Loader2, Store, Globe, X, MapPin, Mail, Phone, Plus, Building2 } from "lucide-react"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import Link from "next/link" // Importado para navegação
+import Link from "next/link"
+import { ADMIN_CSS } from "./AdminDashboardPage"
 
-type Business = {
-    id: string;
-    businessName: string;
-    businessPhone: string;
-    email?: string;
-    address: string;
-    website?: string;
-    category: string;
-    createdAt?: any;
-};
+type Business = { id: string; businessName: string; businessPhone: string; email?: string; address: string; website?: string; category: string; createdAt?: any; }
+
+const CAT_COLORS: Record<string, string> = { restaurante: "#FF7043", comercio: "#00CCFF", servicos: "#F7B000", saude: "#E91E8C", automotivo: "#8B5CF6", casa: "#22c55e" }
 
 export default function AdminEmpresasPage() {
-    const [businesses, setBusinesses] = useState<Business[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterCategory, setFilterCategory] = useState("all");
+  const [businesses, setBusinesses] = useState<Business[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterCat, setFilterCat] = useState("all")
 
-    const fetchBusinesses = async () => {
-        setLoading(true);
-        try {
-            const snapshot = await getDocs(collection(db, "businesses"));
-            const list = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as Business[];
-            setBusinesses(list);
-        } catch (error) {
-            console.error("Erro ao buscar empresas:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const snap = await getDocs(collection(db, "businesses"))
+        setBusinesses(snap.docs.map(d => ({ id: d.id, ...d.data() })) as Business[])
+      } catch (e) { console.error(e) } finally { setLoading(false) }
+    }; fetch()
+  }, [])
 
-    useEffect(() => { fetchBusinesses(); }, []);
+  const handleDelete = async (id: string) => {
+    try { await deleteDoc(doc(db, "businesses", id)); setBusinesses(p => p.filter(b => b.id !== id)) }
+    catch (e) { console.error(e) }
+  }
 
-    const handleDeleteBusiness = async (id: string) => {
-        try {
-            await deleteDoc(doc(db, "businesses", id));
-            setBusinesses(prev => prev.filter(b => b.id !== id));
-        } catch (error) {
-            console.error(error);
-        }
-    };
+  const formatDate = (d: any) => { if (!d) return '—'; if (d.toDate) return d.toDate().toLocaleDateString('pt-BR'); return '—' }
 
-    const formatDate = (date: any) => {
-        if (!date) return 'N/A';
-        if (date.toDate) return date.toDate().toLocaleDateString('pt-BR');
-        if (date instanceof Date) return date.toLocaleDateString('pt-BR');
-        return 'N/A';
-    }
+  const exportCSV = () => {
+    const ds = new Date().toLocaleDateString('pt-BR')
+    const rows = [['Relatório Empresas'], [`Gerado: ${ds}`], [], ['Nome,Categoria,Email,Telefone,Endereço'].join(',')]
+    businesses.forEach(b => rows.push([`"${b.businessName}"`, b.category, b.email || '', b.businessPhone, `"${b.address}"`].join(',')))
+    const blob = new Blob(["\uFEFF" + rows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+    a.download = `empresas_${ds.replace(/\//g, '-')}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a)
+  }
 
-    const exportToCSV = () => {
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('pt-BR');
-        const timeStr = now.toLocaleTimeString('pt-BR');
-        const csvRows = [];
-        csvRows.push(['Relatório de Empresas - Novo Tempo Conecta']);
-        csvRows.push([`Gerado em: ${dateStr} às ${timeStr}`]);
-        csvRows.push([]);
-        const headers = ["Nome da Empresa", "Categoria", "Email", "Telefone", "Endereço", "Site/Instagram", "Data Cadastro"];
-        csvRows.push(headers.join(","));
-        businesses.forEach(b => {
-            const row = [
-                `"${b.businessName}"`,
-                b.category,
-                b.email || "N/A",
-                b.businessPhone,
-                `"${b.address}"`,
-                b.website || "",
-                formatDate(b.createdAt)
-            ];
-            csvRows.push(row.join(","));
-        });
-        const csvContent = csvRows.join("\n");
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        const fileName = `relatorio_empresas_${dateStr.replace(/\//g, '-')}.csv`;
-        link.setAttribute("href", url);
-        link.setAttribute("download", fileName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+  const filtered = businesses.filter(b => {
+    const ms = b.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) || b.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    const mc = filterCat === 'all' || b.category === filterCat
+    return ms && mc
+  })
 
-    const filtered = businesses.filter(b => {
-        const matchesSearch = b.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              (b.email && b.email.toLowerCase().includes(searchTerm.toLowerCase()));
-        const matchesCategory = filterCategory === "all" || b.category === filterCategory;
-        return matchesSearch && matchesCategory;
-    });
-
-    const getCategoryStyle = (category: string) => {
-        return "bg-[#00CCFF]/10 text-[#00CCFF] hover:bg-[#00CCFF]/20 border-[#00CCFF]/20";
-    };
-
-    return (
-        <div className="space-y-6">
-            {/* Cabeçalho atualizado com o botão de adicionar */}
-            <div className="rounded-xl bg-[#002240] p-8 text-white shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold mb-2">Gerenciamento de Empresas</h1>
-                    <p className="text-white/80">
-                        Filtre, visualize e gerencie todos os estabelecimentos comerciais parceiros.
-                    </p>
-                </div>
-                <Link href="/admin/empresas/novo">
-                    <Button className="bg-[#00CCFF] hover:bg-[#00CCFF]/90 text-[#001529] font-bold shadow-lg h-12 px-6">
-                        <Plus className="w-5 h-5 mr-2" />
-                        Nova Empresa
-                    </Button>
-                </Link>
+  return (
+    <>
+      <style>{ADMIN_CSS}</style>
+      <div className="adm">
+        <div className="adm-hero">
+          <div className="adm-hero-orb1" /><div className="adm-hero-orb2" />
+          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <div className="adm-hero-eyebrow">Gestão de Empresas</div>
+              <div className="adm-hero-title">Estabelecimentos</div>
+              <div className="adm-hero-sub">Filtre, visualize e gerencie todos os estabelecimentos comerciais parceiros.</div>
             </div>
-
-             <Card className="border-none shadow-sm bg-white">
-                <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-4 text-slate-700 font-semibold">
-                        <Filter className="w-5 h-5 text-[#00CCFF]" />
-                        <span>Filtros de Busca</span>
-                    </div>
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input
-                                placeholder="Buscar por nome ou e-mail da empresa..."
-                                className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-[#00CCFF] text-slate-900 placeholder:text-slate-400"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                        <Select value={filterCategory} onValueChange={setFilterCategory}>
-                            <SelectTrigger className="w-full md:w-[200px] bg-slate-50 border-slate-200">
-                                <SelectValue placeholder="Categoria" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Todas as Categorias</SelectItem>
-                                <SelectItem value="restaurante">Restaurantes</SelectItem>
-                                <SelectItem value="servicos">Serviços</SelectItem>
-                                <SelectItem value="comercio">Comércio</SelectItem>
-                                <SelectItem value="saude">Saúde</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button variant="ghost" onClick={() => {setSearchTerm(''); setFilterCategory('all')}} className="text-slate-500 hover:text-[#00CCFF]">
-                            <X className="w-4 h-4 mr-2" /> Limpar
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-sm bg-white overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-6 py-4">
-                    <CardTitle className="text-lg text-slate-800">Lista de Empresas ({filtered.length})</CardTitle>
-                    <Button variant="outline" size="sm" onClick={exportToCSV} className="text-slate-600 border-slate-300 hover:bg-white">
-                        <Download className="w-4 h-4 mr-2" /> Exportar Relatório
-                    </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                    {loading ? (
-                         <div className="flex justify-center p-12"><Loader2 className="h-10 w-10 animate-spin text-[#00CCFF]" /></div>
-                    ) : (
-                        <div className="rounded-md">
-                            <Table>
-                                <TableHeader className="bg-slate-50">
-                                    <TableRow>
-                                        <TableHead className="pl-6 font-semibold text-slate-600">Empresa</TableHead>
-                                        <TableHead className="font-semibold text-slate-600">Categoria</TableHead>
-                                        <TableHead className="font-semibold text-slate-600">Contato</TableHead>
-                                        <TableHead className="font-semibold text-slate-600">Endereço</TableHead>
-                                        <TableHead className="font-semibold text-slate-600">Data Cadastro</TableHead>
-                                        <TableHead className="text-right pr-6 font-semibold text-slate-600">Ações</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filtered.length === 0 ? (
-                                        <TableRow><TableCell colSpan={6} className="text-center py-12 text-slate-500">Nenhuma empresa encontrada.</TableCell></TableRow> 
-                                    ) : (
-                                        filtered.map(b => (
-                                            <TableRow key={b.id} className="hover:bg-slate-50/80 transition-colors">
-                                                <TableCell className="pl-6 py-4 font-medium">
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-10 w-10 rounded-lg border border-slate-200 bg-white">
-                                                            <AvatarFallback className="bg-slate-100 text-slate-600 rounded-lg">
-                                                                <Store className="w-5 h-5"/>
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div className="flex flex-col">
-                                                            <span className="font-semibold text-slate-900">{b.businessName}</span>
-                                                            {b.website && (
-                                                                <a href={b.website.startsWith('http') ? b.website : `https://${b.website}`} target="_blank" className="flex items-center text-xs text-[#00CCFF] hover:underline mt-0.5">
-                                                                    <Globe className="w-3 h-3 mr-1" /> Website
-                                                                </a>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline" className={getCategoryStyle(b.category)}>
-                                                        {b.category}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-col gap-1 text-sm">
-                                                        <div className="flex items-center text-slate-700">
-                                                            <Phone className="w-3 h-3 mr-1.5 text-slate-400" />
-                                                            {b.businessPhone}
-                                                        </div>
-                                                        {b.email && (
-                                                            <div className="flex items-center text-slate-500 text-xs">
-                                                                <Mail className="w-3 h-3 mr-1.5 text-slate-400" />
-                                                                {b.email}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="max-w-[200px]">
-                                                    <div className="flex items-start gap-1 text-slate-600 text-sm truncate" title={b.address}>
-                                                        <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-                                                        {b.address}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-slate-600 text-sm">
-                                                    {formatDate(b.createdAt)}
-                                                </TableCell>
-                                                <TableCell className="text-right pr-6">
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full">
-                                                                <Trash2 className="w-4 h-4"/>
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Excluir Empresa?</AlertDialogTitle>
-                                                                <AlertDialogDescription>Ação irreversível. Isso apagará permanentemente o perfil de <strong>{b.businessName}</strong>.</AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                <AlertDialogAction onClick={() => handleDeleteBusiness(b.id)} className="bg-red-600 hover:bg-red-700">Confirmar</AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "12px 20px" }}>
+                <Building2 size={20} color="#F7B000" />
+                <div>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontSize: "1.6rem", fontWeight: 800, color: "#fff", lineHeight: 1 }}>{businesses.length}</div>
+                  <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.45)", letterSpacing: "0.07em", textTransform: "uppercase" }}>Total</div>
+                </div>
+              </div>
+              <Link href="/admin/empresas/novo">
+                <button className="adm-btn adm-btn-cyan" style={{ height: 52, fontSize: "0.88rem" }}><Plus size={16} /> Nova Empresa</button>
+              </Link>
+            </div>
+          </div>
         </div>
-    )
+
+        {/* FILTERS */}
+        <div className="adm-card" style={{ marginBottom: "1.5rem" }}>
+          <div className="adm-card-body">
+            <div className="adm-filter-wrap" style={{ flexWrap: "wrap" }}>
+              <div className="adm-search-wrap" style={{ flex: 1, minWidth: 200 }}>
+                <Search size={15} color="#b0bec5" />
+                <input className="adm-search-input" placeholder="Buscar por nome ou e-mail..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+              </div>
+              <select className="adm-select" value={filterCat} onChange={e => setFilterCat(e.target.value)}>
+                <option value="all">Todas as categorias</option>
+                <option value="restaurante">Restaurante</option>
+                <option value="comercio">Comércio</option>
+                <option value="servicos">Serviços</option>
+                <option value="saude">Saúde</option>
+              </select>
+              {(searchTerm || filterCat !== 'all') && (
+                <button className="adm-btn adm-btn-ghost" onClick={() => { setSearchTerm(''); setFilterCat('all') }}><X size={14} /> Limpar</button>
+              )}
+              <button className="adm-btn adm-btn-outline" onClick={exportCSV}><Download size={14} /> Exportar CSV</button>
+            </div>
+          </div>
+        </div>
+
+        {/* TABLE */}
+        <div className="adm-card">
+          <div className="adm-card-header">
+            <div><div className="adm-card-title">Lista de Empresas</div><div className="adm-card-sub">{filtered.length} resultado{filtered.length !== 1 ? "s" : ""}</div></div>
+          </div>
+          <div className="adm-table-wrap">
+            {loading ? (
+              <div className="adm-loading"><Loader2 size={26} color="#00CCFF" style={{ animation: "adm-spin 1s linear infinite" }} /> Carregando...</div>
+            ) : (
+              <table className="adm-table">
+                <thead>
+                  <tr>
+                    <th style={{ paddingLeft: 20 }}>Empresa</th>
+                    <th>Categoria</th>
+                    <th>Contato</th>
+                    <th>Endereço</th>
+                    <th>Cadastro</th>
+                    <th style={{ textAlign: "right", paddingRight: 20 }}>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <tr><td colSpan={6}><div className="adm-empty">Nenhuma empresa encontrada.</div></td></tr>
+                  ) : filtered.map(b => {
+                    const cc = CAT_COLORS[b.category] || "#00CCFF"
+                    return (
+                      <tr key={b.id}>
+                        <td style={{ paddingLeft: 20 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f8f6f2", border: "1.5px solid #f0ece5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <Store size={16} color="#b0a898" />
+                            </div>
+                            <div>
+                              <div className="adm-name">{b.businessName}</div>
+                              {b.website && (
+                                <a href={b.website.startsWith('http') ? b.website : `https://${b.website}`} target="_blank" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.72rem", color: "#00CCFF", textDecoration: "none", marginTop: 2 }}>
+                                  <Globe size={10} /> Website
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="adm-badge" style={{ background: `${cc}15`, color: cc, border: `1px solid ${cc}30` }}>{b.category}</span>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: "0.8rem", color: "#3a4a5a", display: "flex", flexDirection: "column", gap: 3 }}>
+                            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Phone size={11} color="#b0bec5" />{b.businessPhone}</span>
+                            {b.email && <span style={{ display: "flex", alignItems: "center", gap: 5, color: "#8a9aaa", fontSize: "0.72rem" }}><Mail size={10} color="#b0bec5" />{b.email}</span>}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", alignItems: "flex-start", gap: 5, fontSize: "0.8rem", color: "#5a6878", maxWidth: 180 }}>
+                            <MapPin size={12} color="#b0bec5" style={{ flexShrink: 0, marginTop: 2 }} />
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.address}</span>
+                          </div>
+                        </td>
+                        <td><div style={{ fontSize: "0.8rem", color: "#8a9aaa" }}>{formatDate(b.createdAt)}</div></td>
+                        <td style={{ textAlign: "right", paddingRight: 20 }}>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button className="adm-btn adm-btn-danger" style={{ padding: "7px 12px" }}><Trash2 size={14} /></button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir Empresa?</AlertDialogTitle>
+                                <AlertDialogDescription>Ação irreversível. Isso apagará permanentemente o perfil de <strong>{b.businessName}</strong>.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(b.id)} className="bg-red-600 hover:bg-red-700">Confirmar</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  )
 }
