@@ -9,7 +9,7 @@ import { Mail, KeyRound, Edit, Loader2, Eye, EyeOff, ShieldCheck } from "lucide-
 import { auth } from "@/lib/firebase"
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, User as FirebaseUser } from "firebase/auth"
 import { Toaster, toast } from "sonner"
-import { ADMIN_CSS } from "./AdminDashboardPage"
+import { ADMIN_CSS } from "../dashboard/page"
 
 const SETTINGS_CSS = `
 .cfg-profile{display:flex;align-items:center;gap:1.5rem;padding:2rem;border-bottom:1px solid #f0ece5;}

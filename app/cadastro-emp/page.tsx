@@ -10,7 +10,7 @@ import { auth, db } from '@/lib/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { Header } from "@/components/navigation/header"
-import { AUTH_CSS } from "./AUTH_CSS"
+import { AUTH_CSS } from "../../components/Auth"
 
 const MapWithNoSSR = dynamic(() => import("./MapRegistrationComponent"), {
   ssr: false,

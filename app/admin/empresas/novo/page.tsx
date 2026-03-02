@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { db } from '@/lib/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { ADMIN_CSS } from "./AdminDashboardPage"
+import { ADMIN_CSS } from "../../dashboard/page"
 
 const MapWithNoSSR = dynamic(() => import("../../../cadastro-emp/MapRegistrationComponent"), {
   ssr: false,

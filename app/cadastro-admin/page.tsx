@@ -7,7 +7,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Header } from "@/components/navigation/header"
-import { AUTH_CSS } from "./AUTH_CSS"
+import { AUTH_CSS } from "../../components/Auth"
 
 export default function AdminCadastroPage() {
   const [showPass, setShowPass] = useState(false)

@@ -5,7 +5,7 @@ import { Loader2, Star, Search, Plus, X, Store } from "lucide-react"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ADMIN_CSS } from "./AdminDashboardPage"
+import { ADMIN_CSS } from "../dashboard/page"
 
 type Business = { id: string; businessName: string; category: string; isFeatured?: boolean; address?: string; }
 
@@ -59,7 +59,7 @@ export default function DestaquesPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.1rem", marginBottom: "1.75rem" }}>
           {[0, 1, 2].map(i => {
             const biz = featured[i]
-            const cc = biz ? (CAT_COLORS[biz.category] || "#00CCFF") : null
+            const cc = biz ? (CAT_COLORS[biz.category] || "#00CCFF") : "#00CCFF"
             return (
               <div key={i} className="adm-slot-card" style={{
                 background: biz ? "#fff" : "#faf8f5",
@@ -72,7 +72,7 @@ export default function DestaquesPage() {
                       <X size={16} />
                     </button>
                     <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${cc}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
-                      <Star size={22} color={cc} fill={cc} />
+                      <Star size={22} color={cc || "#00CCFF"} fill={cc || "#00CCFF"} />
                     </div>
                     <div style={{ fontFamily: "'Syne',sans-serif", fontSize: "1rem", fontWeight: 700, color: "#002240", textAlign: "center", marginBottom: 6 }}>{biz.businessName}</div>
                     <span className="adm-badge" style={{ background: `${cc}15`, color: cc, border: `1px solid ${cc}30` }}>{biz.category}</span>

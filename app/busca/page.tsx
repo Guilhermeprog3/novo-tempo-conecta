@@ -7,7 +7,7 @@ import { db } from "@/lib/firebase"
 import { collection, getDocs, query, where } from "firebase/firestore"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Header } from "@/components/navigation/header"
-import { AUTH_CSS } from "./AUTH_CSS"
+import { AUTH_CSS } from "../../components/Auth"
 
 type Business = {
   id: string; businessName: string; category: string;

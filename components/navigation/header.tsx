@@ -20,6 +20,220 @@ interface HeaderProps {
   subtitle?: string
 }
 
+// CSS movido para fora para evitar re-processamento e resolver erro de hidratação
+const headerStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  .hdr {
+    font-family: 'DM Sans', sans-serif;
+    --navy: #002240;
+    --gold: #F7B000;
+    --cyan: #00CCFF;
+  }
+
+  .hdr-bar {
+    position: sticky; top: 0; z-index: 9999;
+    background: rgba(0,34,64,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(247,176,0,0.12);
+    transition: box-shadow 0.3s;
+  }
+
+  .hdr-bar.scrolled {
+    box-shadow: 0 4px 30px rgba(0,0,0,0.35);
+  }
+
+  .hdr-inner {
+    max-width: 1280px; margin: 0 auto;
+    padding: 0 1.5rem; height: 68px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .hdr-nav {
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .hdr-nav-link {
+    position: relative;
+    padding: 6px 14px; border-radius: 100px;
+    font-size: 0.88rem; font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .hdr-nav-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .hdr-nav-link.active {
+    color: var(--gold);
+    background: rgba(247,176,0,0.1);
+  }
+
+  .hdr-nav-link.active::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+    width: 16px; height: 2px;
+    background: var(--gold); border-radius: 2px;
+  }
+
+  .hdr-auth {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .hdr-btn-ghost {
+    padding: 7px 16px; border-radius: 10px;
+    font-size: 0.85rem; font-weight: 500;
+    color: rgba(255,255,255,0.75);
+    background: none; border: none; cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .hdr-btn-ghost:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+
+  .hdr-btn-outline {
+    padding: 7px 16px; border-radius: 10px;
+    font-size: 0.85rem; font-weight: 500;
+    color: rgba(255,255,255,0.8);
+    background: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer; text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+
+  .hdr-btn-outline:hover {
+    border-color: rgba(247,176,0,0.5);
+    color: var(--gold);
+    background: rgba(247,176,0,0.06);
+  }
+
+  .hdr-btn-primary {
+    padding: 7px 16px; border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.83rem; font-weight: 700;
+    color: var(--navy);
+    background: var(--gold);
+    border: none; cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 14px rgba(247,176,0,0.3);
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+  }
+
+  .hdr-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(247,176,0,0.45);
+  }
+
+  .hdr-avatar-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 10px 4px 4px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .hdr-avatar-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(247,176,0,0.3);
+  }
+
+  .hdr-avatar-name {
+    font-size: 0.83rem; font-weight: 500; color: rgba(255,255,255,0.85);
+    max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .hdr-mobile-btn {
+    display: none;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 8px;
+    color: #fff; cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .hdr-mobile {
+    border-top: 1px solid rgba(247,176,0,0.1);
+    background: rgba(0,26,52,0.98);
+    padding: 1.2rem 1.5rem 1.5rem;
+  }
+
+  .hdr-mobile-nav {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 1.2rem;
+  }
+
+  .hdr-mobile-link {
+    padding: 10px 14px; border-radius: 12px;
+    font-size: 0.92rem; font-weight: 500;
+    color: rgba(255,255,255,0.75); text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .hdr-mobile-link:hover, .hdr-mobile-link.active {
+    background: rgba(247,176,0,0.1);
+    color: var(--gold);
+  }
+
+  .hdr-mobile-divider {
+    height: 1px; background: rgba(255,255,255,0.07);
+    margin-bottom: 1.2rem;
+  }
+
+  .hdr-mobile-actions {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .hdr-mobile-user {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 8px;
+  }
+
+  .hdr-mobile-user-name {
+    font-size: 0.9rem; font-weight: 600; color: #fff;
+  }
+
+  .hdr-mobile-user-email {
+    font-size: 0.72rem; color: var(--gold);
+  }
+
+  .hdr-dropdown-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 0.85rem; color: rgba(255,255,255,0.8);
+    text-decoration: none; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .hdr-dropdown-item:hover {
+    background: rgba(247,176,0,0.12);
+    color: var(--gold);
+  }
+
+  .hdr-dropdown-item.danger {
+    color: #f87171;
+  }
+
+  .hdr-dropdown-item.danger:hover {
+    background: rgba(239,68,68,0.1);
+    color: #fca5a5;
+  }
+
+  @media (max-width: 768px) {
+    .hdr-nav, .hdr-auth { display: none !important; }
+    .hdr-mobile-btn { display: flex; }
+  }
+`;
+
 export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, seus negócios" }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
@@ -31,9 +245,13 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
   useEffect(() => {
     const userData = localStorage.getItem("user")
     if (userData) {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-      setIsLoggedIn(true)
+      try {
+        const parsedUser = JSON.parse(userData)
+        setUser(parsedUser)
+        setIsLoggedIn(true)
+      } catch (e) {
+        console.error("Erro ao ler dados do usuário")
+      }
     }
     setIsMounted(true)
   }, [])
@@ -67,230 +285,10 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
-        .hdr {
-          font-family: 'DM Sans', sans-serif;
-          --navy: #002240;
-          --gold: #F7B000;
-          --cyan: #00CCFF;
-        }
-
-        .hdr-bar {
-          position: sticky; top: 0; z-index: 9999;
-          background: rgba(0,34,64,0.92);
-          backdrop-filter: blur(16px);
-          border-bottom: 1px solid rgba(247,176,0,0.12);
-          transition: box-shadow 0.3s;
-        }
-
-        .hdr-bar.scrolled {
-          box-shadow: 0 4px 30px rgba(0,0,0,0.35);
-        }
-
-        .hdr-inner {
-          max-width: 1280px; margin: 0 auto;
-          padding: 0 1.5rem; height: 68px;
-          display: flex; align-items: center; justify-content: space-between;
-          gap: 1.5rem;
-        }
-
-        /* NAV */
-        .hdr-nav {
-          display: flex; align-items: center; gap: 4px;
-        }
-
-        .hdr-nav-link {
-          position: relative;
-          padding: 6px 14px; border-radius: 10px;
-          font-size: 0.88rem; font-weight: 500;
-          color: rgba(255,255,255,0.7);
-          text-decoration: none;
-          transition: color 0.2s, background 0.2s;
-        }
-
-        .hdr-nav-link:hover {
-          color: #fff;
-          background: rgba(255,255,255,0.06);
-        }
-
-        .hdr-nav-link.active {
-          color: var(--gold);
-          background: rgba(247,176,0,0.1);
-        }
-
-        .hdr-nav-link.active::after {
-          content: '';
-          position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
-          width: 16px; height: 2px;
-          background: var(--gold); border-radius: 2px;
-        }
-
-        /* AUTH BUTTONS */
-        .hdr-auth {
-          display: flex; align-items: center; gap: 8px;
-        }
-
-        .hdr-btn-ghost {
-          padding: 7px 16px; border-radius: 10px;
-          font-size: 0.85rem; font-weight: 500;
-          color: rgba(255,255,255,0.75);
-          background: none; border: none; cursor: pointer;
-          text-decoration: none;
-          transition: background 0.2s, color 0.2s;
-        }
-
-        .hdr-btn-ghost:hover {
-          background: rgba(255,255,255,0.08);
-          color: #fff;
-        }
-
-        .hdr-btn-outline {
-          padding: 7px 16px; border-radius: 10px;
-          font-size: 0.85rem; font-weight: 500;
-          color: rgba(255,255,255,0.8);
-          background: none;
-          border: 1px solid rgba(255,255,255,0.2);
-          cursor: pointer; text-decoration: none;
-          transition: border-color 0.2s, color 0.2s, background 0.2s;
-        }
-
-        .hdr-btn-outline:hover {
-          border-color: rgba(247,176,0,0.5);
-          color: var(--gold);
-          background: rgba(247,176,0,0.06);
-        }
-
-        .hdr-btn-primary {
-          padding: 7px 16px; border-radius: 10px;
-          font-family: 'Syne', sans-serif;
-          font-size: 0.83rem; font-weight: 700;
-          color: var(--navy);
-          background: var(--gold);
-          border: none; cursor: pointer; text-decoration: none;
-          box-shadow: 0 4px 14px rgba(247,176,0,0.3);
-          transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
-        }
-
-        .hdr-btn-primary:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(247,176,0,0.45);
-        }
-
-        /* AVATAR TRIGGER */
-        .hdr-avatar-btn {
-          display: flex; align-items: center; gap: 8px;
-          padding: 4px 10px 4px 4px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 100px; cursor: pointer;
-          transition: background 0.2s, border-color 0.2s;
-        }
-
-        .hdr-avatar-btn:hover {
-          background: rgba(255,255,255,0.1);
-          border-color: rgba(247,176,0,0.3);
-        }
-
-        .hdr-avatar-name {
-          font-size: 0.83rem; font-weight: 500; color: rgba(255,255,255,0.85);
-          max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-
-        /* MOBILE TOGGLE */
-        .hdr-mobile-btn {
-          display: none;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px; padding: 8px;
-          color: #fff; cursor: pointer;
-          transition: background 0.2s;
-        }
-
-        .hdr-mobile-btn:hover { background: rgba(255,255,255,0.1); }
-
-        /* MOBILE MENU */
-        .hdr-mobile {
-          border-top: 1px solid rgba(247,176,0,0.1);
-          background: rgba(0,26,52,0.98);
-          padding: 1.2rem 1.5rem 1.5rem;
-        }
-
-        .hdr-mobile-nav {
-          display: flex; flex-direction: column; gap: 4px;
-          margin-bottom: 1.2rem;
-        }
-
-        .hdr-mobile-link {
-          padding: 10px 14px; border-radius: 12px;
-          font-size: 0.92rem; font-weight: 500;
-          color: rgba(255,255,255,0.75); text-decoration: none;
-          transition: background 0.15s, color 0.15s;
-        }
-
-        .hdr-mobile-link:hover, .hdr-mobile-link.active {
-          background: rgba(247,176,0,0.1);
-          color: var(--gold);
-        }
-
-        .hdr-mobile-divider {
-          height: 1px; background: rgba(255,255,255,0.07);
-          margin-bottom: 1.2rem;
-        }
-
-        .hdr-mobile-actions {
-          display: flex; flex-direction: column; gap: 8px;
-        }
-
-        .hdr-mobile-user {
-          display: flex; align-items: center; gap: 12px;
-          padding: 12px 14px; border-radius: 14px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.08);
-          margin-bottom: 8px;
-        }
-
-        .hdr-mobile-user-name {
-          font-size: 0.9rem; font-weight: 600; color: #fff;
-        }
-
-        .hdr-mobile-user-email {
-          font-size: 0.72rem; color: var(--gold);
-        }
-
-        /* DROPDOWN */
-        .hdr-dropdown-item {
-          display: flex; align-items: center; gap: 8px;
-          padding: 9px 12px; border-radius: 8px;
-          font-size: 0.85rem; color: rgba(255,255,255,0.8);
-          text-decoration: none; cursor: pointer;
-          transition: background 0.15s, color 0.15s;
-        }
-
-        .hdr-dropdown-item:hover {
-          background: rgba(247,176,0,0.12);
-          color: var(--gold);
-        }
-
-        .hdr-dropdown-item.danger {
-          color: #f87171;
-        }
-
-        .hdr-dropdown-item.danger:hover {
-          background: rgba(239,68,68,0.1);
-          color: #fca5a5;
-        }
-
-        @media (max-width: 768px) {
-          .hdr-nav, .hdr-auth { display: none !important; }
-          .hdr-mobile-btn { display: flex; }
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{ __html: headerStyles }} />
 
       <header className={`hdr hdr-bar ${scrolled ? "scrolled" : ""}`}>
         <div className="hdr-inner">
-          {/* LOGO */}
           <Link href="/" style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
             <Image
               src="/logo.png"
@@ -301,8 +299,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             />
           </Link>
 
-          {/* DESKTOP NAV */}
-          <nav className="hdr-nav" style={{ display: "flex" }}>
+          <nav className="hdr-nav">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -314,16 +311,15 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             ))}
           </nav>
 
-          {/* DESKTOP AUTH */}
-          <div className="hdr-auth" style={{ display: "flex" }}>
+          <div className="hdr-auth">
             {!isMounted ? (
-              <div style={{ width: 200, height: 36 }} />
+              <div style={{ width: 100 }} />
             ) : isLoggedIn ? (
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button className="hdr-avatar-btn">
                     <Avatar style={{ width: 30, height: 30, border: "1.5px solid rgba(247,176,0,0.4)" }}>
-                      <AvatarImage src={user?.avatar || "/avatar-mulher-brasileira.jpg"} alt={user?.name || "Usuário"} />
+                      <AvatarImage src={user?.avatar} alt={user?.name || "Usuário"} />
                       <AvatarFallback style={{ background: "#F7B000", color: "#002240", fontWeight: 700, fontSize: "0.8rem" }}>
                         {user?.name?.charAt(0) || "U"}
                       </AvatarFallback>
@@ -336,22 +332,14 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 <DropdownMenuContent
                   align="end"
                   sideOffset={10}
-                  style={{
-                    zIndex: 999999, width: 220,
-                    borderRadius: 16,
-                    border: "1px solid rgba(247,176,0,0.15)",
-                    background: "#001830",
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-                    padding: "6px",
-                  }}
+                  className="w-56 bg-[#001830] border-rgba(247,176,0,0.15) text-white"
+                  style={{ zIndex: 999999 }}
                 >
-                  <DropdownMenuLabel style={{ padding: "10px 12px 8px" }}>
-                    <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "#fff" }}>{user?.name || "Usuário"}</div>
-                    <div style={{ fontSize: "0.72rem", color: "#F7B000", marginTop: 2 }}>{user?.email}</div>
+                  <DropdownMenuLabel>
+                    <div className="font-semibold">{user?.name}</div>
+                    <div className="text-xs text-[#F7B000] truncate">{user?.email}</div>
                   </DropdownMenuLabel>
-
-                  <DropdownMenuSeparator style={{ background: "rgba(255,255,255,0.07)", margin: "4px 0" }} />
-
+                  <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuItem asChild>
                     <Link href="/usuario/dashboard" className="hdr-dropdown-item">
                       <User size={14} /> Meu Perfil
@@ -367,17 +355,13 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                       <Star size={14} /> Minhas Avaliações
                     </Link>
                   </DropdownMenuItem>
-
-                  <DropdownMenuSeparator style={{ background: "rgba(255,255,255,0.07)", margin: "4px 0" }} />
-
+                  <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuItem asChild>
                     <Link href="/usuario/configuracoes" className="hdr-dropdown-item">
                       <Settings size={14} /> Configurações
                     </Link>
                   </DropdownMenuItem>
-
-                  <DropdownMenuSeparator style={{ background: "rgba(255,255,255,0.07)", margin: "4px 0" }} />
-
+                  <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuItem onClick={handleLogout} className="hdr-dropdown-item danger">
                     <LogOut size={14} /> Sair
                   </DropdownMenuItem>
@@ -386,19 +370,17 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             ) : (
               <>
                 <Link href="/login" className="hdr-btn-ghost">Entrar</Link>
-                <Link href="/cadastro" className="hdr-btn-outline">Cadastrar Cidadão</Link>
-                <Link href="/cadastro-emp" className="hdr-btn-primary">Cadastrar Negócio</Link>
+                <Link href="/cadastro" className="hdr-btn-outline">Cidadão</Link>
+                <Link href="/cadastro-emp" className="hdr-btn-primary">Negócio</Link>
               </>
             )}
           </div>
 
-          {/* MOBILE TOGGLE */}
           <button className="hdr-mobile-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
-        {/* MOBILE MENU */}
         {mobileMenuOpen && (
           <div className="hdr-mobile">
             <nav className="hdr-mobile-nav">
@@ -413,67 +395,33 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 </Link>
               ))}
             </nav>
-
             <div className="hdr-mobile-divider" />
-
             <div className="hdr-mobile-actions">
-              {!isMounted ? (
-                <div style={{ height: 40 }} />
-              ) : isLoggedIn ? (
+              {isLoggedIn ? (
                 <>
                   <div className="hdr-mobile-user">
-                    <Avatar style={{ width: 36, height: 36, border: "1.5px solid rgba(247,176,0,0.4)" }}>
-                      <AvatarImage src={user?.avatar || "/avatar-mulher-brasileira.jpg"} alt={user?.name || "Usuário"} />
-                      <AvatarFallback style={{ background: "#F7B000", color: "#002240", fontWeight: 700 }}>
-                        {user?.name?.charAt(0) || "U"}
-                      </AvatarFallback>
+                    <Avatar style={{ width: 36, height: 36 }}>
+                      <AvatarImage src={user?.avatar} />
+                      <AvatarFallback className="bg-[#F7B000] text-[#002240]">{user?.name?.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="hdr-mobile-user-name">{user?.name || "Usuário"}</div>
+                      <div className="hdr-mobile-user-name">{user?.name}</div>
                       <div className="hdr-mobile-user-email">{user?.email}</div>
                     </div>
                   </div>
-                  <Link
-                    href="/usuario/dashboard"
-                    className="hdr-mobile-link"
-                    style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid rgba(255,255,255,0.08)" }}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <User size={15} /> Meu Perfil
+                  <Link href="/usuario/dashboard" className="hdr-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                    Meu Perfil
                   </Link>
-                  <button
-                    onClick={() => { handleLogout(); setMobileMenuOpen(false) }}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      padding: "10px 14px", borderRadius: 12,
-                      background: "rgba(239,68,68,0.08)",
-                      border: "1px solid rgba(239,68,68,0.2)",
-                      color: "#f87171", fontSize: "0.9rem", fontWeight: 500,
-                      cursor: "pointer",
-                    }}
-                  >
-                    <LogOut size={15} /> Sair
+                  <button onClick={handleLogout} className="hdr-mobile-link text-red-400 border border-red-900/30">
+                    Sair
                   </button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="hdr-mobile-link" style={{ border: "1px solid rgba(255,255,255,0.08)", textAlign: "center" }} onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/login" className="hdr-mobile-link border border-white/10 text-center" onClick={() => setMobileMenuOpen(false)}>
                     Entrar
                   </Link>
-                  <Link href="/cadastro" className="hdr-mobile-link" style={{ border: "1px solid rgba(255,255,255,0.08)", textAlign: "center" }} onClick={() => setMobileMenuOpen(false)}>
-                    Cadastrar Cidadão
-                  </Link>
-                  <Link
-                    href="/cadastro-emp"
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{
-                      display: "block", textAlign: "center",
-                      padding: "10px 14px", borderRadius: 12,
-                      background: "#F7B000", color: "#002240",
-                      fontFamily: "'Syne', sans-serif", fontWeight: 700,
-                      fontSize: "0.88rem", textDecoration: "none",
-                    }}
-                  >
+                  <Link href="/cadastro-emp" className="hdr-btn-primary block text-center" onClick={() => setMobileMenuOpen(false)}>
                     Cadastrar Negócio
                   </Link>
                 </>

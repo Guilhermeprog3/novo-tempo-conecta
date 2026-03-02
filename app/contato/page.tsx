@@ -3,7 +3,7 @@
 import { Mail, Phone, MapPin, User, Book, MessageSquare, Send, ArrowRight } from "lucide-react"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
-import { AUTH_CSS } from "./AUTH_CSS"
+import { AUTH_CSS } from "../../components/Auth"
 
 export default function ContatoPage() {
   return (

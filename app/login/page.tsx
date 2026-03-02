@@ -9,7 +9,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Header } from "@/components/navigation/header"
-import { AUTH_CSS } from "./AUTH_CSS"
+import { AUTH_CSS } from "../../components/Auth"
 
 export default function LoginPage() {
   const router = useRouter()

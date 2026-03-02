@@ -6,7 +6,7 @@ import { Search, Download, Trash2, Loader2, X, Users } from "lucide-react"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ADMIN_CSS } from "./AdminDashboardPage"
+import { ADMIN_CSS } from "../dashboard/page"
 
 type User = { id: string; name: string; email: string; phone: string; role?: string; createdAt: any; avatar?: string; }
 

@@ -6,7 +6,7 @@ import { Search, Download, Trash2, Loader2, Store, Globe, X, MapPin, Mail, Phone
 import { db } from "@/lib/firebase"
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"
 import Link from "next/link"
-import { ADMIN_CSS } from "./AdminDashboardPage"
+import { ADMIN_CSS } from "../dashboard/page"
 
 type Business = { id: string; businessName: string; businessPhone: string; email?: string; address: string; website?: string; category: string; createdAt?: any; }
 
