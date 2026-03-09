@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, Mail, Lock, Store, MapPin, Clock, Loader2, AlertTriangle, User, Info } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, Store, MapPin, Clock, Loader2, AlertTriangle, User, Info, Map as MapIcon, Globe, Phone } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
 import { auth, db } from '@/lib/firebase'
@@ -28,6 +28,14 @@ const CATEGORIES = [
   { value: "saude", label: "Farmácias e Saúde" },
   { value: "beleza", label: "Estética e Barbearia" },
   { value: "servicos", label: "Prestação de Serviços" },
+  { value: "educacao", label: "Educação e Cursos" },
+  { value: "construcao", label: "Construção e Reformas" },
+  { value: "automotivo", label: "Automotivo (Oficinas e Peças)" },
+  { value: "pet", label: "Pet Shop e Veterinária" },
+  { value: "tecnologia", label: "Tecnologia e Eletrônicos" },
+  { value: "moda", label: "Moda e Acessórios" },
+  { value: "lazer", label: "Lazer e Entretenimento" },
+  { value: "solidario", label: "🤝 Empreendedorismo Solidário" },
   { value: "outro", label: "Outros Negócios" },
 ]
 
@@ -44,49 +52,80 @@ export default function EmpresarioCadastroPage() {
   const [showPass, setShowPass] = useState(false)
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [error, setError] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
+
   const [formData, setFormData] = useState({
     ownerName: '', email: '', businessName: '', category: '',
-    businessPhone: '', address: '', website: '', description: '',
+    businessPhone: '', whatsapp: '', website: '',
+    street: '', number: '', block: '', reference: '',
     password: '', confirmPassword: '', terms: false
   })
+  
   const [openingHours, setOpeningHours] = useState(
     DAYS.map(d => ({ day: d.label, opens: '08:00', closes: '18:00', isOpen: false }))
   )
 
+  useEffect(() => {
+    setIsMounted(true)
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        },
+        (err) => console.error("Erro ao obter geolocalização:", err),
+        { enableHighAccuracy: true }
+      )
+    }
+  }, [])
+
   const set = (k: string, v: any) => setFormData(p => ({ ...p, [k]: v }))
+  
   const updateHours = (i: number, field: string, value: any) => {
-    const h = [...openingHours]; h[i] = { ...h[i], [field]: value }; setOpeningHours(h)
+    const h = [...openingHours]; 
+    h[i] = { ...h[i], [field]: value }; 
+    setOpeningHours(h)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setError('')
+    e.preventDefault(); 
+    setError('')
     if (!position) { setError("Por favor, marque o local da sua loja no mapa."); return }
     if (formData.password !== formData.confirmPassword) { setError("As senhas não coincidem."); return }
     if (!formData.terms) { setError("Você precisa aceitar os termos de uso."); return }
+    
     setLoading(true)
     try {
       const cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+      
+      const fullAddress = `${formData.street}, Nº ${formData.number}${formData.block ? `, Qd ${formData.block}` : ''}. Ref: ${formData.reference}`;
+
       await setDoc(doc(db, "businesses", cred.user.uid), {
         ...formData,
+        address: fullAddress,
         openingHours: openingHours.filter(h => h.isOpen),
         location: { latitude: position.lat, longitude: position.lng },
-        role: 'business', status: 'pending', createdAt: new Date()
+        role: 'business', 
+        status: 'pending', 
+        createdAt: new Date()
       })
       router.push('/empresario/dashboard')
-    } catch (err: any) { setError(err.message) }
-    finally { setLoading(false) }
+    } catch (err: any) { 
+      setError(err.message) 
+    } finally { 
+      setLoading(false) 
+    }
   }
 
   return (
     <>
-      <style>{AUTH_CSS}</style>
+      {isMounted && <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />}
+      
       <div className="auth-page">
         <Header />
         <div className="auth-bg" style={{ alignItems: "flex-start", paddingTop: "3rem" }}>
           <div className="auth-orb1" /><div className="auth-orb2" /><div className="auth-grid" />
 
           <div className="auth-card auth-card-wider">
-            {/* TOP */}
             <div className="auth-card-top">
               <div className="auth-card-top-orb" />
               <div className="auth-icon-wrap" style={{ background: "rgba(247,176,0,0.1)", border: "1px solid rgba(247,176,0,0.2)" }}>
@@ -94,14 +133,13 @@ export default function EmpresarioCadastroPage() {
               </div>
               <div className="auth-eyebrow">Empresário Parceiro</div>
               <div className="auth-title">Cadastrar Minha Loja</div>
-              <div className="auth-subtitle">Divulgue seu estabelecimento para toda a comunidade</div>
+              <div className="auth-subtitle">Divulgue seu negócio para toda a cidade</div>
             </div>
 
             <div className="auth-body">
               <form onSubmit={handleSubmit}>
-
-                {/* INFORMAÇÕES DO NEGÓCIO + MAPA */}
                 <div className="auth-section-label"><Info size={12} /> Informações do Negócio</div>
+                
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <div className="auth-field">
@@ -111,6 +149,7 @@ export default function EmpresarioCadastroPage() {
                         <input className="auth-input" placeholder="Ex: Panificadora Central" required onChange={e => set('businessName', e.target.value)} />
                       </div>
                     </div>
+
                     <div className="auth-form-grid cols2">
                       <div className="auth-field">
                         <label className="auth-label">Categoria *</label>
@@ -120,34 +159,60 @@ export default function EmpresarioCadastroPage() {
                         </select>
                       </div>
                       <div className="auth-field">
-                        <label className="auth-label">Telefone Comercial</label>
+                        <label className="auth-label">WhatsApp *</label>
                         <div className="auth-input-wrap">
-                          <input className="auth-input no-icon" placeholder="(00) 00000-0000" onChange={e => set('businessPhone', e.target.value)} />
+                          <Phone size={14} className="ai" />
+                          <input className="auth-input" placeholder="(00) 00000-0000" required onChange={e => set('whatsapp', e.target.value)} />
                         </div>
                       </div>
                     </div>
+
                     <div className="auth-field">
-                      <label className="auth-label">Endereço *</label>
+                      <label className="auth-label">Site ou Rede Social</label>
+                      <div className="auth-input-wrap">
+                        <Globe size={14} className="ai" />
+                        <input className="auth-input" placeholder="https://..." onChange={e => set('website', e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div className="auth-field">
+                      <label className="auth-label">Rua / Logradouro *</label>
                       <div className="auth-input-wrap">
                         <MapPin size={14} className="ai" />
-                        <input className="auth-input" placeholder="Rua, Número, Bairro" required onChange={e => set('address', e.target.value)} />
+                        <input className="auth-input" placeholder="Nome da rua" required onChange={e => set('street', e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div className="auth-form-grid cols2">
+                      <div className="auth-field">
+                        <label className="auth-label">Número *</label>
+                        <input className="auth-input no-icon" placeholder="123" required onChange={e => set('number', e.target.value)} />
+                      </div>
+                      <div className="auth-field">
+                        <label className="auth-label">Quadra</label>
+                        <input className="auth-input no-icon" placeholder="Ex: 04" onChange={e => set('block', e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div className="auth-field">
+                      <label className="auth-label">Ponto de Referência *</label>
+                      <div className="auth-input-wrap">
+                        <Info size={14} className="ai" />
+                        <input className="auth-input" placeholder="Ex: Ao lado do mercado" required onChange={e => set('reference', e.target.value)} />
                       </div>
                     </div>
                   </div>
 
-                  {/* MAPA */}
                   <div className="auth-field">
                     <label className="auth-label" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <MapPin size={12} color="#F7B000" /> Localização no Mapa *
+                      <MapIcon size={12} color="#F7B000" /> Localização no Mapa *
                     </label>
-                    <div style={{ height: 200, borderRadius: 14, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.09)", position: "relative", zIndex: 0 }}>
+                    <div style={{ height: "100%", minHeight: 320, borderRadius: 14, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.09)", position: "relative", zIndex: 0 }}>
                       <MapWithNoSSR position={position} setPosition={setPosition} />
                     </div>
-                    <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.22)", marginTop: 5, textAlign: "center" }}>Clique para fixar a localização exata</div>
                   </div>
                 </div>
 
-                {/* HORÁRIOS */}
                 <div className="auth-section-label"><Clock size={12} /> Horário de Funcionamento</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: "7px", marginBottom: "1.5rem" }}>
                   {openingHours.map((h, i) => (
@@ -170,7 +235,6 @@ export default function EmpresarioCadastroPage() {
                   ))}
                 </div>
 
-                {/* DADOS DE ACESSO */}
                 <div className="auth-section-label"><User size={12} /> Dados de Acesso</div>
                 <div className="auth-form-grid cols2" style={{ marginBottom: "1rem" }}>
                   <div className="auth-field">
@@ -201,12 +265,17 @@ export default function EmpresarioCadastroPage() {
                     <label className="auth-label">Confirmar Senha *</label>
                     <div className="auth-input-wrap">
                       <Lock size={14} className="ai" />
-                      <input className="auth-input no-icon" type="password" placeholder="Repita a senha" required onChange={e => set('confirmPassword', e.target.value)} style={{ paddingLeft: 14 }} />
+                      <input 
+                        className="auth-input" 
+                        type="password" 
+                        placeholder="Repita a senha" 
+                        required 
+                        onChange={e => set('confirmPassword', e.target.value)} 
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* TERMS */}
                 <div className="auth-terms" style={{ marginBottom: "1.4rem" }}>
                   <Checkbox
                     className="border-[rgba(255,255,255,0.18)] data-[state=checked]:bg-[#00CCFF] data-[state=checked]:border-[#00CCFF] mt-0.5 flex-shrink-0"
@@ -228,7 +297,7 @@ export default function EmpresarioCadastroPage() {
                 )}
 
                 <button type="submit" className="auth-btn auth-btn-gold" disabled={loading}>
-                  {loading ? <Loader2 size={17} style={{ animation: "auth-spin 1s linear infinite" }} /> : <Store size={16} />}
+                  {loading ? <Loader2 size={17} className="animate-spin" /> : <Store size={16} />}
                   {loading ? "Cadastrando..." : "Cadastrar Meu Negócio"}
                 </button>
               </form>

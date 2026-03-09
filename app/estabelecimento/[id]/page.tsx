@@ -224,6 +224,10 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
   const [userRating, setUserRating] = useState(0);
   const [comment, setComment] = useState("");
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+
+  // ── FIX: store the real name fetched from Firestore ──────────────────────
+  const [firestoreUserName, setFirestoreUserName] = useState<string>("");
+
   const [isFav, setIsFav] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -237,8 +241,26 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
     const unsub = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user && params.id) {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        if (snap.exists()) setIsFav((snap.data().favorites || []).includes(params.id));
+        // Load favorites
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          setIsFav((data.favorites || []).includes(params.id));
+
+          // ── FIX: get the real name from Firestore ────────────────────────
+          // Try common field names: name, fullName, displayName, nome
+          const realName =
+            data.name ||
+            data.fullName ||
+            data.displayName ||
+            data.nome ||
+            user.displayName ||  // fallback to Firebase Auth displayName
+            "";
+          setFirestoreUserName(realName);
+        } else {
+          // Document doesn't exist yet — fallback to Auth displayName
+          setFirestoreUserName(user.displayName || "");
+        }
       }
     });
     return () => unsub();
@@ -275,17 +297,40 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser || !business || userRating === 0 || !comment.trim()) { showToast("Selecione uma nota e escreva um comentário."); return; }
+    if (!currentUser || !business || userRating === 0 || !comment.trim()) {
+      showToast("Selecione uma nota e escreva um comentário.");
+      return;
+    }
+
+    // ── FIX: use the Firestore name, with clear fallback chain ───────────
+    const displayName =
+      firestoreUserName ||
+      currentUser.displayName ||
+      currentUser.email?.split("@")[0] ||
+      "Usuário";
+
     try {
       const bizRef = doc(db, "businesses", params.id);
       if (userReview) {
-        await updateDoc(doc(db, "businesses", params.id, "reviews", userReview.id), { rating: userRating, comment, createdAt: new Date() });
+        await updateDoc(doc(db, "businesses", params.id, "reviews", userReview.id), {
+          rating: userRating,
+          comment,
+          userName: displayName, // also update the name in case it changed
+          createdAt: new Date()
+        });
         const newAvg = ((business.rating || 0) * (business.reviewCount || 0) - userReview.rating + userRating) / (business.reviewCount || 1);
         await updateDoc(bizRef, { rating: newAvg });
         setBusiness(p => p ? { ...p, rating: newAvg } : null);
         showToast("Avaliação atualizada!");
       } else {
-        await addDoc(collection(db, "businesses", params.id, "reviews"), { userId: currentUser.uid, userName: currentUser.displayName || "Usuário", userAvatar: currentUser.photoURL, rating: userRating, comment, createdAt: new Date() });
+        await addDoc(collection(db, "businesses", params.id, "reviews"), {
+          userId: currentUser.uid,
+          userName: displayName,  // ← real name from Firestore
+          userAvatar: currentUser.photoURL,
+          rating: userRating,
+          comment,
+          createdAt: new Date()
+        });
         const newCount = (business.reviewCount || 0) + 1;
         const newAvg = ((business.rating || 0) * (business.reviewCount || 0) + userRating) / newCount;
         await updateDoc(bizRef, { rating: newAvg, reviewCount: newCount });
@@ -293,7 +338,9 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
         showToast("Avaliação enviada!");
       }
       setShowForm(false);
-    } catch { showToast("Erro ao salvar. Tente novamente."); }
+    } catch {
+      showToast("Erro ao salvar. Tente novamente.");
+    }
   };
 
   const handleDeleteReview = async () => {
