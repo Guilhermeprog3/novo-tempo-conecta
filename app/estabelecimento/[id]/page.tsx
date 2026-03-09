@@ -225,40 +225,26 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
   const [comment, setComment] = useState("");
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
 
-  // ── FIX: store the real name fetched from Firestore ──────────────────────
   const [firestoreUserName, setFirestoreUserName] = useState<string>("");
-
   const [isFav, setIsFav] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const userReview = reviews.find(r => r.userId === currentUser?.uid);
-
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user && params.id) {
-        // Load favorites
         const userSnap = await getDoc(doc(db, "users", user.uid));
         if (userSnap.exists()) {
           const data = userSnap.data();
           setIsFav((data.favorites || []).includes(params.id));
-
-          // ── FIX: get the real name from Firestore ────────────────────────
-          // Try common field names: name, fullName, displayName, nome
-          const realName =
-            data.name ||
-            data.fullName ||
-            data.displayName ||
-            data.nome ||
-            user.displayName ||  // fallback to Firebase Auth displayName
-            "";
+          const realName = data.name || data.fullName || data.displayName || data.nome || user.displayName || "";
           setFirestoreUserName(realName);
         } else {
-          // Document doesn't exist yet — fallback to Auth displayName
           setFirestoreUserName(user.displayName || "");
         }
       }
@@ -268,10 +254,22 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
 
   useEffect(() => {
     if (!params.id) return;
+    
+    // Busca os dados do estabelecimento com tratamento de campos nulos
     getDoc(doc(db, "businesses", params.id)).then(snap => {
-      if (snap.exists()) setBusiness({ id: snap.id, ...snap.data() } as BusinessData);
+      if (snap.exists()) {
+        const data = snap.data();
+        setBusiness({ 
+          id: snap.id, 
+          ...data,
+          hours: data.hours || "", // <-- Fix preventivo: garante que hours nunca seja undefined
+          specialties: data.specialties || [],
+          images: data.images || []
+        } as BusinessData);
+      }
       setLoading(false);
     });
+
     const unsub = onSnapshot(collection(db, "businesses", params.id, "reviews"), qs => {
       setReviews(qs.docs.map(d => ({ id: d.id, ...d.data() } as Review))
         .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()));
@@ -302,12 +300,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
       return;
     }
 
-    // ── FIX: use the Firestore name, with clear fallback chain ───────────
-    const displayName =
-      firestoreUserName ||
-      currentUser.displayName ||
-      currentUser.email?.split("@")[0] ||
-      "Usuário";
+    const displayName = firestoreUserName || currentUser.displayName || currentUser.email?.split("@")[0] || "Usuário";
 
     try {
       const bizRef = doc(db, "businesses", params.id);
@@ -315,7 +308,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
         await updateDoc(doc(db, "businesses", params.id, "reviews", userReview.id), {
           rating: userRating,
           comment,
-          userName: displayName, // also update the name in case it changed
+          userName: displayName,
           createdAt: new Date()
         });
         const newAvg = ((business.rating || 0) * (business.reviewCount || 0) - userReview.rating + userRating) / (business.reviewCount || 1);
@@ -325,7 +318,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
       } else {
         await addDoc(collection(db, "businesses", params.id, "reviews"), {
           userId: currentUser.uid,
-          userName: displayName,  // ← real name from Firestore
+          userName: displayName,
           userAvatar: currentUser.photoURL,
           rating: userRating,
           comment,
@@ -412,7 +405,6 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
 
       <div className="est-body">
         <div>
-          {/* Gallery */}
           <div className="est-card">
             <div className="est-card-header">
               <div className="est-card-title">
@@ -421,7 +413,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
               </div>
             </div>
             <div className="est-card-body">
-              {business.images?.length ? (
+              {business.images && business.images.length > 0 ? (
                 <div className="est-gallery">
                   {business.images.map((url, i) => (
                     <div key={i} className="est-gallery-img"><img src={url} alt={`Foto ${i+1}`}/></div>
@@ -436,7 +428,6 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             </div>
           </div>
 
-          {/* About */}
           <div className="est-card">
             <div className="est-card-header">
               <div className="est-card-title">
@@ -446,14 +437,15 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             </div>
             <div className="est-card-body">
               <p className="est-about-desc">{business.description || "Nenhuma descrição fornecida."}</p>
-              {business.specialties?.length ? (
-                <><div className="est-specs-label">Especialidades</div>
-                <div className="est-specs">{business.specialties.map((s,i)=><span key={i} className="est-spec">{s}</span>)}</div></>
-              ) : null}
+              {business.specialties && business.specialties.length > 0 && (
+                <>
+                  <div className="est-specs-label">Especialidades</div>
+                  <div className="est-specs">{business.specialties.map((s,i)=><span key={i} className="est-spec">{s}</span>)}</div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Reviews */}
           <div className="est-card">
             <div className="est-card-header">
               <div className="est-card-title">
@@ -515,7 +507,6 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
           </div>
         </div>
 
-        {/* SIDEBAR */}
         <div>
           <div className="est-side-card">
             <div className="est-side-header"><Phone size={14} color="#00CCFF"/> Canais de Atendimento</div>
@@ -550,7 +541,8 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                 <div className={`est-status-dot ${business.isOpen ? "open" : "closed"}`}/>
                 <div>
                   <div className={`est-status-text ${business.isOpen ? "open" : "closed"}`}>{business.isOpen ? "Aberto agora" : "Fechado agora"}</div>
-                  <div className="est-hours-detail">{business.hours.replace(/; /g,'\n')}</div>
+                  {/* CORREÇÃO APLICADA AQUI: Adicionado optional chaining ?. para evitar erro se hours for undefined */}
+                  <div className="est-hours-detail">{business.hours?.replace(/; /g,'\n') || "Horário não informado"}</div>
                 </div>
               </div>
             </div>

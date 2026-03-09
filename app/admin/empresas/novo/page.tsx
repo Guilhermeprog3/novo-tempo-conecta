@@ -3,8 +3,7 @@
 import React, { useState } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { Store, MapPin, Clock, Loader2, AlertTriangle, Info, ArrowLeft, Save } from "lucide-react"
-import { Label } from "@/components/ui/label"
+import { Store, MapPin, Clock, Loader2, AlertTriangle, Info, ArrowLeft, Save, Globe, Phone, User, AlignLeft, Hash, Layers } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { db } from '@/lib/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
@@ -22,6 +21,14 @@ const CATEGORIES = [
   { value: "saude", label: "Farmácias e Saúde" },
   { value: "beleza", label: "Estética e Barbearia" },
   { value: "servicos", label: "Prestação de Serviços" },
+  { value: "educacao", label: "Educação e Cursos" },
+  { value: "construcao", label: "Construção e Reformas" },
+  { value: "automotivo", label: "Automotivo (Oficinas e Peças)" },
+  { value: "pet", label: "Pet Shop e Veterinária" },
+  { value: "tecnologia", label: "Tecnologia e Eletrônicos" },
+  { value: "moda", label: "Moda e Acessórios" },
+  { value: "lazer", label: "Lazer e Entretenimento" },
+  { value: "solidario", label: "🤝 Empreendedorismo Solidário" },
   { value: "outro", label: "Outros Negócios" },
 ]
 
@@ -38,6 +45,8 @@ const NOVO_CSS = `
 .nv-input{width:100%;height:42px;padding:0 12px;background:#f8f6f2;border:1.5px solid #ede9e0;border-radius:11px;font-size:0.875rem;font-family:'DM Sans',sans-serif;color:#1a2a3a;outline:none;transition:border-color 0.2s,background 0.2s;}
 .nv-input::placeholder{color:#b0bec5;}
 .nv-input:focus{border-color:#00CCFF;background:#fff;}
+.nv-textarea{width:100%;padding:12px;background:#f8f6f2;border:1.5px solid #ede9e0;border-radius:11px;font-size:0.875rem;font-family:'DM Sans',sans-serif;color:#1a2a3a;outline:none;resize:none;min-height:70px;transition:all 0.2s;}
+.nv-textarea:focus{border-color:#00CCFF;background:#fff;}
 .nv-select{width:100%;height:42px;padding:0 12px;background:#f8f6f2;border:1.5px solid #ede9e0;border-radius:11px;font-size:0.875rem;font-family:'DM Sans',sans-serif;color:#1a2a3a;outline:none;cursor:pointer;}
 .nv-day-card{background:#fff;border:1.5px solid #f0ece5;border-radius:12px;padding:12px;transition:border-color 0.2s;}
 .nv-day-card.active{border-color:rgba(0,204,255,0.4);background:rgba(0,204,255,0.03);}
@@ -51,25 +60,49 @@ export default function AdminNovoCadastroEmpresa() {
   const [loading, setLoading] = useState(false)
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({ ownerName: '', email: '', businessName: '', category: '', businessPhone: '', address: '', website: '', description: '' })
-  const [openingHours, setOpeningHours] = useState(DAYS.map(d => ({ day: d.label, opens: '08:00', closes: '18:00', isOpen: false })))
+  const [formData, setFormData] = useState({ 
+    ownerName: '', email: '', businessName: '', category: '', 
+    businessPhone: '', whatsapp: '', website: '', description: '',
+    street: '', number: '', block: '', reference: ''
+  })
+  
+  const [openingHours, setOpeningHours] = useState(
+    DAYS.map(d => ({ day: d.label, opens: '08:00', closes: '18:00', isOpen: false }))
+  )
 
   const updateHours = (i: number, field: string, value: any) => {
-    const h = [...openingHours]; h[i] = { ...h[i], [field]: value }; setOpeningHours(h)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(null)
-    if (!position) return setError("Por favor, marque a localização no mapa.")
-    setLoading(true)
-    try {
-      await addDoc(collection(db, "businesses"), { ...formData, openingHours: openingHours.filter(h => h.isOpen), location: { latitude: position.lat, longitude: position.lng }, role: 'business', status: 'approved', createdAt: serverTimestamp() })
-      router.push('/admin/empresas')
-    } catch (err: any) { setError("Erro ao salvar: " + err.message) }
-    finally { setLoading(false) }
+    const h = [...openingHours]; 
+    h[i] = { ...h[i], [field]: value }; 
+    setOpeningHours(h)
   }
 
   const set = (k: string, v: string) => setFormData(p => ({ ...p, [k]: v }))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); 
+    setError(null)
+    if (!position) return setError("Por favor, marque a localização no mapa.")
+    
+    setLoading(true)
+    try {
+      const fullAddress = `${formData.street}, Nº ${formData.number}${formData.block ? `, Qd ${formData.block}` : ''}. Ref: ${formData.reference}`;
+
+      await addDoc(collection(db, "businesses"), { 
+        ...formData, 
+        address: fullAddress, // Salva o endereço concatenado para compatibilidade
+        openingHours: openingHours.filter(h => h.isOpen), 
+        location: { latitude: position.lat, longitude: position.lng }, 
+        role: 'business', 
+        status: 'approved',
+        createdAt: serverTimestamp() 
+      })
+      router.push('/admin/empresas')
+    } catch (err: any) { 
+      setError("Erro ao salvar: " + err.message) 
+    } finally { 
+      setLoading(false) 
+    }
+  }
 
   return (
     <>
@@ -96,17 +129,20 @@ export default function AdminNovoCadastroEmpresa() {
           <div className="adm-card-body">
             <form onSubmit={handleSubmit}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2.5rem", marginBottom: "2rem" }}>
-                {/* DADOS */}
+                
+                {/* COLUNA 1: DADOS DO NEGÓCIO */}
                 <div>
                   <div className="nv-section-head">
                     <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(0,204,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}><Info size={14} color="#00CCFF" /></div>
                     <span className="nv-section-label">Informações do Negócio</span>
                   </div>
+                  
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <div>
                       <label className="nv-label">Nome do Estabelecimento *</label>
-                      <input required className="nv-input" placeholder="Ex: Restaurante Sabor Local" onChange={e => set('businessName', e.target.value)} />
+                      <input required className="nv-input" placeholder="Ex: Panificadora Central" onChange={e => set('businessName', e.target.value)} />
                     </div>
+                    
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                       <div>
                         <label className="nv-label">Categoria *</label>
@@ -116,27 +152,61 @@ export default function AdminNovoCadastroEmpresa() {
                         </select>
                       </div>
                       <div>
-                        <label className="nv-label">Telefone</label>
-                        <input className="nv-input" placeholder="(86) 90000-0000" onChange={e => set('businessPhone', e.target.value)} />
+                        <label className="nv-label">WhatsApp *</label>
+                        <input required className="nv-input" placeholder="(86) 90000-0000" onChange={e => set('whatsapp', e.target.value)} />
                       </div>
                     </div>
+
                     <div>
-                      <label className="nv-label">Endereço Completo *</label>
-                      <input required className="nv-input" placeholder="Rua, Número, Bairro" onChange={e => set('address', e.target.value)} />
+                      <label className="nv-label">Descrição do Negócio *</label>
+                      <textarea required className="nv-textarea" placeholder="Conte um pouco sobre a empresa..." onChange={e => set('description', e.target.value)} />
+                    </div>
+
+                    <div>
+                      <label className="nv-label">Logradouro / Rua *</label>
+                      <div style={{ position: "relative" }}>
+                        <MapPin size={14} style={{ position: "absolute", left: 12, top: 14, color: "#b0bec5" }} />
+                        <input required className="nv-input" style={{ paddingLeft: 36 }} placeholder="Nome da rua" onChange={e => set('street', e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                      <div>
+                        <label className="nv-label">Número *</label>
+                        <input required className="nv-input" placeholder="123" onChange={e => set('number', e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="nv-label">Quadra</label>
+                        <input className="nv-input" placeholder="Ex: 04" onChange={e => set('block', e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="nv-label">Ponto de Referência *</label>
+                      <input required className="nv-input" placeholder="Ex: Próximo ao posto" onChange={e => set('reference', e.target.value)} />
                     </div>
                   </div>
                 </div>
 
-                {/* MAPA */}
-                <div>
-                  <div className="nv-section-head">
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(247,176,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}><MapPin size={14} color="#F7B000" /></div>
-                    <span className="nv-section-label">Localização Geográfica *</span>
+                {/* COLUNA 2: MAPA E EXTRAS */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                  <div>
+                    <div className="nv-section-head">
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(247,176,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}><MapPin size={14} color="#F7B000" /></div>
+                      <span className="nv-section-label">Localização no Mapa *</span>
+                    </div>
+                    <div style={{ height: 260, borderRadius: 14, overflow: "hidden", border: "1.5px solid #ede9e0", position: "relative", zIndex: 0 }}>
+                      <MapWithNoSSR position={position} setPosition={setPosition} />
+                    </div>
                   </div>
-                  <div style={{ height: 260, borderRadius: 14, overflow: "hidden", border: "1.5px solid #ede9e0", position: "relative", zIndex: 0 }}>
-                    <MapWithNoSSR position={position} setPosition={setPosition} />
+
+                  <div>
+                    <label className="nv-label">Site ou Redes Sociais</label>
+                    <div style={{ position: "relative" }}>
+                      <Globe size={14} style={{ position: "absolute", left: 12, top: 14, color: "#b0bec5" }} />
+                      <input className="nv-input" style={{ paddingLeft: 36 }} placeholder="instagram.com/..." onChange={e => set('website', e.target.value)} />
+                    </div>
                   </div>
-                  <p style={{ fontSize: "0.72rem", color: "#b0bec5", textAlign: "center", marginTop: 8 }}>Clique no mapa para fixar a localização exata.</p>
                 </div>
               </div>
 
@@ -166,14 +236,17 @@ export default function AdminNovoCadastroEmpresa() {
 
               {/* RESPONSÁVEL */}
               <div style={{ borderTop: "1.5px solid #f0ece5", paddingTop: "1.5rem", marginBottom: "2rem" }}>
-                <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8a9aaa", marginBottom: "1.2rem" }}>Dados de Contato Interno</div>
+                <div className="nv-section-head">
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(0,34,64,0.05)", display: "flex", alignItems: "center", justifyContent: "center" }}><User size={14} color="#002240" /></div>
+                  <span className="nv-section-label">Dados do Proprietário</span>
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
                     <label className="nv-label">Nome do Responsável</label>
                     <input className="nv-input" placeholder="Ex: João Silva" onChange={e => set('ownerName', e.target.value)} />
                   </div>
                   <div>
-                    <label className="nv-label">E-mail de Contato</label>
+                    <label className="nv-label">E-mail de Acesso/Contato</label>
                     <input type="email" className="nv-input" placeholder="contato@empresa.com" onChange={e => set('email', e.target.value)} />
                   </div>
                 </div>
@@ -181,11 +254,11 @@ export default function AdminNovoCadastroEmpresa() {
 
               {error && <div className="nv-error" style={{ marginBottom: "1.5rem" }}><AlertTriangle size={16} />{error}</div>}
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, borderTop: "1.5px solid #f0ece5", paddingTop: "1.5rem" }}>
-                <button type="button" className="adm-btn adm-btn-outline" onClick={() => router.back()}>Cancelar</button>
-                <button type="submit" className="adm-btn adm-btn-primary" disabled={loading}>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, borderTop: "1.5px solid #f0ece5", paddingTop: "1.5rem" }}>
+                <button type="button" className="adm-btn adm-btn-ghost" style={{ border: "1px solid #ede9e0" }} onClick={() => router.back()}>Cancelar</button>
+                <button type="submit" className="adm-btn adm-btn-cyan" style={{ minWidth: 180 }} disabled={loading}>
                   {loading ? <Loader2 size={15} style={{ animation: "adm-spin 1s linear infinite" }} /> : <Save size={15} />}
-                  Salvar Empresa
+                  Salvar Estabelecimento
                 </button>
               </div>
             </form>

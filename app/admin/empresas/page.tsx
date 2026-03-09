@@ -8,9 +8,54 @@ import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"
 import Link from "next/link"
 import { ADMIN_CSS } from "../dashboard/page"
 
-type Business = { id: string; businessName: string; businessPhone: string; email?: string; address: string; website?: string; category: string; createdAt?: any; }
+type Business = { 
+  id: string; 
+  businessName: string; 
+  businessPhone: string; 
+  email?: string; 
+  address: string; 
+  website?: string; 
+  category: string; 
+  createdAt?: any; 
+}
 
-const CAT_COLORS: Record<string, string> = { restaurante: "#FF7043", comercio: "#00CCFF", servicos: "#F7B000", saude: "#E91E8C", automotivo: "#8B5CF6", casa: "#22c55e" }
+// Mapeamento completo de cores para as badges
+const CAT_COLORS: Record<string, string> = { 
+  restaurante: "#FF7043", 
+  comercio: "#00CCFF", 
+  mercado: "#4CAF50",
+  saude: "#E91E8C", 
+  beleza: "#F06292",
+  servicos: "#F7B000", 
+  educacao: "#4FC3F7",
+  construcao: "#A1887F",
+  automotivo: "#8B5CF6", 
+  pet: "#FF8A65",
+  tecnologia: "#4DB6AC",
+  moda: "#BA68C8",
+  lazer: "#AED581",
+  solidario: "#00CCFF", 
+  outro: "#90A4AE"
+}
+
+// Array de categorias idêntico ao do cadastro para o select
+const CATEGORIES = [
+  { value: "restaurante", label: "Restaurantes e Gastronomia" },
+  { value: "comercio", label: "Loja e Varejo" },
+  { value: "mercado", label: "Mercados e Mercearias" },
+  { value: "saude", label: "Farmácias e Saúde" },
+  { value: "beleza", label: "Estética e Barbearia" },
+  { value: "servicos", label: "Prestação de Serviços" },
+  { value: "educacao", label: "Educação e Cursos" },
+  { value: "construcao", label: "Construção e Reformas" },
+  { value: "automotivo", label: "Automotivo (Oficinas e Peças)" },
+  { value: "pet", label: "Pet Shop e Veterinária" },
+  { value: "tecnologia", label: "Tecnologia e Eletrônicos" },
+  { value: "moda", label: "Moda e Acessórios" },
+  { value: "lazer", label: "Lazer e Entretenimento" },
+  { value: "solidario", label: "Empreendedorismo Solidário" },
+  { value: "outro", label: "Outros Negócios" },
+]
 
 export default function AdminEmpresasPage() {
   const [businesses, setBusinesses] = useState<Business[]>([])
@@ -23,16 +68,29 @@ export default function AdminEmpresasPage() {
       try {
         const snap = await getDocs(collection(db, "businesses"))
         setBusinesses(snap.docs.map(d => ({ id: d.id, ...d.data() })) as Business[])
-      } catch (e) { console.error(e) } finally { setLoading(false) }
-    }; fetch()
+      } catch (e) { 
+        console.error(e) 
+      } finally { 
+        setLoading(false) 
+      }
+    }; 
+    fetch()
   }, [])
 
   const handleDelete = async (id: string) => {
-    try { await deleteDoc(doc(db, "businesses", id)); setBusinesses(p => p.filter(b => b.id !== id)) }
-    catch (e) { console.error(e) }
+    try { 
+      await deleteDoc(doc(db, "businesses", id))
+      setBusinesses(p => p.filter(b => b.id !== id)) 
+    } catch (e) { 
+      console.error(e) 
+    }
   }
 
-  const formatDate = (d: any) => { if (!d) return '—'; if (d.toDate) return d.toDate().toLocaleDateString('pt-BR'); return '—' }
+  const formatDate = (d: any) => { 
+    if (!d) return '—'
+    if (d.toDate) return d.toDate().toLocaleDateString('pt-BR')
+    return '—' 
+  }
 
   const exportCSV = () => {
     const ds = new Date().toLocaleDateString('pt-BR')
@@ -48,6 +106,11 @@ export default function AdminEmpresasPage() {
     const mc = filterCat === 'all' || b.category === filterCat
     return ms && mc
   })
+
+  // Função para pegar o Label bonito da categoria através do value
+  const getCategoryLabel = (value: string) => {
+    return CATEGORIES.find(c => c.value === value)?.label || value
+  }
 
   return (
     <>
@@ -86,10 +149,9 @@ export default function AdminEmpresasPage() {
               </div>
               <select className="adm-select" value={filterCat} onChange={e => setFilterCat(e.target.value)}>
                 <option value="all">Todas as categorias</option>
-                <option value="restaurante">Restaurante</option>
-                <option value="comercio">Comércio</option>
-                <option value="servicos">Serviços</option>
-                <option value="saude">Saúde</option>
+                {CATEGORIES.map(cat => (
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                ))}
               </select>
               {(searchTerm || filterCat !== 'all') && (
                 <button className="adm-btn adm-btn-ghost" onClick={() => { setSearchTerm(''); setFilterCat('all') }}><X size={14} /> Limpar</button>
@@ -128,7 +190,7 @@ export default function AdminEmpresasPage() {
                       <tr key={b.id}>
                         <td style={{ paddingLeft: 20 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f8f6f2", border: "1.5px solid #f0ece5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1.5px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                               <Store size={16} color="#b0a898" />
                             </div>
                             <div>
@@ -142,21 +204,23 @@ export default function AdminEmpresasPage() {
                           </div>
                         </td>
                         <td>
-                          <span className="adm-badge" style={{ background: `${cc}15`, color: cc, border: `1px solid ${cc}30` }}>{b.category}</span>
+                          <span className="adm-badge" style={{ background: `${cc}15`, color: cc, border: `1px solid ${cc}30` }}>
+                            {getCategoryLabel(b.category)}
+                          </span>
                         </td>
                         <td>
-                          <div style={{ fontSize: "0.8rem", color: "#3a4a5a", display: "flex", flexDirection: "column", gap: 3 }}>
+                          <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.7)", display: "flex", flexDirection: "column", gap: 3 }}>
                             <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Phone size={11} color="#b0bec5" />{b.businessPhone}</span>
-                            {b.email && <span style={{ display: "flex", alignItems: "center", gap: 5, color: "#8a9aaa", fontSize: "0.72rem" }}><Mail size={10} color="#b0bec5" />{b.email}</span>}
+                            {b.email && <span style={{ display: "flex", alignItems: "center", gap: 5, color: "rgba(255,255,255,0.45)", fontSize: "0.72rem" }}><Mail size={10} color="#b0bec5" />{b.email}</span>}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: "flex", alignItems: "flex-start", gap: 5, fontSize: "0.8rem", color: "#5a6878", maxWidth: 180 }}>
+                          <div style={{ display: "flex", alignItems: "flex-start", gap: 5, fontSize: "0.8rem", color: "rgba(255,255,255,0.6)", maxWidth: 180 }}>
                             <MapPin size={12} color="#b0bec5" style={{ flexShrink: 0, marginTop: 2 }} />
                             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.address}</span>
                           </div>
                         </td>
-                        <td><div style={{ fontSize: "0.8rem", color: "#8a9aaa" }}>{formatDate(b.createdAt)}</div></td>
+                        <td><div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.4)" }}>{formatDate(b.createdAt)}</div></td>
                         <td style={{ textAlign: "right", paddingRight: 20 }}>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
