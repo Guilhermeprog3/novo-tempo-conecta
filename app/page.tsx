@@ -1,11 +1,10 @@
 "use client"
-
+import { collection, getDocs, query, limit, where, getCountFromServer } from "firebase/firestore"
 import { useState, useEffect } from "react"
 import { MapPin, Star, Store, Utensils, Wrench, Heart, Clock, ShieldCheck, ArrowRight, Sparkles, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { SearchBar } from "@/components/search-bar"
 import { db } from "@/lib/firebase"
-import { collection, getDocs, query, limit, where } from "firebase/firestore"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
 import { motion, Variants } from "framer-motion"
@@ -333,29 +332,32 @@ export default function HomePage() {
   ];
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const businessesCollection = collection(db, "businesses");
-        const publicQuery = query(businessesCollection, where("isPublic", "==", true));
-        const allSnap = await getDocs(publicQuery);
-        setStats({ businessCount: allSnap.size });
+  const fetchData = async () => {
+    try {
+      const businessesCollection = collection(db, "businesses")
+      
+      // OTIMIZAÇÃO: Conta documentos no servidor sem os descarregar
+      const publicQuery = query(businessesCollection, where("isPublic", "==", true))
+      const countSnapshot = await getCountFromServer(publicQuery)
+      setStats({ businessCount: countSnapshot.data().count })
 
-        const featuredQuery = query(
-          businessesCollection,
-          where("isPublic", "==", true),
-          where("isFeatured", "==", true),
-          limit(3)
-        );
-        const featSnap = await getDocs(featuredQuery);
-        setFeaturedBusinesses(featSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Business[]);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+      // Procura apenas os destaques necessários
+      const featuredQuery = query(
+        businessesCollection,
+        where("isPublic", "==", true),
+        where("isFeatured", "==", true),
+        limit(3)
+      )
+      const featSnap = await getDocs(featuredQuery)
+      setFeaturedBusinesses(featSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Business[])
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  fetchData()
+}, [])
 
   const renderStars = (rating: number = 0) => (
     <div style={{ display: "flex", gap: 2 }}>
@@ -383,7 +385,7 @@ export default function HomePage() {
 
             <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
               <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0}>
-                <div className="hp-eyebrow"><Sparkles size={12} />Plataforma do Novo Tempo</div>
+                <div className="hp-eyebrow"><Sparkles size={12} />Novo Tempo Conecta</div>
               </motion.div>
 
               <motion.h1 className="hp-title" variants={fadeUp} initial="hidden" animate="show" custom={1}>
