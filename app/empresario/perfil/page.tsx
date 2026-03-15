@@ -5,8 +5,7 @@ import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
-import { auth, db, storage } from "@/lib/firebase" // Certifique-se que 'storage' é exportado em @/lib/firebase
+import { auth, db } from "@/lib/firebase"
 import {
   Loader2, Save, Edit3, Building2, Tag, AlignLeft,
   Phone, MessageCircle, Globe, MapPin, Clock, Store,
@@ -14,8 +13,16 @@ import {
   Upload, Star, Images
 } from "lucide-react"
 
-const ProfileMapNoSSR = dynamic(() => import("./ProfileMapComponent"), { ssr: false })
+// --- CONFIGURAÇÃO CLOUDINARY ---
+const CLOUDINARY_CLOUD_NAME = "dgecbcilr"; 
+const CLOUDINARY_UPLOAD_PRESET = "imoveis_unsigned";
 
+const ProfileMapNoSSR = dynamic(() => import("./ProfileMapComponent"), { 
+  ssr: false,
+  loading: () => <div className="emp-map-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="animate-spin" /></div>
+})
+
+// Estilos mantidos (conforme sua versão)
 const EMP_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 .emp { --navy:#002240;--gold:#F7B000;--cyan:#00CCFF;--bg:#F4F1EC; font-family:'DM Sans',sans-serif; background:var(--bg);min-height:100vh; }
@@ -94,12 +101,14 @@ const EMP_CSS = `
 @media(max-width:768px){ .emp-info-grid{grid-template-columns:1fr;} .emp-form-grid{grid-template-columns:1fr;} .emp-hours-grid,.emp-hours-edit-grid{grid-template-columns:repeat(4,1fr);} }
 `
 
+// Tipagens e componentes auxiliares (mantidos da sua estrutura original)
 type OpeningHour = { day: string; opens: string; closes: string; isOpen: boolean }
 type BusinessData = {
   businessName: string; category: string; description: string;
   businessPhone: string; whatsapp: string; website: string;
   address: string; openingHours?: OpeningHour[];
   coverImage?: string; galleryImages?: string[];
+  location?: { latitude: number; longitude: number };
   [key: string]: any
 }
 
@@ -110,6 +119,7 @@ const ALL_DAYS = [
   { short: "Dom", full: "Domingo" },
 ]
 
+// Componentes HoursDisplay, HoursEditor e InfoItem (mantidos)
 function HoursDisplay({ openingHours }: { openingHours?: OpeningHour[] }) {
   const count = openingHours?.length || 0
   const getHour = (short: string, full: string) =>
@@ -184,6 +194,7 @@ function InfoItem({ icon, label, value, full, iconBg = "rgba(0,204,255,0.08)", i
   )
 }
 
+// --- COMPONENTE DE IMAGEM ATUALIZADO PARA CLOUDINARY ---
 function ImageSection({ uid, coverImage, galleryImages, isEditing, onCoverChange, onGalleryChange }: {
   uid: string; coverImage?: string; galleryImages?: string[];
   isEditing: boolean; onCoverChange: (url: string) => void; onGalleryChange: (urls: string[]) => void
@@ -194,22 +205,31 @@ function ImageSection({ uid, coverImage, galleryImages, isEditing, onCoverChange
   const [uploadingGallery, setUploadingGallery] = useState(false)
   const [drag, setDrag] = useState(false)
 
-  // FIX: Adicionada verificação de segurança para o storage
-  const upload = async (file: File, path: string): Promise<string> => {
-    if (!storage) throw new Error("Storage não inicializado");
-    const r = ref(storage, path)
-    await uploadBytes(r, file)
-    return getDownloadURL(r)
-  }
+  // Função de Upload para o Cloudinary
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("folder", `businesses/${uid}`); // Organiza por pastas no Cloudinary
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: "POST", body: formData }
+    );
+
+    if (!response.ok) throw new Error("Falha no upload para o Cloudinary");
+    const data = await response.json();
+    return data.secure_url; // Retorna a URL segura (https)
+  };
 
   const handleCover = async (file: File) => {
     if (!file.type.startsWith("image/")) return
     setUploadingCover(true)
     try { 
-      const url = await upload(file, `businesses/${uid}/cover/${Date.now()}_${file.name}`);
+      const url = await uploadToCloudinary(file);
       onCoverChange(url) 
     } catch (err) {
-      console.error("Erro cover:", err);
+      console.error("Erro cover Cloudinary:", err);
     } finally { setUploadingCover(false) }
   }
 
@@ -218,36 +238,27 @@ function ImageSection({ uid, coverImage, galleryImages, isEditing, onCoverChange
     if (!imgs.length) return
     setUploadingGallery(true)
     try {
-      const urls = await Promise.all(imgs.map(f => upload(f, `businesses/${uid}/gallery/${Date.now()}_${f.name}`)))
+      const urls = await Promise.all(imgs.map(f => uploadToCloudinary(f)))
       onGalleryChange([...(galleryImages || []), ...urls])
     } catch (err) {
-      console.error("Erro gallery:", err);
+      console.error("Erro gallery Cloudinary:", err);
     } finally { setUploadingGallery(false) }
   }
 
-  const removeCover = async () => {
-    if (coverImage && storage) { 
-      try { await deleteObject(ref(storage, coverImage)) } catch {} 
-    }
-    onCoverChange("")
-  }
-
-  const removeGallery = async (url: string) => {
-    if (storage) {
-      try { await deleteObject(ref(storage, url)) } catch {}
-    }
-    onGalleryChange((galleryImages || []).filter(u => u !== url))
-  }
+  // No Cloudinary Client-side (Unsigned), não deletamos via API por segurança.
+  // Apenas removemos o link do Firebase (o Firebase gerencia o link, o Cloudinary gerencia o binário).
+  const removeCover = () => onCoverChange("");
+  const removeGallery = (url: string) => onGalleryChange((galleryImages || []).filter(u => u !== url));
 
   return (
     <div className="emp-img-body">
-      <div className="emp-img-section-label"><Camera size={13} /> Foto de Capa</div>
+      <div className="emp-img-section-label"><Camera size={13} /> Foto de Capa (via Cloudinary)</div>
       {isEditing ? (
         <>
           {uploadingCover && (
             <div className="emp-uploading">
-              <Loader2 size={14} style={{ animation: "emp-spin 1s linear infinite", color: "#00CCFF", flexShrink: 0 }} />
-              Enviando foto de capa...
+              <Loader2 size={14} className="animate-spin text-cyan-400 mr-2" />
+              Otimizando e enviando para nuvem...
             </div>
           )}
           <div className="emp-cover-wrap">
@@ -266,7 +277,7 @@ function ImageSection({ uid, coverImage, galleryImages, isEditing, onCoverChange
                 </>
               : <div className="emp-cover-empty" onClick={() => !uploadingCover && coverRef.current?.click()}>
                   <div className="emp-cover-empty-icon"><Camera size={22} color="#00CCFF" /></div>
-                  <div style={{ fontSize: "0.82rem", color: "#5a6878", fontWeight: 500 }}>Clique para adicionar uma foto de capa</div>
+                  <div style={{ fontSize: "0.82rem", color: "#5a6878", fontWeight: 500 }}>Clique para adicionar foto via Cloudinary</div>
                 </div>}
           </div>
           <input ref={coverRef} type="file" accept="image/*" style={{ display: "none" }}
@@ -280,15 +291,15 @@ function ImageSection({ uid, coverImage, galleryImages, isEditing, onCoverChange
 
       <div style={{ marginTop: "1.5rem" }}>
         <div className="emp-img-section-label">
-          <Images size={13} /> Galeria de Fotos
+          <Images size={13} /> Galeria (CDN Otimizada)
           {galleryImages && galleryImages.length > 0 && <span>{galleryImages.length} foto{galleryImages.length !== 1 ? "s" : ""}</span>}
         </div>
         {isEditing ? (
           <>
             {uploadingGallery && (
               <div className="emp-uploading">
-                <Loader2 size={14} style={{ animation: "emp-spin 1s linear infinite", color: "#00CCFF", flexShrink: 0 }} />
-                Enviando fotos para a galeria...
+                <Loader2 size={14} className="animate-spin text-cyan-400 mr-2" />
+                Processando galeria...
               </div>
             )}
             {galleryImages && galleryImages.length > 0 && (
@@ -313,7 +324,7 @@ function ImageSection({ uid, coverImage, galleryImages, isEditing, onCoverChange
               onDrop={e => { e.preventDefault(); setDrag(false); e.dataTransfer.files && handleGallery(e.dataTransfer.files) }}
             >
               <div className="emp-upload-zone-icon"><Upload size={20} color="#00CCFF" /></div>
-              <div style={{ fontSize: "0.83rem", color: "#5a6878", fontWeight: 500 }}>Clique ou arraste fotos aqui</div>
+              <div style={{ fontSize: "0.83rem", color: "#5a6878", fontWeight: 500 }}>Arraste suas fotos aqui</div>
             </div>
             <input ref={galleryRef} type="file" accept="image/*" multiple style={{ display: "none" }}
               onChange={e => e.target.files && handleGallery(e.target.files)} />
@@ -327,13 +338,14 @@ function ImageSection({ uid, coverImage, galleryImages, isEditing, onCoverChange
                   </div>
                 ))}
               </div>
-            : <div className="emp-img-empty">Nenhuma foto na galeria</div>
+            : <div className="emp-img-empty">Galeria vazia</div>
         )}
       </div>
     </div>
   )
 }
 
+// --- PÁGINA PRINCIPAL (Mantida, salvando os links no Firestore) ---
 export default function EmpresarioPerfilPage() {
   const router = useRouter()
   const [loading, setLoading]     = useState(true)
@@ -372,6 +384,7 @@ export default function EmpresarioPerfilPage() {
     if (!auth.currentUser || !formData) return
     setSaving(true)
     try {
+      // Aqui salvamos as URLs do Cloudinary no Firestore
       await updateDoc(doc(db, "businesses", auth.currentUser.uid), {
         ...formData, openingHours: editHours, coverImage, galleryImages,
         location: position ? { latitude: position.lat, longitude: position.lng } : null,
@@ -391,7 +404,8 @@ export default function EmpresarioPerfilPage() {
   }
 
   if (loading || !formData) return (
-    <><style>{EMP_CSS}</style>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: EMP_CSS }} />
       <div className="emp-loading"><Loader2 style={{ width: 40, height: 40, color: "#00CCFF", animation: "emp-spin 1s linear infinite" }} /></div>
     </>
   )
@@ -426,7 +440,8 @@ export default function EmpresarioPerfilPage() {
   ]
 
   return (
-    <><style>{EMP_CSS}</style>
+    <>
+    <style dangerouslySetInnerHTML={{ __html: EMP_CSS }} />
     <div className="emp">
       <div className="emp-hero">
         <div className="emp-hero-orb1" /><div className="emp-hero-orb2" /><div className="emp-hero-grid" />
@@ -434,15 +449,15 @@ export default function EmpresarioPerfilPage() {
           <div>
             <div className="emp-hero-eyebrow">Área do Empresário</div>
             <div className="emp-hero-title">Perfil do Negócio</div>
-            <div className="emp-hero-sub">{isEditing ? "Edite as informações do seu estabelecimento" : "Gerencie seu perfil atualizado"}</div>
+            <div className="emp-hero-sub">{isEditing ? "Edite as informações" : "Gerencie seu perfil"}</div>
           </div>
-          <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
+          <div style={{ display: "flex", gap: 10 }}>
             {isEditing
               ? <>
                   <button className="emp-btn emp-btn-ghost" onClick={handleCancel}>Cancelar</button>
                   <button className="emp-btn emp-btn-green" onClick={handleSave} disabled={saving}>
-                    {saving ? <Loader2 size={15} style={{ animation: "emp-spin 1s linear infinite" }} /> : <Save size={15} />}
-                    {saving ? "Salvando..." : "Salvar Alterações"}
+                    {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                    {saving ? "Salvando..." : "Salvar"}
                   </button>
                 </>
               : <button className="emp-btn emp-btn-gold" onClick={() => setIsEditing(true)}><Edit3 size={15} /> Editar Perfil</button>}
@@ -455,7 +470,7 @@ export default function EmpresarioPerfilPage() {
           <div className="emp-card-header">
             <div className="emp-card-title-wrap">
               <div className="emp-card-icon" style={{ background: "rgba(247,176,0,0.1)" }}><ImagePlus size={16} color="#F7B000" /></div>
-              <div><div className="emp-card-title">Fotos do Estabelecimento</div></div>
+              <div className="emp-card-title">Mídias do Estabelecimento</div>
             </div>
           </div>
           <ImageSection

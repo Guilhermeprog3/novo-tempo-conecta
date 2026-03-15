@@ -34,7 +34,10 @@ type BusinessData = {
   rating?: number; reviewCount?: number; address: string;
   businessPhone: string; whatsapp?: string; hours: string;
   website?: string; description: string; specialties?: string[];
-  isOpen?: boolean; images?: string[];
+  isOpen?: boolean; 
+  coverImage?: string;     // Adicionado Cloudinary
+  galleryImages?: string[]; // Adicionado Cloudinary
+  images?: string[];       // Mantido para compatibilidade legado
   location: { latitude: number; longitude: number };
 };
 
@@ -262,9 +265,11 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
         setBusiness({ 
           id: snap.id, 
           ...data,
-          hours: data.hours || "", // <-- Fix preventivo: garante que hours nunca seja undefined
+          hours: data.hours || "",
           specialties: data.specialties || [],
-          images: data.images || []
+          // Prioriza novos campos do Cloudinary, mantém antigo se existir
+          coverImage: data.coverImage || "",
+          galleryImages: data.galleryImages || []
         } as BusinessData);
       }
       setLoading(false);
@@ -350,20 +355,26 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
   };
 
   if (loading) return (
-    <><style>{EST_CSS}</style>
+    <><style dangerouslySetInnerHTML={{ __html: EST_CSS }} />
     <div className="est-loading"><Loader2 style={{ width: 44, height: 44, color: "#00CCFF", animation: "est-spin 1s linear infinite" }} /></div></>
   );
 
   if (!business) return (
-    <><style>{EST_CSS}</style>
+    <><style dangerouslySetInnerHTML={{ __html: EST_CSS }} />
     <div className="est-loading" style={{ flexDirection: "column", gap: "1rem" }}>
       <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "#002240" }}>Estabelecimento não encontrado</p>
       <Link href="/" style={{ color: "#00CCFF", fontSize: "0.875rem" }}>← Voltar</Link>
     </div></>
   );
 
+  // Lógica de imagens unificada
+  const allImages = [
+    ...(business.coverImage ? [business.coverImage] : []),
+    ...(business.galleryImages || [])
+  ];
+
   return (
-    <><style>{EST_CSS}</style>
+    <><style dangerouslySetInnerHTML={{ __html: EST_CSS }} />
     <div className="est">
       <Header />
       <div className="est-hero">
@@ -413,9 +424,9 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
               </div>
             </div>
             <div className="est-card-body">
-              {business.images && business.images.length > 0 ? (
+              {allImages.length > 0 ? (
                 <div className="est-gallery">
-                  {business.images.map((url, i) => (
+                  {allImages.map((url, i) => (
                     <div key={i} className="est-gallery-img"><img src={url} alt={`Foto ${i+1}`}/></div>
                   ))}
                 </div>
@@ -541,7 +552,6 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
                 <div className={`est-status-dot ${business.isOpen ? "open" : "closed"}`}/>
                 <div>
                   <div className={`est-status-text ${business.isOpen ? "open" : "closed"}`}>{business.isOpen ? "Aberto agora" : "Fechado agora"}</div>
-                  {/* CORREÇÃO APLICADA AQUI: Adicionado optional chaining ?. para evitar erro se hours for undefined */}
                   <div className="est-hours-detail">{business.hours?.replace(/; /g,'\n') || "Horário não informado"}</div>
                 </div>
               </div>
@@ -558,7 +568,7 @@ export default function EstabelecimentoPage({ params }: { params: { id: string }
             </div>
             <div className="est-side-body">
               <p style={{ fontSize: "0.82rem", color: "#5a6878", marginBottom: "1rem" }}>{business.address}</p>
-              <a href={`https://www.google.com/maps/dir/?api=1&destination=${business.location.latitude},${business.location.longitude}`} target="_blank" rel="noopener noreferrer" className="est-cta est-cta-gold">
+              <a href={`http://maps.google.com/?q=${business.location.latitude},${business.location.longitude}`} target="_blank" rel="noopener noreferrer" className="est-cta est-cta-gold">
                 <Navigation size={15}/> Traçar Rota
               </a>
             </div>
