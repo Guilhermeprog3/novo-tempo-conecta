@@ -54,13 +54,13 @@ const BUSCA_CSS = `
 .busca-topbar { position: sticky; top: 0; z-index: 80; background: #002240; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 12px 24px; }
 .busca-topbar-inner { max-width: 1280px; margin: 0 auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .busca-search-wrap { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 13px; padding: 0 14px; height: 46px; }
-.busca-search-inp { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 0.875rem; }
-.busca-sort-sel { height: 46px; padding: 0 14px; border-radius: 13px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.65); cursor: pointer; }
-.busca-mob-btn { height: 46px; padding: 0 16px; border-radius: 13px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.55); display: none; align-items: center; gap: 7px; }
+.busca-search-inp { flex: 1; background: transparent; border: none; outline: none; color: #ffffff; font-size: 0.875rem; }
+.busca-sort-sel { height: 46px; padding: 0 14px; border-radius: 13px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); color: #ffffff; cursor: pointer; }
+.busca-mob-btn { height: 46px; padding: 0 16px; border-radius: 13px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); color: #ffffff; display: none; align-items: center; gap: 7px; }
 .busca-body { max-width:1280px; margin:0 auto; display:flex; gap:24px; padding:28px 24px 60px; }
 .busca-sidebar { width:268px; flex-shrink:0; background:#fff; border-radius:20px; border:1px solid #f0ece5; box-shadow:0 2px 16px rgba(0,34,64,0.07); position:sticky; top:86px; max-height:calc(100vh - 110px); overflow-y:auto; }
 .busca-fsec { padding:1rem 1.2rem; border-bottom:1px solid #f5f3f0; }
-.busca-fsec-title { font-size:0.7rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#8a9aaa; }
+.busca-fsec-title { font-size:0.7rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#002240; }
 .bcat { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:100px; cursor:pointer; font-size:0.71rem; font-weight:600; margin:0 4px 5px 0; border:1.5px solid #ede9e0; background:#faf8f5; }
 .bcat.on { color:#fff; border-color:transparent; }
 .btoggle { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:11px; cursor:pointer; margin-bottom:6px; }
@@ -192,7 +192,7 @@ function SearchResults() {
       <div className="busca-topbar">
         <div className="busca-topbar-inner">
           <div className="busca-search-wrap">
-            <Search size={16} color="rgba(255,255,255,0.35)" />
+            <Search size={16} color="#ffffff" />
             <input className="busca-search-inp" placeholder="O que você procura em Timon?"
               value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
@@ -205,7 +205,7 @@ function SearchResults() {
 
         <div className="busca-results">
           <div className="busca-rhead">
-            <div className="busca-count"><strong>{filtered.length}</strong> resultados encontrados</div>
+            <div className="busca-count"><strong style={{ color: "#002240" }}>{filtered.length}</strong> resultados encontrados</div>
           </div>
 
           <div className="busca-grid">
@@ -217,15 +217,15 @@ function SearchResults() {
                   <Link href={`/estabelecimento/${b.id}`} key={b.id} className="busca-card">
                     <div className="busca-img">
                       {displayImg ? <img src={displayImg} alt={b.businessName} /> : <div className="busca-img-ph"><Store size={40} color="#c8c0b0" /></div>}
-                      <div style={{ position: "absolute", top: 10, right: 10, background: open ? "#22c55e" : "#8a9aaa", padding: "3px 8px", borderRadius: 10, color: "#fff", fontSize: "0.6rem", fontWeight: 700 }}>
+                      <div style={{ position: "absolute", top: 10, right: 10, background: open ? "#22c55e" : "#002240", padding: "3px 8px", borderRadius: 10, color: "#fff", fontSize: "0.6rem", fontWeight: 700 }}>
                         {open ? "ABERTO" : "FECHADO"}
                       </div>
                     </div>
                     <div className="busca-cbody">
                       <div className="busca-cname">{b.businessName}</div>
                       <Stars rating={b.rating} />
-                      <div className="busca-cdesc">{b.description?.substring(0, 80)}...</div>
-                      <div className="busca-cfoot">
+                      <div className="busca-cdesc" style={{ color: "#002240" }}>{b.description?.substring(0, 80)}...</div>
+                      <div className="busca-cfoot" style={{ color: "#002240" }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {b.address?.split(',')[0]}</span>
                         {b.whatsapp && <Phone size={12} color="#22c55e" />}
                       </div>

@@ -25,7 +25,7 @@ const MapWithNoSSR = dynamic(() => import("./MapRegistrationComponent"), {
       border: "1.5px solid rgba(255,255,255,0.07)",
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
-      gap: 10, color: "rgba(255,255,255,0.3)", fontSize: "0.82rem"
+      gap: 10, color: "#FFFFFF", fontSize: "0.82rem"
     }}>
       <Loader2 size={22} style={{ animation: "cad-spin 1s linear infinite", color: "#00CCFF" }} />
       Carregando mapa...
@@ -73,7 +73,7 @@ const CAD_CSS = `
 
 @keyframes cad-spin    { from{transform:rotate(0)} to{transform:rotate(360deg)} }
 @keyframes cad-slide   { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
-@keyframes cad-orb     { 0%,100%{transform:translate(0,0)} 50%{transform:translate(28px,-18px)} }
+@keyframes cad-orb      { 0%,100%{transform:translate(0,0)} 50%{transform:translate(28px,-18px)} }
 
 .cad-page {
   font-family: 'DM Sans', sans-serif;
@@ -111,7 +111,7 @@ const CAD_CSS = `
   font-family:'Syne',sans-serif; font-size:clamp(1.6rem,4vw,2.2rem);
   font-weight:800; color:#fff; margin-bottom:0.4rem; position:relative; z-index:1;
 }
-.cad-sub { font-size:0.88rem; color:rgba(255,255,255,0.45); position:relative; z-index:1; }
+.cad-sub { font-size:0.88rem; color:#FFFFFF; position:relative; z-index:1; }
 
 /* PROGRESS BAR */
 .cad-progress { height:3px; background:rgba(255,255,255,0.06); }
@@ -136,7 +136,7 @@ const CAD_CSS = `
   width:34px; height:34px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.1);
-  color:rgba(255,255,255,0.25); transition:all 0.3s;
+  color:#FFFFFF; transition:all 0.3s;
 }
 .cad-step.active .cad-step-dot {
   background:var(--gold); border-color:var(--gold); color:var(--navy);
@@ -145,7 +145,7 @@ const CAD_CSS = `
 .cad-step.done .cad-step-dot {
   background:rgba(247,176,0,0.12); border-color:rgba(247,176,0,0.4); color:var(--gold);
 }
-.cad-step-lbl { font-size:0.66rem; font-weight:700; letter-spacing:0.04em; color:rgba(255,255,255,0.3); }
+.cad-step-lbl { font-size:0.66rem; font-weight:700; letter-spacing:0.04em; color:#FFFFFF; }
 .cad-step.active .cad-step-lbl { color:var(--gold); }
 .cad-step.done  .cad-step-lbl { color:rgba(247,176,0,0.65); }
 
@@ -164,7 +164,7 @@ const CAD_CSS = `
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
 .cad-panel-title { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:800; color:#fff; }
-.cad-panel-desc  { font-size:0.78rem; color:rgba(255,255,255,0.38); margin-top:2px; }
+.cad-panel-desc  { font-size:0.78rem; color:#FFFFFF; margin-top:2px; }
 .cad-body { padding:1.8rem 2rem; }
 
 /* FIELDS */
@@ -172,12 +172,12 @@ const CAD_CSS = `
 .cad-field:last-child { margin-bottom:0; }
 .cad-lbl {
   display:block; font-size:0.69rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.06em; color:rgba(255,255,255,0.38); margin-bottom:7px;
+  letter-spacing:0.06em; color:#FFFFFF; margin-bottom:7px;
 }
 .cad-lbl em { color:var(--cyan); font-style:normal; margin-left:2px; }
 .cad-wrap-inp { position:relative; }
-.cad-ico { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.22); pointer-events:none; }
-.cad-ico-ta { position:absolute; left:14px; top:13px; color:rgba(255,255,255,0.22); pointer-events:none; }
+.cad-ico { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#FFFFFF; pointer-events:none; }
+.cad-ico-ta { position:absolute; left:14px; top:13px; color:#FFFFFF; pointer-events:none; }
 
 .cad-inp, .cad-sel, .cad-ta {
   width:100%; background:rgba(255,255,255,0.04);
@@ -190,7 +190,7 @@ const CAD_CSS = `
 .cad-inp.rpad { padding-right:46px; }
 .cad-sel { height:48px; padding:0 16px; cursor:pointer; appearance:none; }
 .cad-ta  { padding:12px 14px 12px 42px; resize:none; line-height:1.6; }
-.cad-inp::placeholder,.cad-ta::placeholder { color:rgba(255,255,255,0.18); }
+.cad-inp::placeholder,.cad-ta::placeholder { color:rgba(255,255,255,0.4); }
 .cad-sel option { background:#001830; color:#fff; }
 .cad-inp:focus,.cad-sel:focus,.cad-ta:focus {
   border-color:rgba(0,204,255,0.45); background:rgba(0,204,255,0.04);
@@ -199,17 +199,17 @@ const CAD_CSS = `
 .cad-eye {
   position:absolute; right:0; top:0; width:48px; height:48px;
   display:flex; align-items:center; justify-content:center;
-  background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.22);
+  background:none; border:none; cursor:pointer; color:#FFFFFF;
   transition:color 0.15s;
 }
-.cad-eye:hover { color:rgba(255,255,255,0.6); }
+.cad-eye:hover { color:rgba(255,255,255,1); }
 
 /* SELECT ARROW */
 .cad-sel-wrap { position:relative; }
 .cad-sel-wrap::after {
   content:''; pointer-events:none; position:absolute;
   right:14px; top:50%; transform:translateY(-50%);
-  border:5px solid transparent; border-top-color:rgba(255,255,255,0.28); margin-top:3px;
+  border:5px solid transparent; border-top-color:#FFFFFF; margin-top:3px;
 }
 
 /* GRIDS */
@@ -219,8 +219,8 @@ const CAD_CSS = `
 
 /* MAP */
 .cad-map { height:280px; border-radius:16px; overflow:hidden; border:1.5px solid rgba(255,255,255,0.09); position:relative; z-index:0; }
-.cad-map-note { font-size:0.71rem; color:rgba(255,255,255,0.28); display:flex; align-items:center; gap:5px; margin-top:8px; }
-.cad-map-note.ok { color:rgba(34,197,94,0.85); }
+.cad-map-note { font-size:0.71rem; color:#FFFFFF; display:flex; align-items:center; gap:5px; margin-top:8px; }
+.cad-map-note.ok { color:rgba(34,197,94,1); }
 
 /* HOURS */
 .cad-days { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
@@ -236,7 +236,7 @@ const CAD_CSS = `
   border-color:rgba(0,204,255,0.38); background:rgba(0,204,255,0.06);
   box-shadow:0 0 0 3px rgba(0,204,255,0.06);
 }
-.cad-day-lbl { font-size:0.66rem; font-weight:700; color:rgba(255,255,255,0.38); text-transform:uppercase; }
+.cad-day-lbl { font-size:0.66rem; font-weight:700; color:#FFFFFF; text-transform:uppercase; }
 .cad-day.on .cad-day-lbl { color:var(--cyan); }
 .cad-toggle {
   width:28px; height:15px; border-radius:100px; position:relative;
@@ -256,14 +256,14 @@ const CAD_CSS = `
   padding:5px 6px; text-align:center; outline:none; transition:border-color 0.15s;
 }
 .cad-time:focus { border-color:rgba(0,204,255,0.4); }
-.cad-time::-webkit-calendar-picker-indicator { filter:invert(0.35); }
+.cad-time::-webkit-calendar-picker-indicator { filter:invert(0); }
 
 /* TERMS */
 .cad-terms {
   display:flex; align-items:flex-start; gap:10px;
   padding:1rem 1.2rem; border-radius:13px;
   background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
-  font-size:0.82rem; color:rgba(255,255,255,0.5); line-height:1.55; margin-bottom:1.2rem;
+  font-size:0.82rem; color:#FFFFFF; line-height:1.55; margin-bottom:1.2rem;
 }
 .cad-terms a { color:var(--cyan); text-decoration:none; }
 .cad-terms a:hover { text-decoration:underline; }
@@ -281,7 +281,7 @@ const CAD_CSS = `
 .cad-btn-back {
   padding:12px 22px; border-radius:13px;
   background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1);
-  color:rgba(255,255,255,0.55); font-size:0.875rem; font-weight:600;
+  color:#FFFFFF; font-size:0.875rem; font-weight:600;
   font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s,color 0.2s;
 }
 .cad-btn-back:hover { background:rgba(255,255,255,0.08); color:#fff; }
@@ -305,7 +305,7 @@ const CAD_CSS = `
 .cad-btn-sub:disabled,.cad-btn-next:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
 /* FOOTER */
-.cad-foot { text-align:center; margin-top:1.6rem; font-size:0.79rem; color:rgba(255,255,255,0.28); }
+.cad-foot { text-align:center; margin-top:1.6rem; font-size:0.79rem; color:#FFFFFF; }
 .cad-foot a { color:var(--cyan); text-decoration:none; }
 .cad-foot a:hover { text-decoration:underline; }
 `
@@ -614,7 +614,7 @@ export default function EmpresarioCadastroPage() {
                     </div>
                   ))}
                 </div>
-                <p style={{ fontSize: "0.73rem", color: "rgba(255,255,255,0.22)", marginTop: "1.2rem" }}>
+                <p style={{ fontSize: "0.73rem", color: "#FFFFFF", marginTop: "1.2rem" }}>
                   Clique no dia para ativar. Os horários podem ser editados depois no painel.
                 </p>
                 <div className="cad-actions" style={{ marginTop: "1.5rem" }}>

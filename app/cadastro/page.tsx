@@ -11,6 +11,29 @@ import { auth, db } from '@/lib/firebase'
 import { Header } from "@/components/navigation/header"
 import { AUTH_CSS } from "../../components/Auth"
 
+// Sobrescrita para garantir que textos cinzas fiquem brancos
+const CADASTRO_OVERRIDE_CSS = `
+  .auth-subtitle, 
+  .auth-label, 
+  .auth-section-label, 
+  .auth-terms, 
+  .auth-divider-text, 
+  .auth-foot,
+  .auth-eyebrow {
+    color: #FFFFFF !important;
+  }
+  .auth-input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+  }
+  .auth-input {
+    color: #FFFFFF !important;
+  }
+  .auth-lnk {
+    color: #00CCFF !important;
+    text-decoration: underline;
+  }
+`;
+
 export default function CadastroPage() {
   const router = useRouter()
   const [showPass, setShowPass] = useState(false)
@@ -42,7 +65,7 @@ export default function CadastroPage() {
 
   return (
     <>
-      <style>{AUTH_CSS}</style>
+      <style>{AUTH_CSS + CADASTRO_OVERRIDE_CSS}</style>
       <div className="auth-page">
         <Header />
         <div className="auth-bg">
@@ -72,14 +95,14 @@ export default function CadastroPage() {
                   <div className="auth-field">
                     <label className="auth-label">Nome completo *</label>
                     <div className="auth-input-wrap">
-                      <User size={14} className="ai" />
+                      <User size={14} className="ai" style={{ color: "#FFFFFF" }} />
                       <input className="auth-input" type="text" placeholder="Seu nome completo" required value={formData.name} onChange={e => set('name', e.target.value)} />
                     </div>
                   </div>
                   <div className="auth-field">
                     <label className="auth-label">Telefone *</label>
                     <div className="auth-input-wrap">
-                      <Phone size={14} className="ai" />
+                      <Phone size={14} className="ai" style={{ color: "#FFFFFF" }} />
                       <input className="auth-input" type="tel" placeholder="(11) 99999-9999" required value={formData.phone} onChange={e => set('phone', e.target.value)} />
                     </div>
                   </div>
@@ -87,7 +110,7 @@ export default function CadastroPage() {
                 <div className="auth-field" style={{ marginBottom: "0.5rem" }}>
                   <label className="auth-label">E-mail *</label>
                   <div className="auth-input-wrap">
-                    <Mail size={14} className="ai" />
+                    <Mail size={14} className="ai" style={{ color: "#FFFFFF" }} />
                     <input className="auth-input" type="email" placeholder="seu@email.com" required value={formData.email} onChange={e => set('email', e.target.value)} />
                   </div>
                   {errors.email && <div className="auth-field-err"><AlertTriangle size={11} />{errors.email}</div>}
@@ -103,10 +126,10 @@ export default function CadastroPage() {
                   <div className="auth-field">
                     <label className="auth-label">Senha *</label>
                     <div className="auth-input-wrap">
-                      <Lock size={14} className="ai" />
+                      <Lock size={14} className="ai" style={{ color: "#FFFFFF" }} />
                       <input className="auth-input pr" type={showPass ? "text" : "password"} placeholder="Mínimo 6 caracteres" required value={formData.password} onChange={e => set('password', e.target.value)} />
                       <button type="button" className="auth-eye-btn" onClick={() => setShowPass(p => !p)}>
-                        {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                        {showPass ? <EyeOff size={15} style={{ color: "#FFFFFF" }} /> : <Eye size={15} style={{ color: "#FFFFFF" }} />}
                       </button>
                     </div>
                     {errors.password && <div className="auth-field-err"><AlertTriangle size={11} />{errors.password}</div>}
@@ -114,10 +137,10 @@ export default function CadastroPage() {
                   <div className="auth-field">
                     <label className="auth-label">Confirmar senha *</label>
                     <div className="auth-input-wrap">
-                      <Lock size={14} className="ai" />
+                      <Lock size={14} className="ai" style={{ color: "#FFFFFF" }} />
                       <input className="auth-input pr" type={showConf ? "text" : "password"} placeholder="Repita sua senha" required value={formData.confirmPassword} onChange={e => set('confirmPassword', e.target.value)} />
                       <button type="button" className="auth-eye-btn" onClick={() => setShowConf(p => !p)}>
-                        {showConf ? <EyeOff size={15} /> : <Eye size={15} />}
+                        {showConf ? <EyeOff size={15} style={{ color: "#FFFFFF" }} /> : <Eye size={15} style={{ color: "#FFFFFF" }} />}
                       </button>
                     </div>
                     {errors.confirmPassword && <div className="auth-field-err"><AlertTriangle size={11} />{errors.confirmPassword}</div>}

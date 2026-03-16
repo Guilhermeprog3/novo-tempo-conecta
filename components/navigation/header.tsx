@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu, X, User, Settings, LogOut, Heart, Star, ChevronDown, Sprout } from "lucide-react"
+import { Menu, X, User, Settings, LogOut, Heart, Star, ChevronDown, Users, LayoutDashboard, Store } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
+import { useAuth } from "@/hooks/use-auth" // Importando o hook de autenticação
 
 interface HeaderProps {
   title?: string
@@ -50,7 +51,8 @@ const headerStyles = `
     position: relative;
     padding: 6px 14px; border-radius: 100px;
     font-size: 0.88rem; font-weight: 500;
-    color: rgba(255,255,255,0.7); text-decoration: none;
+    color: #ffffff; 
+    text-decoration: none;
     transition: color 0.2s, background 0.2s;
   }
   .hdr-nav-link:hover { color: #fff; background: rgba(255,255,255,0.06); }
@@ -86,7 +88,7 @@ const headerStyles = `
 
   .hdr-btn-ghost {
     padding: 7px 16px; border-radius: 10px;
-    font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.75);
+    font-size: 0.85rem; font-weight: 500; color: #ffffff; 
     background: none; border: none; cursor: pointer; text-decoration: none;
     transition: background 0.2s, color 0.2s;
   }
@@ -94,7 +96,7 @@ const headerStyles = `
 
   .hdr-btn-outline {
     padding: 7px 16px; border-radius: 10px;
-    font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.8);
+    font-size: 0.85rem; font-weight: 500; color: #ffffff; 
     background: none; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; text-decoration: none;
     transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
@@ -118,7 +120,7 @@ const headerStyles = `
   }
   .hdr-avatar-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(247,176,0,0.3); }
   .hdr-avatar-name {
-    font-size: 0.83rem; font-weight: 500; color: rgba(255,255,255,0.85);
+    font-size: 0.83rem; font-weight: 500; color: #ffffff; 
     max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
@@ -137,7 +139,8 @@ const headerStyles = `
   .hdr-mobile-link {
     padding: 10px 14px; border-radius: 12px;
     font-size: 0.92rem; font-weight: 500;
-    color: rgba(255,255,255,0.75); text-decoration: none;
+    color: #ffffff; 
+    text-decoration: none;
     transition: background 0.15s, color 0.15s;
   }
   .hdr-mobile-link:hover, .hdr-mobile-link.active { background: rgba(247,176,0,0.1); color: var(--gold); }
@@ -170,7 +173,7 @@ const headerStyles = `
   .hdr-dropdown-item {
     display: flex; align-items: center; gap: 8px;
     padding: 9px 12px; border-radius: 8px;
-    font-size: 0.85rem; color: rgba(255,255,255,0.8);
+    font-size: 0.85rem; color: #ffffff; 
     text-decoration: none; cursor: pointer;
     transition: background 0.15s, color 0.15s;
   }
@@ -185,21 +188,10 @@ const headerStyles = `
 `
 
 export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, seus negócios" }: HeaderProps) {
+  const { user, logout, isLoading } = useAuth() 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [user, setUser] = useState<any>(null)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
-
-  useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      try { setUser(JSON.parse(userData)); setIsLoggedIn(true) }
-      catch (e) { console.error("Erro ao ler dados do usuário") }
-    }
-    setIsMounted(true)
-  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -207,25 +199,43 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem("user")
-    localStorage.removeItem("userType")
-    setUser(null); setIsLoggedIn(false)
-    window.location.href = "/"
-  }
-
   const isActive = (path: string) => {
     if (path === "/" && pathname === "/") return true
     if (path !== "/" && pathname.startsWith(path)) return true
     return false
   }
 
-  const navItems = [
-    { href: "/",       label: "Início"  },
-    { href: "/sobre",  label: "Sobre"   },
-    { href: "/mapa",   label: "Mapa"    },
-    { href: "/contato",label: "Contato" },
-  ]
+  const getNavItems = () => {
+    const baseItems = [
+      { href: "/", label: "Início" },
+      { href: "/mapa", label: "Mapa" },
+    ]
+
+    if (user?.role === "admin") {
+      return [
+        ...baseItems,
+        { href: "/admin/dashboard", label: "Painel ADM" },
+        { href: "/admin/empresas", label: "Empresas" },
+        { href: "/admin/usuarios", label: "Usuários" },
+      ]
+    }
+
+    if (user?.role === "business") {
+      return [
+        ...baseItems,
+        { href: "/empresario/dashboard", label: "Meu Negócio" },
+        { href: "/empresario/avaliacoes", label: "Avaliações" },
+      ]
+    }
+
+    return [
+      ...baseItems,
+      { href: "/sobre", label: "Sobre" },
+      { href: "/contato", label: "Contato" },
+    ]
+  }
+
+  const navItems = getNavItems()
 
   return (
     <>
@@ -233,12 +243,10 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
       <header className={`hdr hdr-bar ${scrolled ? "scrolled" : ""}`}>
         <div className="hdr-inner">
-          {/* LOGO */}
           <Link href="/" style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
             <Image src="/logo.png" alt="Logo Novo Tempo Conecta" width={160} height={44} priority />
           </Link>
 
-          {/* DESKTOP NAV */}
           <nav className="hdr-nav">
             {navItems.map(item => (
               <Link key={item.href} href={item.href}
@@ -247,21 +255,19 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               </Link>
             ))}
 
-            {/* ── ECONOMIA SOLIDÁRIA BUTTON ── */}
             <Link
               href="/empreendimento-solidario"
               className={`hdr-solidaria ${isActive("/empreendimento-solidario") ? "active" : ""}`}
             >
-              <Sprout size={14} />
+              <Users size={14} />
               Economia Solidária
             </Link>
           </nav>
 
-          {/* DESKTOP AUTH */}
           <div className="hdr-auth">
-            {!isMounted ? (
+            {isLoading ? (
               <div style={{ width: 100 }} />
-            ) : isLoggedIn ? (
+            ) : user ? (
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button className="hdr-avatar-btn">
@@ -272,7 +278,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                       </AvatarFallback>
                     </Avatar>
                     <span className="hdr-avatar-name">{user?.name?.split(" ")[0] || "Usuário"}</span>
-                    <ChevronDown size={13} color="rgba(255,255,255,0.5)" />
+                    <ChevronDown size={13} color="#ffffff" />
                   </button>
                 </DropdownMenuTrigger>
 
@@ -284,21 +290,30 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                     <div className="text-xs text-[#F7B000] truncate">{user?.email}</div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem asChild>
-                    <Link href="/usuario/dashboard" className="hdr-dropdown-item"><User size={14} /> Meu Perfil</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/usuario/favoritos" className="hdr-dropdown-item"><Heart size={14} /> Favoritos</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/usuario/avaliacoes" className="hdr-dropdown-item"><Star size={14} /> Minhas Avaliações</Link>
-                  </DropdownMenuItem>
+                  
+                  {user.role === "admin" && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/configuracoes" className="hdr-dropdown-item"><Settings size={14} /> Configurações</Link>
+                    </DropdownMenuItem>
+                  )}
+                  {user.role === "business" && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/empresario/perfil" className="hdr-dropdown-item"><Store size={14} /> Perfil do Negócio</Link>
+                    </DropdownMenuItem>
+                  )}
+                  {user.role === "user" && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/usuario/dashboard" className="hdr-dropdown-item"><User size={14} /> Meu Perfil</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/usuario/favoritos" className="hdr-dropdown-item"><Heart size={14} /> Favoritos</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
                   <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem asChild>
-                    <Link href="/usuario/configuracoes" className="hdr-dropdown-item"><Settings size={14} /> Configurações</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem onClick={handleLogout} className="hdr-dropdown-item danger">
+                  <DropdownMenuItem onClick={logout} className="hdr-dropdown-item danger">
                     <LogOut size={14} /> Sair
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -306,19 +321,17 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             ) : (
               <>
                 <Link href="/login" className="hdr-btn-ghost">Entrar</Link>
-                <Link href="/cadastro" className="hdr-btn-outline">Cidadão</Link>
-                <Link href="/cadastro-emp" className="hdr-btn-primary">Negócio</Link>
+                <Link href="/cadastro" className="hdr-btn-outline">Comunidade</Link>
+                <Link href="/cadastro-emp" className="hdr-btn-primary">Empresa</Link>
               </>
             )}
           </div>
 
-          {/* MOBILE TOGGLE */}
           <button className="hdr-mobile-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
-        {/* MOBILE MENU */}
         {mobileMenuOpen && (
           <div className="hdr-mobile">
             <nav className="hdr-mobile-nav">
@@ -329,14 +342,12 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                   {item.label}
                 </Link>
               ))}
-
-              {/* ── ECONOMIA SOLIDÁRIA (mobile) ── */}
               <Link
                 href="/empreendimento-solidario"
                 className={`hdr-mobile-solidaria ${isActive("/empreendimento-solidario") ? "active" : ""}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <Sprout size={16} />
+                <Users size={16} />
                 Economia Solidária
               </Link>
             </nav>
@@ -344,7 +355,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
             <div className="hdr-mobile-divider" />
 
             <div className="hdr-mobile-actions">
-              {isLoggedIn ? (
+              {user ? (
                 <>
                   <div className="hdr-mobile-user">
                     <Avatar style={{ width: 36, height: 36 }}>
@@ -356,10 +367,11 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                       <div className="hdr-mobile-user-email">{user?.email}</div>
                     </div>
                   </div>
-                  <Link href="/usuario/dashboard" className="hdr-mobile-link" onClick={() => setMobileMenuOpen(false)}>
-                    Meu Perfil
+                  <Link href={user.role === 'admin' ? '/admin/dashboard' : user.role === 'business' ? '/empresario/dashboard' : '/usuario/dashboard'} 
+                    className="hdr-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                    Meu Painel
                   </Link>
-                  <button onClick={handleLogout} className="hdr-mobile-link text-red-400 border border-red-900/30">
+                  <button onClick={logout} className="hdr-mobile-link text-red-400 border border-red-900/30">
                     Sair
                   </button>
                 </>
@@ -369,7 +381,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                     Entrar
                   </Link>
                   <Link href="/cadastro-emp" className="hdr-btn-primary block text-center" onClick={() => setMobileMenuOpen(false)}>
-                    Cadastrar Negócio
+                    Empresa
                   </Link>
                 </>
               )}

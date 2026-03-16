@@ -2,30 +2,35 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
-  // Redirect old URLs to new structure
   const url = request.nextUrl.clone()
+  const userRole = request.cookies.get("userRole")?.value
 
-  // Redirect /business/* to /estabelecimento/*
+  // 1. Proteção de Rotas de Administração
+  if (url.pathname.startsWith("/admin") && userRole !== "admin") {
+    return NextResponse.redirect(new URL("/login", request.url))
+  }
+
+  // 2. Proteção de Rotas de Empresário
+  if (url.pathname.startsWith("/empresario") && userRole !== "business") {
+    // Se for admin, pode opcionalmente entrar, se não, redireciona
+    if (userRole !== "admin") {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
+  }
+
+  // 3. Proteção de Rotas de Utilizador Comum (Dashboard de Cidadão)
+  if (url.pathname.startsWith("/usuario") && !userRole) {
+    return NextResponse.redirect(new URL("/login", request.url))
+  }
+
+  // Redirecionamentos de SEO/Estrutura existentes
   if (url.pathname.startsWith("/business/")) {
     url.pathname = url.pathname.replace("/business/", "/estabelecimento/")
     return NextResponse.redirect(url)
   }
 
-  // Redirect /search to /busca
   if (url.pathname === "/search") {
     url.pathname = "/busca"
-    return NextResponse.redirect(url)
-  }
-
-  // Redirect /categories to /categorias
-  if (url.pathname === "/categories") {
-    url.pathname = "/categorias"
-    return NextResponse.redirect(url)
-  }
-
-  // Redirect /about to /sobre
-  if (url.pathname === "/about") {
-    url.pathname = "/sobre"
     return NextResponse.redirect(url)
   }
 
@@ -33,5 +38,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // Aplicar middleware a todas as rotas exceto ficheiros estáticos e API
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }

@@ -1,11 +1,9 @@
 "use client"
 
-import { MapPin, FileText, Shield, Heart, ArrowRight, Instagram, Facebook, Mail } from "lucide-react"
+import { MapPin, FileText, Shield, Heart, ArrowRight, Mail, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
-// Constante de estilos fora do componente para evitar re-processamento 
-// e resolver o erro de hidratação do Next.js
 const footerStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -29,14 +27,15 @@ const footerStyles = `
     grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 3rem;
     padding-bottom: 3.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
   }
 
   /* BRAND COL */
   .ftr-brand-desc {
-    font-size: 0.875rem; color: rgba(255,255,255,0.45);
+    font-size: 0.875rem; 
+    color: #ffffff; 
     line-height: 1.75; margin: 1rem 0 1.5rem;
-    font-weight: 300; max-width: 260px;
+    font-weight: 400; max-width: 260px;
   }
 
   .ftr-social {
@@ -45,17 +44,17 @@ const footerStyles = `
 
   .ftr-social-btn {
     width: 36px; height: 36px; border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
     display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,0.5);
+    color: #ffffff;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
     text-decoration: none;
   }
 
   .ftr-social-btn:hover {
-    background: rgba(0,204,255,0.1);
-    border-color: rgba(0,204,255,0.3);
+    background: rgba(0,204,255,0.2);
+    border-color: var(--cyan);
     color: var(--cyan);
   }
 
@@ -64,7 +63,7 @@ const footerStyles = `
     font-family: 'Syne', sans-serif;
     font-size: 0.78rem; font-weight: 700;
     letter-spacing: 0.09em; text-transform: uppercase;
-    color: rgba(255,255,255,0.3);
+    color: #ffffff; 
     margin-bottom: 1.2rem;
   }
 
@@ -73,16 +72,16 @@ const footerStyles = `
   }
 
   .ftr-link {
-    font-size: 0.875rem; color: rgba(255,255,255,0.55);
+    font-size: 0.875rem; 
+    color: #ffffff; 
     text-decoration: none; font-weight: 400;
     display: flex; align-items: center; gap: 6px;
-    transition: color 0.2s;
+    transition: color 0.2s, opacity 0.2s;
   }
 
-  .ftr-link:hover { color: #fff; }
+  .ftr-link:hover { opacity: 0.8; color: var(--cyan); }
 
-  .ftr-link-icon { opacity: 0.5; transition: opacity 0.2s; }
-  .ftr-link:hover .ftr-link-icon { opacity: 1; }
+  .ftr-link-icon { color: #ffffff; opacity: 1; }
 
   /* BOTTOM */
   .ftr-bottom {
@@ -93,24 +92,8 @@ const footerStyles = `
   }
 
   .ftr-copyright {
-    font-size: 0.78rem; color: rgba(255,255,255,0.25);
-  }
-
-  .ftr-made {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 0.78rem; color: rgba(255,255,255,0.25);
-  }
-
-  .ftr-made span { color: #E91E8C; }
-
-  .ftr-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(0,204,255,0.08);
-    border: 1px solid rgba(0,204,255,0.15);
-    color: rgba(0,204,255,0.6);
-    padding: 3px 10px; border-radius: 100px;
-    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em;
-    text-transform: uppercase;
+    font-size: 0.78rem; 
+    color: #ffffff; 
   }
 
   @media (max-width: 960px) {
@@ -136,7 +119,7 @@ export function Footer() {
 
             {/* BRAND */}
             <div>
-              <div style={{ marginBottom: 4 }}>
+              <div style={{ marginBottom: 15 }}>
                 <Image
                   src="/logo.png"
                   alt="Novo Tempo Conecta"
@@ -146,14 +129,12 @@ export function Footer() {
                 />
               </div>
               <p className="ftr-brand-desc">
-                Fortalecendo a economia local e conectando nossa comunidade. Uma iniciativa do IFMA Campus Timon.
+                Fortalecendo a economia local e conectando nossa comunidade através da tecnologia.
               </p>
               <div className="ftr-social">
-                <a href="#" className="ftr-social-btn" aria-label="Instagram">
-                  <Instagram size={15} />
-                </a>
-                <a href="#" className="ftr-social-btn" aria-label="Facebook">
-                  <Facebook size={15} />
+                {/* Ícone de WhatsApp adicionado */}
+                <a href="https://wa.me/SEUNUMERO" target="_blank" rel="noopener noreferrer" className="ftr-social-btn" aria-label="WhatsApp">
+                  <MessageCircle size={18} />
                 </a>
                 <a href="/contato" className="ftr-social-btn" aria-label="Email">
                   <Mail size={15} />
@@ -161,9 +142,9 @@ export function Footer() {
               </div>
             </div>
 
-            {/* MORADORES */}
+            {/* COMUNIDADE */}
             <div>
-              <div className="ftr-col-title">Para Moradores</div>
+              <div className="ftr-col-title">Para a Comunidade</div>
               <div className="ftr-links">
                 <Link href="/busca" className="ftr-link">
                   <ArrowRight size={12} className="ftr-link-icon" />
@@ -180,9 +161,9 @@ export function Footer() {
               </div>
             </div>
 
-            {/* EMPRESÁRIOS */}
+            {/* EMPREENDEDORES */}
             <div>
-              <div className="ftr-col-title">Para Empresários</div>
+              <div className="ftr-col-title">Para Empreendedores</div>
               <div className="ftr-links">
                 <Link href="/cadastro-emp" className="ftr-link">
                   <ArrowRight size={12} className="ftr-link-icon" />
@@ -212,12 +193,6 @@ export function Footer() {
                   Política de Privacidade
                 </Link>
               </div>
-              <div style={{ marginTop: "1.5rem" }}>
-                <div className="ftr-badge">
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
-                  IFMA Campus Timon
-                </div>
-              </div>
             </div>
 
           </div>
@@ -225,9 +200,6 @@ export function Footer() {
           <div className="ftr-bottom">
             <div className="ftr-copyright">
               &copy; {currentYear} Novo Tempo Conecta. Todos os direitos reservados.
-            </div>
-            <div className="ftr-made">
-              Feito com <span>♥</span> pelo IFMA
             </div>
           </div>
         </div>

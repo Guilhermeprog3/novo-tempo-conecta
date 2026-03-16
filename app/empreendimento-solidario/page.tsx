@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Heart, MapPin, Store, ArrowRight, ShieldCheck, Search, Sparkles } from "lucide-react"
+import { Users, MapPin, Store, ArrowRight, ShieldCheck, Search, Sparkles, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -142,12 +142,13 @@ export default function EmpreendimentoSolidarioPage() {
         }
 
         .hero-subtitle {
-          color: rgba(255,255,255,0.65);
+          color: #FFFFFF; /* Trocado para Branco */
           font-size: 1.1rem;
           font-weight: 300;
           max-width: 520px;
           line-height: 1.7;
           margin: 0 auto 2.5rem;
+          opacity: 0.9;
         }
 
         .search-wrap {
@@ -161,14 +162,16 @@ export default function EmpreendimentoSolidarioPage() {
           left: 16px;
           top: 50%;
           transform: translateY(-50%);
-          color: rgba(255,255,255,0.4);
+          color: #FFFFFF; /* Trocado para Branco */
           width: 18px;
           height: 18px;
           transition: color 0.2s;
+          opacity: 0.6;
         }
 
         .search-wrap:focus-within svg {
           color: var(--gold);
+          opacity: 1;
         }
 
         .search-input {
@@ -186,7 +189,7 @@ export default function EmpreendimentoSolidarioPage() {
           transition: border-color 0.2s, background 0.2s;
         }
 
-        .search-input::placeholder { color: rgba(255,255,255,0.35); }
+        .search-input::placeholder { color: rgba(255,255,255,0.6); } /* Placeholder mais visível */
         .search-input:focus {
           border-color: var(--gold);
           background: rgba(255,255,255,0.12);
@@ -213,15 +216,16 @@ export default function EmpreendimentoSolidarioPage() {
 
         .stat-label {
           font-size: 0.75rem;
-          color: rgba(255,255,255,0.45);
+          color: #FFFFFF; /* Trocado para Branco */
           letter-spacing: 0.06em;
           text-transform: uppercase;
           margin-top: 4px;
+          opacity: 0.8;
         }
 
         .stat-divider {
           width: 1px;
-          background: rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.2);
           align-self: stretch;
         }
 
@@ -367,13 +371,13 @@ export default function EmpreendimentoSolidarioPage() {
           align-items: center;
           gap: 5px;
           font-size: 0.78rem;
-          color: #8a9aaa;
+          color: #5a6878;
           margin-bottom: 0.9rem;
         }
 
         .card-desc {
           font-size: 0.88rem;
-          color: #5a6878;
+          color: #334155;
           line-height: 1.65;
           flex: 1;
           overflow: hidden;
@@ -474,13 +478,13 @@ export default function EmpreendimentoSolidarioPage() {
 
           <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
             <div className="hero-tag">
-              <Heart size={13} fill="currentColor" />
+              <Users size={13} fill="currentColor" />
               Comunidade · Impacto · Futuro
             </div>
 
             <h1 className="hero-title">
-              Empreendedorismo<br />
-              <span>Solidário</span>
+              Empreendimentos<br />
+              <span>Econômicos Solidários</span>
             </h1>
 
             <p className="hero-subtitle">
@@ -563,7 +567,7 @@ export default function EmpreendimentoSolidarioPage() {
                         )}
                         <div className="card-overlay" />
                         <div className="card-badge">
-                          <Heart size={10} fill="currentColor" />
+                          <Users size={10} fill="currentColor" />
                           Solidário
                         </div>
                       </div>

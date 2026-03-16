@@ -62,11 +62,11 @@ const PASS_CSS = `
 .pass-back {
   display: inline-flex; align-items: center; gap: 7px;
   font-size: 0.83rem; font-weight: 600;
-  color: rgba(255,255,255,0.45);
+  color: #FFFFFF;
   text-decoration: none; margin-bottom: 2rem;
   transition: color 0.15s, gap 0.2s;
 }
-.pass-back:hover { color: rgba(255,255,255,0.8); gap: 10px; }
+.pass-back:hover { color: #FFFFFF; gap: 10px; opacity: 0.8; }
 
 /* card */
 .pass-card {
@@ -94,16 +94,16 @@ const PASS_CSS = `
   margin-bottom: 6px;
 }
 .pass-subtitle {
-  font-size: 0.875rem; color: rgba(255,255,255,0.4);
+  font-size: 0.875rem; color: #FFFFFF;
   text-align: center; line-height: 1.65;
-  margin-bottom: 2rem; font-weight: 300;
+  margin-bottom: 2rem; font-weight: 400;
 }
 
 /* form */
 .pass-label {
   display: block;
   font-size: 0.72rem; font-weight: 700;
-  color: rgba(255,255,255,0.5);
+  color: #FFFFFF;
   letter-spacing: 0.08em; text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -123,7 +123,7 @@ const PASS_CSS = `
   color: #fff; outline: none;
   transition: border-color 0.2s, background 0.2s;
 }
-.pass-input::placeholder { color: rgba(255,255,255,0.25); }
+.pass-input::placeholder { color: rgba(255,255,255,0.4); }
 .pass-input:focus {
   border-color: var(--cyan);
   background: rgba(255,255,255,0.09);
@@ -170,11 +170,11 @@ const PASS_CSS = `
   display: flex; align-items: center; gap: 12px; margin-bottom: 1.3rem;
 }
 .pass-divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
-.pass-divider-text { font-size: 0.7rem; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 0.1em; }
+.pass-divider-text { font-size: 0.7rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.1em; }
 
 .pass-signup {
   text-align: center; font-size: 0.85rem;
-  color: rgba(255,255,255,0.35);
+  color: #FFFFFF;
 }
 .pass-signup a {
   color: var(--gold); text-decoration: none; font-weight: 700;
@@ -248,7 +248,7 @@ export default function EsqueceuSenhaPage() {
                 <label className="pass-label" htmlFor="email">E-mail cadastrado</label>
                 <div className="pass-input-wrap">
                   <div className="pass-input-icon">
-                    <Mail size={16} color="rgba(0,204,255,0.5)" />
+                    <Mail size={16} color="rgba(255,255,255,0.7)" />
                   </div>
                   <input
                     id="email" type="email"

@@ -11,6 +11,27 @@ import { auth, db } from '@/lib/firebase'
 import { Header } from "@/components/navigation/header"
 import { AUTH_CSS } from "../../components/Auth"
 
+// Sobrescrita para garantir que textos cinzas fiquem brancos
+const LOGIN_OVERRIDE_CSS = `
+  .auth-subtitle, 
+  .auth-label, 
+  .auth-check-lbl, 
+  .auth-divider-text, 
+  .auth-foot,
+  .auth-eyebrow {
+    color: #FFFFFF !important;
+  }
+  .auth-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+  .auth-input {
+    color: #FFFFFF !important;
+  }
+  .auth-forgot {
+    color: #00CCFF !important; /* Mantendo o link em destaque para usabilidade */
+  }
+`;
+
 export default function LoginPage() {
   const router = useRouter()
   const [showPass, setShowPass] = useState(false)
@@ -56,7 +77,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <style>{AUTH_CSS}</style>
+      <style>{AUTH_CSS + LOGIN_OVERRIDE_CSS}</style>
       <div className="auth-page">
         <Header />
         <div className="auth-bg">
@@ -82,7 +103,7 @@ export default function LoginPage() {
                   <div className="auth-field">
                     <label className="auth-label">E-mail</label>
                     <div className="auth-input-wrap">
-                      <Mail size={14} className="ai" />
+                      <Mail size={14} className="ai" style={{ color: "#FFFFFF" }} />
                       <input className="auth-input" type="email" placeholder="seu@email.com" required value={email} onChange={e => setEmail(e.target.value)} />
                     </div>
                   </div>
@@ -90,10 +111,10 @@ export default function LoginPage() {
                   <div className="auth-field">
                     <label className="auth-label">Senha</label>
                     <div className="auth-input-wrap">
-                      <Lock size={14} className="ai" />
+                      <Lock size={14} className="ai" style={{ color: "#FFFFFF" }} />
                       <input className="auth-input pr" type={showPass ? "text" : "password"} placeholder="Sua senha" required value={password} onChange={e => setPassword(e.target.value)} />
                       <button type="button" className="auth-eye-btn" onClick={() => setShowPass(p => !p)}>
-                        {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                        {showPass ? <EyeOff size={15} style={{ color: "#FFFFFF" }} /> : <Eye size={15} style={{ color: "#FFFFFF" }} />}
                       </button>
                     </div>
                   </div>

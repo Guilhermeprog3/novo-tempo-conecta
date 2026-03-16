@@ -6,10 +6,9 @@ import {
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
   signOut, 
-  createUserWithEmailAndPassword,
   User as FirebaseUser 
 } from "firebase/auth"
-import { doc, getDoc, setDoc } from "firebase/firestore"
+import { doc, getDoc } from "firebase/firestore"
 
 interface UserProfile {
   id: string
@@ -17,6 +16,7 @@ interface UserProfile {
   email: string
   role: "user" | "business" | "admin"
   businessId?: string
+  avatar?: string
 }
 
 interface AuthContextType {
@@ -28,23 +28,35 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+// Função auxiliar para definir cookies (visto que o middleware corre no servidor)
+const setRoleCookie = (role: string | null) => {
+  if (role) {
+    document.cookie = `userRole=${role}; path=/; max-age=86400; SameSite=Lax`
+  } else {
+    document.cookie = "userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;"
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Escuta em tempo real o estado de autenticação do Firebase
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Busca os dados adicionais (como 'role') no Firestore
         const docRef = doc(db, "users", firebaseUser.uid)
         const docSnap = await getDoc(docRef)
         
         if (docSnap.exists()) {
-          setUser({ id: firebaseUser.uid, ...docSnap.data() } as UserProfile)
+          const userData = { id: firebaseUser.uid, ...docSnap.data() } as UserProfile
+          setUser(userData)
+          setRoleCookie(userData.role)
+          localStorage.setItem("user", JSON.stringify(userData))
         }
       } else {
         setUser(null)
+        setRoleCookie(null)
+        localStorage.removeItem("user")
       }
       setIsLoading(false)
     })
@@ -67,6 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await signOut(auth)
     setUser(null)
+    setRoleCookie(null)
+    localStorage.removeItem("user")
+    window.location.href = "/"
   }
 
   return (
