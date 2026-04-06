@@ -14,7 +14,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { useAuth } from "@/hooks/use-auth" // Importando o hook de autenticação
+import { useAuth } from "@/hooks/use-auth"
 
 interface HeaderProps {
   title?: string
@@ -145,7 +145,6 @@ const headerStyles = `
   }
   .hdr-mobile-link:hover, .hdr-mobile-link.active { background: rgba(247,176,0,0.1); color: var(--gold); }
 
-  /* Mobile solidária */
   .hdr-mobile-solidaria {
     display: flex; align-items: center; gap: 8px;
     padding: 10px 14px; border-radius: 12px;
@@ -188,7 +187,7 @@ const headerStyles = `
 `
 
 export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, seus negócios" }: HeaderProps) {
-  const { user, logout, isLoading } = useAuth() 
+  const { user, logout, isLoading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
@@ -208,12 +207,15 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
   const getNavItems = () => {
     const baseItems = [
       { href: "/", label: "Início" },
+      { href: "/sobre", label: "Sobre" },
       { href: "/mapa", label: "Mapa" },
     ]
 
     if (user?.role === "admin") {
       return [
-        ...baseItems,
+        { href: "/", label: "Início" },
+        { href: "/sobre", label: "Sobre" },
+        { href: "/mapa", label: "Mapa" },
         { href: "/admin/dashboard", label: "Painel ADM" },
         { href: "/admin/empresas", label: "Empresas" },
         { href: "/admin/usuarios", label: "Usuários" },
@@ -222,7 +224,9 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
     if (user?.role === "business") {
       return [
-        ...baseItems,
+        { href: "/", label: "Início" },
+        { href: "/sobre", label: "Sobre" },
+        { href: "/mapa", label: "Mapa" },
         { href: "/empresario/dashboard", label: "Meu Negócio" },
         { href: "/empresario/avaliacoes", label: "Avaliações" },
       ]
@@ -230,7 +234,6 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
 
     return [
       ...baseItems,
-      { href: "/sobre", label: "Sobre" },
       { href: "/contato", label: "Contato" },
     ]
   }
@@ -260,7 +263,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
               className={`hdr-solidaria ${isActive("/empreendimento-solidario") ? "active" : ""}`}
             >
               <Users size={14} />
-              Economia Solidária
+              Empreendimentos Econômicos Solidários
             </Link>
           </nav>
 
@@ -290,7 +293,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                     <div className="text-xs text-[#F7B000] truncate">{user?.email}</div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-white/10" />
-                  
+
                   {user.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin/configuracoes" className="hdr-dropdown-item"><Settings size={14} /> Configurações</Link>
@@ -348,7 +351,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Users size={16} />
-                Economia Solidária
+                Empreendimentos Econômicos Solidários
               </Link>
             </nav>
 
@@ -367,7 +370,7 @@ export function Header({ title = "Novo Tempo Conecta", subtitle = "Seu bairro, s
                       <div className="hdr-mobile-user-email">{user?.email}</div>
                     </div>
                   </div>
-                  <Link href={user.role === 'admin' ? '/admin/dashboard' : user.role === 'business' ? '/empresario/dashboard' : '/usuario/dashboard'} 
+                  <Link href={user.role === 'admin' ? '/admin/dashboard' : user.role === 'business' ? '/empresario/dashboard' : '/usuario/dashboard'}
                     className="hdr-mobile-link" onClick={() => setMobileMenuOpen(false)}>
                     Meu Painel
                   </Link>

@@ -3,7 +3,7 @@
 import { 
   FileText, ShieldCheck, AlertCircle, UserCheck, MessageSquare, 
   AlertTriangle, Scale, Lock, Ban, Image as ImageIcon, ExternalLink,
-  Gavel, Clock
+  Gavel, Clock, Target, Users, Eye, RefreshCw
 } from "lucide-react"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
@@ -119,6 +119,8 @@ const TERMOS_CSS = `
     line-height: 1.8; margin-bottom: 1rem;
   }
 
+  .termos-p:last-child { margin-bottom: 0; }
+
   .termos-ul {
     list-style: none; padding: 0; margin: 0.8rem 0;
     display: flex; flex-direction: column; gap: 10px;
@@ -149,17 +151,169 @@ const TERMOS_CSS = `
   }
 `;
 
+const sections = [
+  {
+    icon: <ShieldCheck size={16} color="#00CCFF" />,
+    iconBg: "rgba(0,204,255,0.1)",
+    title: "1. Sobre a plataforma",
+    content: (
+      <p className="termos-p">
+        O Novo Tempo Conecta é uma plataforma digital voltada à divulgação de negócios, serviços e iniciativas comunitárias locais. Seu propósito é ampliar a visibilidade dos empreendimentos da comunidade, facilitar conexões entre moradores e empreendedores e incentivar o desenvolvimento local sustentável.
+      </p>
+    ),
+  },
+  {
+    icon: <Target size={16} color="#F7B000" />,
+    iconBg: "rgba(247,176,0,0.1)",
+    title: "2. Finalidade de uso",
+    content: (
+      <p className="termos-p">
+        A plataforma destina-se à divulgação de informações sobre negócios, serviços, produtos e iniciativas comunitárias. O uso da plataforma deve ocorrer de forma ética, responsável e em conformidade com a legislação brasileira.
+      </p>
+    ),
+  },
+  {
+    icon: <UserCheck size={16} color="#22c55e" />,
+    iconBg: "rgba(34,197,94,0.1)",
+    title: "3. Cadastro e veracidade das informações",
+    content: (
+      <p className="termos-p">
+        Ao cadastrar informações na plataforma, o usuário declara que todos os dados fornecidos são verdadeiros, completos e atualizados, responsabilizando-se integralmente pelo conteúdo inserido, incluindo nome do negócio, descrição, contatos, imagens, localização, horários e demais informações publicadas.
+      </p>
+    ),
+  },
+  {
+    icon: <AlertCircle size={16} color="#7c3aed" />,
+    iconBg: "rgba(124,58,237,0.1)",
+    title: "4. Responsabilidade do anunciante ou prestador de serviço",
+    content: (
+      <p className="termos-p">
+        Cada anunciante, empreendedor ou prestador de serviço é exclusivamente responsável pelas informações divulgadas, pela qualidade dos produtos e serviços oferecidos, pelos preços praticados, pelas condições negociadas e pelo cumprimento das obrigações assumidas perante os usuários.
+      </p>
+    ),
+  },
+  {
+    icon: <Eye size={16} color="#00CCFF" />,
+    iconBg: "rgba(0,204,255,0.1)",
+    title: "5. Papel da plataforma",
+    content: (
+      <>
+        <p className="termos-p">
+          O Novo Tempo Conecta atua como ambiente de divulgação e conexão entre as partes. A plataforma não realiza intermediação financeira, não processa pagamentos e não participa diretamente das contratações realizadas entre usuários e anunciantes, salvo disposição futura expressamente informada.
+        </p>
+      </>
+    ),
+  },
+  {
+    icon: <Ban size={16} color="#ef4444" />,
+    iconBg: "rgba(239,68,68,0.1)",
+    title: "6. Condutas proibidas",
+    content: (
+      <>
+        <p className="termos-p">Não será permitido utilizar a plataforma para:</p>
+        <ul className="termos-ul">
+          <li>publicar informações falsas ou enganosas;</li>
+          <li>divulgar conteúdo ofensivo, discriminatório, ilícito ou fraudulento;</li>
+          <li>violar direitos autorais, marcas ou direitos de terceiros;</li>
+          <li>praticar atos que comprometam a segurança, a estabilidade ou o funcionamento da plataforma;</li>
+          <li>utilizar a plataforma para finalidades contrárias à sua proposta comunitária e social.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    icon: <ImageIcon size={16} color="#F7B000" />,
+    iconBg: "rgba(247,176,0,0.1)",
+    title: "7. Conteúdo enviado pelos usuários",
+    content: (
+      <p className="termos-p">
+        O usuário que inserir textos, imagens, logotipos ou outros materiais declara possuir os direitos ou autorizações necessários para sua utilização. Ao publicar esse conteúdo na plataforma, autoriza sua exibição no ambiente digital do Novo Tempo Conecta para fins de divulgação institucional e comunitária relacionados ao projeto.
+      </p>
+    ),
+  },
+  {
+    icon: <AlertTriangle size={16} color="#f97316" />,
+    iconBg: "rgba(249,115,22,0.1)",
+    title: "8. Moderação e remoção de conteúdo",
+    content: (
+      <p className="termos-p">
+        O Novo Tempo Conecta poderá, a qualquer momento e sem aviso prévio, revisar, suspender, editar ou remover conteúdos que estejam em desacordo com estes Termos, com a legislação aplicável ou com a finalidade da plataforma.
+      </p>
+    ),
+  },
+  {
+    icon: <Clock size={16} color="#00CCFF" />,
+    iconBg: "rgba(0,204,255,0.1)",
+    title: "9. Disponibilidade da plataforma",
+    content: (
+      <p className="termos-p">
+        Serão empregados esforços razoáveis para manter a plataforma acessível e funcional. No entanto, não há garantia de disponibilidade contínua, ausência de falhas, interrupções temporárias ou indisponibilidades por razões técnicas, operacionais, de manutenção ou força maior.
+      </p>
+    ),
+  },
+  {
+    icon: <ExternalLink size={16} color="#475569" />,
+    iconBg: "rgba(0,0,0,0.05)",
+    title: "10. Links externos e serviços de terceiros",
+    content: (
+      <p className="termos-p">
+        A plataforma poderá conter links para aplicativos, redes sociais, serviços de mensagens, mapas ou páginas externas. O Novo Tempo Conecta não se responsabiliza pelo conteúdo, funcionamento, políticas ou práticas adotadas por terceiros.
+      </p>
+    ),
+  },
+  {
+    icon: <Lock size={16} color="#7c3aed" />,
+    iconBg: "rgba(124,58,237,0.1)",
+    title: "11. Privacidade e proteção de dados",
+    content: (
+      <p className="termos-p">
+        O tratamento de dados pessoais realizado no âmbito da plataforma observará a legislação aplicável, especialmente a Lei Geral de Proteção de Dados Pessoais (LGPD). Informações mais detalhadas estão disponíveis na Política de Privacidade.
+      </p>
+    ),
+  },
+  {
+    icon: <RefreshCw size={16} color="#22c55e" />,
+    iconBg: "rgba(34,197,94,0.1)",
+    title: "12. Alterações nos Termos de Uso",
+    content: (
+      <p className="termos-p">
+        Os presentes Termos poderão ser atualizados periodicamente para refletir mudanças legais, técnicas, operacionais ou institucionais. A versão vigente estará sempre disponível para consulta na própria plataforma.
+      </p>
+    ),
+  },
+  {
+    icon: <MessageSquare size={16} color="#F7B000" />,
+    iconBg: "rgba(247,176,0,0.1)",
+    title: "13. Contato",
+    content: (
+      <p className="termos-p">
+        Em caso de dúvidas, solicitações ou comunicações relacionadas a estes Termos de Uso, o usuário poderá utilizar os canais oficiais disponibilizados pela equipe responsável pela plataforma.
+      </p>
+    ),
+  },
+  {
+    icon: <Gavel size={16} color="#ef4444" />,
+    iconBg: "rgba(239,68,68,0.1)",
+    title: "14. Legislação aplicável",
+    content: (
+      <p className="termos-p">
+        Estes Termos de Uso são regidos pela legislação brasileira. Sempre que possível, eventuais conflitos deverão ser resolvidos de forma amigável. Não sendo possível, será competente o foro legalmente aplicável.
+      </p>
+    ),
+  },
+]
+
 export default function TermosDeUsoPage() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   return (
     <>
       {mounted && <style dangerouslySetInnerHTML={{ __html: TERMOS_CSS }} />}
-      
+
       <div className="termos-page">
         <Header />
 
@@ -171,7 +325,7 @@ export default function TermosDeUsoPage() {
               <FileText size={30} color="#F7B000" />
             </div>
             <h1 className="termos-title">Termos de Uso</h1>
-            <p className="termos-date">Versão Completa - Atualizada em 15 de Março de 2026</p>
+            <p className="termos-date">Última atualização: 31 de março de 2026</p>
           </div>
         </section>
 
@@ -179,123 +333,22 @@ export default function TermosDeUsoPage() {
           <div className="termos-card">
             <div className="termos-lead">
               <p>
-                Bem-vindo ao <strong>Novo Tempo Conecta</strong>. Este documento rege o uso da nossa plataforma.
-                Ao utilizar nossos serviços, você aceita integralmente as condições abaixo descritas.
+                Bem-vindo ao <strong>Novo Tempo Conecta</strong>. Estes Termos de Uso regulam o acesso e a utilização da plataforma e ao acessar ou utilizar a plataforma, o usuário declara que leu, compreendeu e concorda com os presentes Termos de Uso.
               </p>
             </div>
 
             <div className="termos-body">
-              {/* 1. OBJETIVO */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(0,204,255,0.1)" }}>
-                    <ShieldCheck size={16} color="#00CCFF" />
+              {sections.map((section, i) => (
+                <div className="termos-section" key={i}>
+                  <div className="termos-section-title">
+                    <div className="termos-section-icon" style={{ background: section.iconBg }}>
+                      {section.icon}
+                    </div>
+                    {section.title}
                   </div>
-                  1. Objeto da Plataforma
+                  {section.content}
                 </div>
-                <p className="termos-p">
-                  O Novo Tempo Conecta é uma plataforma de tecnologia que atua como vitrine digital de empresas e prestadores de serviços. Nosso papel é puramente informativo e de intermediação de contato, não fazendo parte da cadeia de venda ou prestação direta de serviços físicos.
-                </p>
-              </div>
-
-              {/* 2. VERACIDADE DAS INFORMAÇÕES */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(247,176,0,0.1)" }}>
-                    <ImageIcon size={16} color="#F7B000" />
-                  </div>
-                  2. Conteúdo e Imagens
-                </div>
-                <p className="termos-p">Ao inserir conteúdo na plataforma, seja você morador ou empresário, você declara que:</p>
-                <ul className="termos-ul">
-                  <li>As fotos de estabelecimentos ou produtos são reais e não induzem o consumidor ao erro.</li>
-                  <li>Você possui os direitos autorais ou autorização de uso das imagens publicadas.</li>
-                  <li>O uso de fotos que contenham nudez, violência ou apologia a crimes resultará em banimento imediato.</li>
-                </ul>
-              </div>
-
-              {/* 3. RELAÇÃO CONSUMO */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(34,197,94,0.1)" }}>
-                    <Scale size={16} color="#22c55e" />
-                  </div>
-                  3. Relação entre Usuários e Empresas
-                </div>
-                <div className="highlight-box">
-                  <p className="termos-p" style={{ margin: 0, fontWeight: 500 }}>
-                    O Novo Tempo Conecta não é parte contratante de nenhuma transação feita entre você e o lojista.
-                  </p>
-                </div>
-                <p className="termos-p">
-                  Qualquer reclamação sobre qualidade de produtos, atrasos em entregas ou reembolsos deve ser tratada diretamente com o estabelecimento responsável. Não possuímos ingerência sobre o estoque ou logística dos anunciantes.
-                </p>
-              </div>
-
-              {/* 4. PROPRIEDADE INTELECTUAL */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(124,58,237,0.1)" }}>
-                    <Lock size={16} color="#7c3aed" />
-                  </div>
-                  4. Propriedade Intelectual
-                </div>
-                <p className="termos-p">
-                  Toda a interface, logotipos, códigos-fonte e design do "Novo Tempo Conecta" são de propriedade exclusiva de seus desenvolvedores. É proibida a reprodução, cópia ou engenharia reversa de qualquer elemento da plataforma sem autorização expressa.
-                </p>
-              </div>
-
-              {/* 5. LINKS DE TERCEIROS */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(0,0,0,0.05)" }}>
-                    <ExternalLink size={16} color="#000" />
-                  </div>
-                  5. Links para Sites Externos
-                </div>
-                <p className="termos-p">
-                  Nossos anúncios podem conter links para WhatsApp, Instagram ou sites próprios de empresas. Não controlamos as políticas de privacidade desses sites terceiros e não nos responsabilizamos por conteúdos ou vírus em links externos.
-                </p>
-              </div>
-
-              {/* 6. DISPONIBILIDADE DO SISTEMA */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(0,204,255,0.1)" }}>
-                    <Clock size={16} color="#00CCFF" />
-                  </div>
-                  6. Estabilidade e Manutenção
-                </div>
-                <p className="termos-p">
-                  Embora busquemos manter a plataforma 24/7 online, o serviço pode ser interrompido para manutenções programadas ou devido a falhas de servidores externos. Não garantimos que a plataforma estará livre de erros ou interrupções.
-                </p>
-              </div>
-
-              {/* 7. FORO JURÍDICO */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(239,68,68,0.1)" }}>
-                    <Gavel size={16} color="#ef4444" />
-                  </div>
-                  7. Lei Aplicável e Foro
-                </div>
-                <p className="termos-p">
-                  Estes Termos são regidos pelas leis da República Federativa do Brasil. Para dirimir quaisquer controvérsias oriundas deste contrato, as partes elegem o Foro da Comarca de Timon, Estado do Maranhão, com renúncia expressa a qualquer outro, por mais privilegiado que seja.
-                </p>
-              </div>
-
-              {/* FINAL NOTE */}
-              <div className="termos-section">
-                <div className="termos-section-title">
-                  <div className="termos-section-icon" style={{ background: "rgba(247,176,0,0.1)" }}>
-                    <MessageSquare size={16} color="#F7B000" />
-                  </div>
-                  Dúvidas e Contato
-                </div>
-                <p className="termos-p">
-                  Caso tenha dúvidas sobre estes termos, entre em contato através do e-mail oficial: <strong>contato@novotempoconecta.com.br</strong>.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </main>

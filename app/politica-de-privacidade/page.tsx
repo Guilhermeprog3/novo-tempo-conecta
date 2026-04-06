@@ -1,6 +1,9 @@
 "use client"
 
-import { Shield, Lock, Eye, Database, Trash2, Server, UserCheck, Mail } from "lucide-react"
+import {
+  Shield, Lock, Eye, Database, Trash2, Server, UserCheck, Mail,
+  Info, Target, Globe, AlertCircle, Cookie, Clock, RefreshCw, Users
+} from "lucide-react"
 import { Header } from "@/components/navigation/header"
 import { Footer } from "@/components/navigation/footer"
 import React, { useEffect, useState } from "react"
@@ -115,6 +118,8 @@ const PRIVACIDADE_CSS = `
     line-height: 1.8; margin-bottom: 1rem;
   }
 
+  .legal-p:last-child { margin-bottom: 0; }
+
   .legal-ul {
     list-style: none; padding: 0; margin: 0.8rem 0;
     display: flex; flex-direction: column; gap: 10px;
@@ -143,19 +148,174 @@ const PRIVACIDADE_CSS = `
     .legal-lead, .legal-body { padding: 1.5rem; }
     .legal-hero { padding: 4rem 1.5rem 3rem; }
   }
-`;
+`
+
+const sections = [
+  {
+    icon: <Info size={16} color="#00CCFF" />,
+    iconBg: "rgba(0,204,255,0.1)",
+    title: "1. Apresentação",
+    content: (
+      <p className="legal-p">
+        O Novo Tempo Conecta é uma plataforma digital voltada à divulgação de empreendimentos, serviços e iniciativas comunitárias do Residencial Novo Tempo com foco no fortalecimento da economia local, da cooperação comunitária e do desenvolvimento sustentável.
+      </p>
+    ),
+  },
+  {
+    icon: <Database size={16} color="#F7B000" />,
+    iconBg: "rgba(247,176,0,0.1)",
+    title: "2. Quais dados podem ser coletados?",
+    content: (
+      <>
+        <p className="legal-p">
+          A plataforma poderá coletar dados informados diretamente pelos usuários, como nome, telefone, e-mail, nome do negócio, categoria, descrição, endereço, imagens, localização aproximada, redes sociais e demais informações necessárias à divulgação do empreendimento ou serviço.
+        </p>
+        <p className="legal-p">
+          Também poderão ser coletados dados técnicos de navegação, como endereço IP, navegador utilizado, tipo de dispositivo, páginas acessadas, data e horário de acesso, conforme os recursos tecnológicos empregados pela plataforma.
+        </p>
+      </>
+    ),
+  },
+  {
+    icon: <Target size={16} color="#22c55e" />,
+    iconBg: "rgba(34,197,94,0.1)",
+    title: "3. Como os dados são utilizados",
+    content: (
+      <>
+        <p className="legal-p">Os dados poderão ser utilizados para:</p>
+        <ul className="legal-ul">
+          <li>permitir o cadastro e a divulgação de negócios, serviços e iniciativas;</li>
+          <li>facilitar o contato entre usuários e empreendedores;</li>
+          <li>responder mensagens, dúvidas ou solicitações enviadas pelos usuários;</li>
+          <li>melhorar o funcionamento, a navegação e a segurança da plataforma;</li>
+          <li>produzir estatísticas de uso e desempenho;</li>
+          <li>cumprir obrigações legais e regulatórias, quando aplicável.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    icon: <Eye size={16} color="#7c3aed" />,
+    iconBg: "rgba(124,58,237,0.1)",
+    title: "4. Divulgação pública de informações comerciais",
+    content: (
+      <p className="legal-p">
+        As informações fornecidas para fins de divulgação de negócios e serviços, como nome comercial, descrição da atividade, telefone de contato, imagens, horário de atendimento e localização, poderão ficar visíveis publicamente na plataforma, em razão da própria finalidade do projeto.
+      </p>
+    ),
+  },
+  {
+    icon: <Globe size={16} color="#00CCFF" />,
+    iconBg: "rgba(0,204,255,0.1)",
+    title: "5. Compartilhamento de dados",
+    content: (
+      <p className="legal-p">
+        O Novo Tempo Conecta não comercializa dados pessoais. O compartilhamento poderá ocorrer apenas quando necessário para a operação da plataforma, com serviços de hospedagem, armazenamento, formulários, ferramentas de análise, mapas ou outros recursos tecnológicos, sempre observadas as finalidades legítimas do projeto e medidas adequadas de proteção.
+      </p>
+    ),
+  },
+  {
+    icon: <Lock size={16} color="#F7B000" />,
+    iconBg: "rgba(247,176,0,0.1)",
+    title: "6. Base legal para o tratamento",
+    content: (
+      <p className="legal-p">
+        O tratamento de dados poderá ocorrer com base no consentimento do titular, no legítimo interesse, no cumprimento de obrigação legal ou regulatória e em outras hipóteses autorizadas pela legislação aplicável, especialmente pela Lei nº 13.709/2018.
+      </p>
+    ),
+  },
+  {
+    icon: <Cookie size={16} color="#f97316" />,
+    iconBg: "rgba(249,115,22,0.1)",
+    title: "7. Cookies e tecnologias semelhantes",
+    content: (
+      <p className="legal-p">
+        A plataforma poderá utilizar cookies e tecnologias semelhantes para funcionamento técnico, segurança, personalização da navegação e análise de desempenho. O usuário poderá, quando aplicável, gerenciar essas preferências no navegador ou nos mecanismos disponibilizados pela plataforma.
+      </p>
+    ),
+  },
+  {
+    icon: <Clock size={16} color="#22c55e" />,
+    iconBg: "rgba(34,197,94,0.1)",
+    title: "8. Armazenamento e retenção dos dados",
+    content: (
+      <p className="legal-p">
+        Os dados serão mantidos pelo tempo necessário para cumprir as finalidades descritas nesta Política, atender obrigações legais, preservar a segurança da plataforma e viabilizar a continuidade do serviço. Quando possível e cabível, os dados serão excluídos, anonimizados ou bloqueados.
+      </p>
+    ),
+  },
+  {
+    icon: <Server size={16} color="#00CCFF" />,
+    iconBg: "rgba(0,204,255,0.1)",
+    title: "9. Segurança das informações",
+    content: (
+      <p className="legal-p">
+        Serão adotadas medidas técnicas e administrativas razoáveis para proteger os dados pessoais contra acessos não autorizados, perdas, alterações, destruição ou qualquer forma de tratamento inadequado. Apesar disso, nenhum sistema digital é totalmente imune a riscos.
+      </p>
+    ),
+  },
+  {
+    icon: <UserCheck size={16} color="#E91E8C" />,
+    iconBg: "rgba(233,30,140,0.1)",
+    title: "10. Direitos do titular",
+    content: (
+      <>
+        <p className="legal-p">Nos termos da legislação aplicável, o titular dos dados poderá solicitar:</p>
+        <ul className="legal-ul">
+          <li>confirmação da existência de tratamento;</li>
+          <li>acesso aos dados pessoais;</li>
+          <li>correção de dados incompletos, inexatos ou desatualizados;</li>
+          <li>anonimização, bloqueio ou eliminação de dados desnecessários;</li>
+          <li>informação sobre compartilhamento de dados;</li>
+          <li>revogação do consentimento, quando essa for a base legal aplicável;</li>
+          <li>eliminação de dados tratados com consentimento, observadas as hipóteses legais de retenção.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    icon: <Users size={16} color="#7c3aed" />,
+    iconBg: "rgba(124,58,237,0.1)",
+    title: "11. Crianças e adolescentes",
+    content: (
+      <p className="legal-p">
+        A plataforma não se destina ao tratamento intencional de dados pessoais de crianças e adolescentes em desacordo com a legislação. Caso seja identificada coleta inadequada, as medidas cabíveis poderão ser adotadas para remoção ou regularização dessas informações.
+      </p>
+    ),
+  },
+  {
+    icon: <RefreshCw size={16} color="#22c55e" />,
+    iconBg: "rgba(34,197,94,0.1)",
+    title: "12. Alterações nesta Política",
+    content: (
+      <p className="legal-p">
+        Esta Política de Privacidade poderá ser atualizada periodicamente para refletir mudanças legais, técnicas, operacionais ou institucionais. A versão vigente estará sempre disponível na plataforma.
+      </p>
+    ),
+  },
+  {
+    icon: <Mail size={16} color="#F7B000" />,
+    iconBg: "rgba(247,176,0,0.1)",
+    title: "13. Contato sobre privacidade",
+    content: (
+      <p className="legal-p">
+        Solicitações, dúvidas ou comunicações relacionadas à privacidade e à proteção de dados poderão ser encaminhadas pelos canais oficiais informados na plataforma.
+      </p>
+    ),
+  },
+]
 
 export default function PoliticaPrivacidadePage() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   return (
     <>
       {mounted && <style dangerouslySetInnerHTML={{ __html: PRIVACIDADE_CSS }} />}
-      
+
       <div className="legal-page">
         <Header />
 
@@ -166,8 +326,8 @@ export default function PoliticaPrivacidadePage() {
             <div className="legal-icon-wrap">
               <Shield size={30} color="#00CCFF" />
             </div>
-            <h1 className="legal-title">Privacidade e Dados</h1>
-            <p className="legal-date">Conformidade com a LGPD • Atualizada em 15 de Março de 2026</p>
+            <h1 className="legal-title">Política de Privacidade</h1>
+            <p className="legal-date">Conformidade com a LGPD • Última atualização: 31 de março de 2026</p>
           </div>
         </section>
 
@@ -175,91 +335,22 @@ export default function PoliticaPrivacidadePage() {
           <div className="legal-card">
             <div className="legal-lead">
               <p>
-                No <strong>Novo Tempo Conecta</strong>, a transparência é o nosso alicerce. Esta política descreve como tratamos seus dados pessoais e quais são seus direitos como titular.
+                O <strong>Novo Tempo Conecta</strong> valoriza a privacidade, a transparência e o tratamento responsável das informações dos usuários. Esta Política de Privacidade explica como dados pessoais podem ser coletados, utilizados, armazenados e protegidos no contexto da plataforma.
               </p>
             </div>
 
             <div className="legal-body">
-              {/* 1. COLETA */}
-              <div className="legal-section">
-                <div className="legal-section-title">
-                  <div className="legal-section-icon" style={{ background: "rgba(0,204,255,0.1)" }}>
-                    <Database size={16} color="#00CCFF" />
+              {sections.map((section, i) => (
+                <div className="legal-section" key={i}>
+                  <div className="legal-section-title">
+                    <div className="legal-section-icon" style={{ background: section.iconBg }}>
+                      {section.icon}
+                    </div>
+                    {section.title}
                   </div>
-                  1. Coleta de Dados Pessoais
+                  {section.content}
                 </div>
-                <p className="legal-p">Nós coletamos apenas as informações estritamente necessárias para o funcionamento da plataforma:</p>
-                <ul className="legal-ul">
-                  <li><strong>Identificação:</strong> Nome completo e e-mail fornecidos no cadastro.</li>
-                  <li><strong>Comunicação:</strong> Número de telefone/WhatsApp para facilitar o contato com os estabelecimentos.</li>
-                  <li><strong>Dados do Negócio:</strong> Informações públicas de empresas para exibição no guia comercial.</li>
-                  <li><strong>Geolocalização:</strong> Coletamos sua localização apenas com sua autorização explícita para o funcionamento do mapa.</li>
-                </ul>
-              </div>
-
-              {/* 2. FINALIDADE */}
-              <div className="legal-section">
-                <div className="legal-section-title">
-                  <div className="legal-section-icon" style={{ background: "rgba(247,176,0,0.1)" }}>
-                    <UserCheck size={16} color="#F7B000" />
-                  </div>
-                  2. Finalidade do Tratamento
-                </div>
-                <p className="legal-p">Seus dados não são vendidos para terceiros. Eles são usados para:</p>
-                <ul className="legal-ul">
-                  <li>Operar as funcionalidades da plataforma e prevenir fraudes.</li>
-                  <li>Permitir que os empresários gerenciem seus anúncios e vitrines.</li>
-                  <li>Responder a solicitações de suporte e enviar comunicações técnicas.</li>
-                  <li>Melhorar a experiência de busca e localização de comércios na região.</li>
-                </ul>
-              </div>
-
-              {/* 3. ARMAZENAMENTO E SEGURANÇA */}
-              <div className="legal-section">
-                <div className="legal-section-title">
-                  <div className="legal-section-icon" style={{ background: "rgba(34,197,94,0.1)" }}>
-                    <Server size={16} color="#22c55e" />
-                  </div>
-                  3. Armazenamento e Segurança
-                </div>
-                <p className="legal-p">
-                  Seus dados são armazenados em servidores de nuvem seguros com protocolos de criptografia ativos (SSL/TLS). 
-                </p>
-                <div className="highlight-box">
-                  <p className="legal-p" style={{ margin: 0, fontSize: '0.88rem' }}>
-                    Mantemos seus dados enquanto sua conta estiver ativa ou conforme exigido por obrigações legais de manutenção de registros.
-                  </p>
-                </div>
-              </div>
-
-              {/* 4. SEUS DIREITOS LGPD */}
-              <div className="legal-section">
-                <div className="legal-section-title">
-                  <div className="legal-section-icon" style={{ background: "rgba(233,30,140,0.1)" }}>
-                    <Trash2 size={16} color="#E91E8C" />
-                  </div>
-                  4. Seus Direitos (LGPD)
-                </div>
-                <p className="legal-p">Você tem controle total sobre seus dados e pode solicitar a qualquer momento:</p>
-                <ul className="legal-ul">
-                  <li><strong>Acesso e Correção:</strong> Visualizar ou editar seus dados pessoais no perfil.</li>
-                  <li><strong>Exclusão:</strong> Solicitar o encerramento da conta e a remoção dos seus dados.</li>
-                  <li><strong>Revogação:</strong> Desativar permissões de localização diretamente nas configurações do seu dispositivo.</li>
-                </ul>
-              </div>
-
-              {/* 5. CONTATO */}
-              <div className="legal-section">
-                <div className="legal-section-title">
-                  <div className="legal-section-icon" style={{ background: "rgba(124,58,237,0.1)" }}>
-                    <Mail size={16} color="#7c3aed" />
-                  </div>
-                  Dúvidas sobre Privacidade?
-                </div>
-                <p className="legal-p">
-                  Para qualquer questão relacionada à privacidade de seus dados, entre em contato através do e-mail oficial: <strong>contato@novotempoconecta.com.br</strong>.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </main>

@@ -17,9 +17,9 @@ type Business = {
   category: string;
   description: string;
   rating?: number;
-  openingHours?: any[]; 
-  coverImage?: string;   
-  galleryImages?: string[]; 
+  openingHours?: any[];
+  coverImage?: string;
+  galleryImages?: string[];
   isPublic?: boolean;
   isFeatured?: boolean;
 };
@@ -36,18 +36,24 @@ const pageStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
   .hp { --navy: #002240; --gold: #F7B000; --cyan: #00CCFF; --rose: #E91E8C; --bg: #F4F1EC; --card-bg: #fff; font-family: 'DM Sans', sans-serif; }
   
-  /* Reduzi o padding superior para aproximar a logo do Header */
   .hp-hero { background: var(--navy); position: relative; overflow: hidden; padding: 2.5rem 1.5rem 6rem; }
   
   .hp-hero-orb1 { position: absolute; border-radius: 50%; pointer-events: none; width: 600px; height: 600px; background: var(--cyan); opacity: 0.12; filter: blur(90px); top: -200px; right: -150px; }
   .hp-hero-orb2 { position: absolute; border-radius: 50%; pointer-events: none; width: 500px; height: 500px; background: var(--gold); opacity: 0.1; filter: blur(90px); bottom: -200px; left: -100px; }
   .hp-hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 64px 64px; }
   
-  /* Estilo do Título: Novo em Branco, Tempo em Ciano */
-  .hp-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.05; color: #ffffff; margin-bottom: 1.2rem; letter-spacing: -0.02em; }
+  .hp-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+  line-height: 1.4;
+  color: #ffffff;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.02em;
+}
   .hp-title em { font-style: normal; color: var(--cyan); }
   
-  .hp-subtitle { color: #ffffff; font-size: 1.1rem; font-weight: 300; max-width: 560px; margin: 0 auto 2.5rem; opacity: 0.9; }
+  .hp-subtitle { color: #ffffff; font-size: 1.05rem; font-weight: 300; max-width: 620px; margin: 0 auto 2.5rem; opacity: 0.88; line-height: 1.7; }
   .hp-search-wrap { max-width: 600px; margin: 0 auto 2.5rem; }
   .hp-cats { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 3.5rem; }
   .hp-cat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 100px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #ffffff; font-size: 0.87rem; font-weight: 500; text-decoration: none; transition: all 0.2s; }
@@ -132,35 +138,34 @@ export default function HomePage() {
           <section className="hp-hero">
             <div className="hp-hero-orb1" /><div className="hp-hero-orb2" /><div className="hp-hero-grid" />
             <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-              
-              {/* Logo com margens reduzidas para aproximar Header e Título */}
-              <motion.div 
+
+              <motion.div
                 className="hero-logo-container"
                 variants={fadeUp} initial="hidden" animate="show" custom={0}
-                style={{ 
-                  display: "flex", 
-                  justifyContent: "center", 
-                  marginBottom: "0.8rem", // Reduzi para aproximar do título
-                  marginTop: "-1rem"      // Reduzi para aproximar do header
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginBottom: "0.8rem",
+                  marginTop: "-1rem"
                 }}
               >
-                <Image 
-                  src="/logo.png" 
-                  alt="Logo Novo Tempo Conecta" 
-                  width={400} 
-                  height={110} 
-                  priority 
+                <Image
+                  src="/logo.png"
+                  alt="Logo Novo Tempo Conecta"
+                  width={400}
+                  height={110}
+                  priority
                   quality={100}
                   style={{ filter: "drop-shadow(0 0 25px rgba(0,204,255,0.35))" }}
                 />
               </motion.div>
 
               <motion.h1 className="hp-title" variants={fadeUp} initial="hidden" animate="show" custom={1}>
-                Descubra o melhor do<br />Novo <em>Tempo</em>
+                Conectando pessoas, negócios<br />e oportunidades no Bairro <em>Novo Tempo</em>
               </motion.h1>
 
               <motion.p className="hp-subtitle" variants={fadeUp} initial="hidden" animate="show" custom={2}>
-                Conecte-se com negócios locais e fortaleça nossa comunidade.
+                Aqui você encontra serviços, produtos e iniciativas locais que ajudam a movimentar a economia do bairro e gerar oportunidades para a comunidade.
               </motion.p>
 
               <motion.div className="hp-search-wrap" variants={fadeUp} initial="hidden" animate="show" custom={3}>
